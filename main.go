@@ -40,7 +40,11 @@ func main() {
 
 	//run Max bot
 	wg.Go(func() {
-		defer cancel()
+		defer func() {
+
+			log.Println("HTTP server has been stopped")
+			cancel()
+		}()
 		bot.Run()
 	})
 
@@ -76,6 +80,8 @@ func main() {
 		Addr:    ":8089",
 	}
 	wg.Go(func() {
+		defer log.Println("HTTP server has been stopped")
+
 		go func() {
 			defer cancel()
 
