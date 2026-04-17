@@ -19,6 +19,7 @@ type TextMsg struct {
 type Bot struct {
 	bot    *max.Api
 	income chan *max.Message
+	chatID int64
 }
 
 func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
@@ -39,7 +40,8 @@ func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
 	}
 	bot, e := max.New(cfg.Max.Token, options...)
 	return &Bot{
-		bot: bot,
+		bot:    bot,
+		chatID: cfg.Max.ChatID,
 	}, e
 }
 
@@ -68,9 +70,14 @@ out:
 		case upd := <-b.bot.GetUpdates(ctx):
 			switch ut := upd.(type) {
 			case *schemes.MessageCreatedUpdate:
+				m := ut.Message
+				if m.Recipient.ChatType != schemes.CHAT || m.Recipient.ChatId != b.chatID {
+					break
+				}
+
 				if e := b.bot.Messages.Send(ctx, max.NewMessage().
-					SetUser(ut.Message.Sender.UserId).
-					SetText(ut.Message.Body.Text)); e != nil {
+					SetChat(m.Recipient.ChatId).
+					SetText(m.Body.Text)); e != nil {
 					log.Println("Send message error:", e)
 				}
 			}

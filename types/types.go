@@ -2,7 +2,8 @@ package types
 
 type Config struct {
 	Max struct {
-		Token string `json:"token"`
+		Token  string `json:"token"`
+		ChatID int64  `json:"chat_id"`
 	} `json:"max"`
 	Proxy struct {
 		Addr string `json:"addr"`
