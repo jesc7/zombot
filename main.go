@@ -36,11 +36,12 @@ func main() {
 
 	wg := &sync.WaitGroup{}
 
-	//Run Max bot
+	//run Max bot
 	wg.Go(func() {
 		bot.Run()
 	})
 
+	//run http server
 	mux := &http.ServeMux{}
 	mux.HandleFunc("/call", fnCalls) //пропущенные звонки
 	mux.HandleFunc("/zsrv", fnZsrv)  //сообщения от ZSrv
@@ -52,17 +53,17 @@ func main() {
 		go func() {
 			defer cancel()
 
-			if err := srv.ListenAndServe(); e != http.ErrServerClosed {
-				log.Fatalf("ListenAndServe error: %v", err)
+			if e := srv.ListenAndServe(); e != http.ErrServerClosed {
+				log.Fatalln("Http server error:", e)
 			}
 		}()
 		<-ctx.Done()
 
-		shutdownCtx, forceCancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer forceCancel()
+		srvCtx, srvCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer srvCancel()
 
-		if err := srv.Shutdown(shutdownCtx); err != nil {
-			log.Fatalf("Ошибка при закрытии сервера: %v", err)
+		if e := srv.Shutdown(srvCtx); e != nil {
+			log.Fatalln("Http server shutdown error:", e)
 		}
 	})
 
