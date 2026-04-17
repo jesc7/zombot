@@ -40,10 +40,13 @@ func main() {
 		bot.Run()
 	})
 
-	var mux http.ServeMux
-	srv := &http.Server{Addr: ":8089"}
-	srv.Handler.HandleFunc("/call", fnCalls) //пропущенные звонки
-	http.HandleFunc("/zsrv", fnZsrv)         //сообщения от ZSrv
+	mux := &http.ServeMux{}
+	mux.HandleFunc("/call", fnCalls) //пропущенные звонки
+	mux.HandleFunc("/zsrv", fnZsrv)  //сообщения от ZSrv
+	srv := &http.Server{
+		Handler: mux,
+		Addr:    ":8089",
+	}
 	wg.Go(func() {
 
 	})
