@@ -37,7 +37,6 @@ func NewServer(ctx context.Context, cfg types.Config, bot *maxbot.Bot) *WebServe
 		w.WriteHeader(http.StatusOK)
 	})
 
-	//запускаем сервер на порту 8089
 	return &WebServer{
 		srv: &http.Server{
 			Handler: mux,
