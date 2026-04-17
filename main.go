@@ -55,7 +55,7 @@ func main() {
 		if !ok {
 			return
 		}
-		bot.SendCall(v[0])
+		bot.MaxBot.SendCall(v[0])
 	}
 
 	//различные сообщения от ZSrv, например, не обновляются прайсы, долго нет заказов и т.д. формат: 'ip:8089/zsrv', body json
