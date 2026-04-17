@@ -11,8 +11,16 @@ type Config struct {
 	} `json:"proxy"`
 }
 
+type MsgType int
+
+const (
+	ZMSG_INFO MsgType = iota
+	ZMSG_WARN
+	ZMSG_PANIC
+)
+
 type ZSrvMessage struct {
-	Status  int    `json:"status"`
-	Caption string `json:"caption"`
-	Text    string `json:"text"`
+	Status  MsgType `json:"status"`
+	Caption string  `json:"caption"`
+	Text    string  `json:"text"`
 }

@@ -54,7 +54,19 @@ func (b *Bot) SendCall(phone string) {
 }
 
 func (b *Bot) SendZSrv(msg types.ZSrvMessage) {
-	//b.income <- max.NewMessage().SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone))
+	if strings.Count(msg.Text, "\n") != 0 {
+		msg.Text = "\n" + msg.Text
+	}
+	var text string
+	switch msg.Status {
+	case types.ZMSG_WARN:
+		text = fmt.Sprintf("⚠️ <i>zsrv %s беспокоится</i>\n%s", msg.Caption, msg.Text)
+	case types.ZMSG_PANIC:
+		text = fmt.Sprintf("🆘 <i>zsrv %s паникует</i>\n%s", msg.Caption, msg.Text)
+	default:
+		text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", msg.Caption, msg.Text)
+	}
+	b.income <- max.NewMessage().SetText(text)
 }
 
 func (b *Bot) Run(ctx context.Context) {
