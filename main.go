@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"sync"
 	"syscall"
 
 	maxBot "github.com/jesc7/zombot/max/bot"
@@ -31,5 +33,21 @@ func main() {
 		log.Fatalln("Can't create Max bot:", e)
 	}
 
-	_ = bot
+	wg := &sync.WaitGroup{}
+
+	//Run Max bot
+	wg.Go(func() {
+		bot.Run()
+	})
+
+	var mux http.ServeMux
+	srv := &http.Server{Addr: ":8089"}
+	srv.Handler.HandleFunc("/call", fnCalls) //пропущенные звонки
+	http.HandleFunc("/zsrv", fnZsrv)         //сообщения от ZSrv
+	wg.Go(func() {
+
+	})
+
+	wg.Wait()
+	log.Println(".")
 }

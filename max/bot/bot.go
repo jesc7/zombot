@@ -13,6 +13,7 @@ import (
 type Bot struct {
 	bot *max.Api
 	ctx context.Context
+	//Out chan
 }
 
 func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
@@ -36,4 +37,8 @@ func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
 		ctx: ctx,
 		bot: b,
 	}, e
+}
+
+func (b *Bot) Run() {
+	//
 }
