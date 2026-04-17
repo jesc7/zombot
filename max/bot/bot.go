@@ -57,16 +57,15 @@ func (b *Bot) SendZSrv(msg types.ZSrvMessage) {
 	if strings.Count(msg.Text, "\n") != 0 {
 		msg.Text = "\n" + msg.Text
 	}
-	var text string
 	switch msg.Status {
 	case types.ZMSG_WARN:
-		text = fmt.Sprintf("⚠️ <i>zsrv %s беспокоится</i>\n%s", msg.Caption, msg.Text)
+		msg.Text = fmt.Sprintf("⚠️ <i>zsrv %s беспокоится</i>\n%s", msg.Caption, msg.Text)
 	case types.ZMSG_PANIC:
-		text = fmt.Sprintf("🆘 <i>zsrv %s паникует</i>\n%s", msg.Caption, msg.Text)
+		msg.Text = fmt.Sprintf("🆘 <i>zsrv %s паникует</i>\n%s", msg.Caption, msg.Text)
 	default:
-		text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", msg.Caption, msg.Text)
+		msg.Text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", msg.Caption, msg.Text)
 	}
-	b.income <- max.NewMessage().SetText(text)
+	b.income <- max.NewMessage().SetText(msg.Text)
 }
 
 func (b *Bot) Run(ctx context.Context) {
