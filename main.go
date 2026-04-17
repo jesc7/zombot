@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"sync"
 	"syscall"
+	"time"
 
 	maxBot "github.com/jesc7/zombot/max/bot"
 	"github.com/jesc7/zombot/types"
@@ -48,7 +49,21 @@ func main() {
 		Addr:    ":8089",
 	}
 	wg.Go(func() {
+		go func() {
+			defer cancel()
 
+			if err := srv.ListenAndServe(); e != http.ErrServerClosed {
+				log.Fatalf("ListenAndServe error: %v", err)
+			}
+		}()
+		<-ctx.Done()
+
+		shutdownCtx, forceCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer forceCancel()
+
+		if err := srv.Shutdown(shutdownCtx); err != nil {
+			log.Fatalf("Ошибка при закрытии сервера: %v", err)
+		}
 	})
 
 	wg.Wait()
