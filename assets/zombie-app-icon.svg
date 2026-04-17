@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Zombie app icon</title>
+  <desc id="desc">Minimal flat app icon with a lime green walking zombie silhouette on a deep dark blue square background.</desc>
+  <rect width="1024" height="1024" fill="#081A36"/>
+  <g fill="#A7FF2F" shape-rendering="geometricPrecision">
+    <polygon points="442,284 592,250 670,318 648,430 512,458 414,390"/>
+    <polygon points="396,430 560,420 658,560 620,694 454,698 348,576"/>
+    <polygon points="552,444 812,470 810,548 560,530"/>
+    <polygon points="804,462 880,490 866,558 798,548"/>
+    <polygon points="500,490 730,560 704,632 482,566"/>
+    <polygon points="468,694 592,694 566,898 454,898 420,804"/>
+    <polygon points="302,900 430,900 430,944 280,944"/>
+    <polygon points="390,678 498,700 418,900 302,900 334,786"/>
+    <polygon points="454,898 650,902 650,944 448,944"/>
+  </g>
+</svg>
