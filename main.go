@@ -41,8 +41,7 @@ func main() {
 	//run Max bot
 	wg.Go(func() {
 		defer func() {
-
-			log.Println("HTTP server has been stopped")
+			log.Println("Max bot has been stopped")
 			cancel()
 		}()
 		bot.Run()
@@ -51,12 +50,12 @@ func main() {
 	//run http server
 	//пропущенные звонки http-сервер принимает на порту :8089
 	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
-	chCalls := make(chan string)
-	defer close(chCalls)
-	fnCalls := func(w http.ResponseWriter, r *http.Request) {
-		if v, ok := r.URL.Query()["phone"]; ok {
-			chCalls <- v[0]
+	calls := func(w http.ResponseWriter, r *http.Request) {
+		v, ok := r.URL.Query()["phone"]
+		if ok {
+			return
 		}
+		bot.SendCall(v[0])
 	}
 
 	//различные сообщения от ZSrv, например, не обновляются прайсы, долго нет заказов и т.д. формат: 'ip:8089/zsrv', body json
@@ -73,8 +72,8 @@ func main() {
 	}
 
 	mux := &http.ServeMux{}
-	mux.HandleFunc("/call", fnCalls) //пропущенные звонки
-	mux.HandleFunc("/zsrv", fnZSrv)  //сообщения от ZSrv
+	mux.HandleFunc("/call", calls)  //пропущенные звонки
+	mux.HandleFunc("/zsrv", fnZSrv) //сообщения от ZSrv
 	srv := &http.Server{
 		Handler: mux,
 		Addr:    ":8089",

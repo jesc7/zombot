@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/jesc7/zombot/types"
 	max "github.com/max-messenger/max-bot-api-client-go"
@@ -44,6 +45,10 @@ func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
 
 func (b *Bot) SendText(text string) {
 	b.income <- max.NewMessage().SetText(text)
+}
+
+func (b *Bot) SendCall(phone string) {
+	b.income <- max.NewMessage().SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone))
 }
 
 func (b *Bot) Run() {
