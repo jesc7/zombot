@@ -31,7 +31,7 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
 	defer cancel()
 
-	bot.MaxBot, e = bot.NewBot(ctx, cfg)
+	Bot, e := bot.NewBot(ctx, cfg)
 	if e != nil {
 		log.Fatalln("Can't create Max bot:", e)
 	}
@@ -44,7 +44,7 @@ func main() {
 			log.Println("Max bot has been stopped")
 			cancel()
 		}()
-		bot.MaxBot.Run()
+		Bot.Run()
 	})
 
 	//run http server
@@ -55,7 +55,7 @@ func main() {
 		if !ok {
 			return
 		}
-		bot.MaxBot.SendCall(v[0])
+		Bot.SendCall(v[0])
 	}
 
 	//различные сообщения от ZSrv, например, не обновляются прайсы, долго нет заказов и т.д. формат: 'ip:8089/zsrv', body json
