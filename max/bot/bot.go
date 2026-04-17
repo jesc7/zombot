@@ -62,9 +62,9 @@ out:
 
 		case msg := <-b.income:
 			_ = msg
-		}
 
-	case upd := <-b.bot.
+		case upd := <-b.bot.GetUpdates(ctx):
+		}
 	}
-	b.bo
+	b.bot.GetUpdates()
 }
