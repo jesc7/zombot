@@ -71,6 +71,7 @@ out:
 			switch ut := upd.(type) {
 			case *schemes.MessageCreatedUpdate:
 				m := ut.Message
+				//только групповой чат из настроек
 				if m.Recipient.ChatType != schemes.CHAT || m.Recipient.ChatId != b.chatID {
 					break
 				}
