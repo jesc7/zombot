@@ -12,25 +12,16 @@ import (
 	"path/filepath"
 	"syscall"
 
+	"github.com/jesc7/zombot/types"
 	max "github.com/max-messenger/max-bot-api-client-go"
 )
-
-type Config struct {
-	Max struct {
-		Token string `json:"token"`
-	} `json:"max"`
-	Proxy struct {
-		Addr string `json:"addr"`
-		Port int    `json:"port"`
-	} `json:"proxy"`
-}
 
 func main() {
 	f, e := os.ReadFile(filepath.Join(filepath.Dir(os.Args[0]), "cfg.json"))
 	if e != nil {
 		log.Fatalln("Can't read config file:", e)
 	}
-	var cfg Config
+	var cfg types.Config
 	if e = json.Unmarshal(f, &cfg); e != nil {
 		log.Fatalln("Can't unmarshal the json:", e)
 	}
