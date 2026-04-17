@@ -30,13 +30,7 @@ type jobCal struct {
 	} `json:"months"`
 }
 
-var (
-	client = http.Client{
-		Transport: &http.Transport{},
-		Timeout:   5 * time.Second,
-	}
-	cal = make(map[string]jobCal)
-)
+var cal = make(map[string]jobCal)
 
 func GetDayType(country string, t time.Time) (dt DayType, e error) {
 	if cal[country].Year != t.Year() {
@@ -57,6 +51,10 @@ func GetDayType(country string, t time.Time) (dt DayType, e error) {
 		}
 
 		if !fromFile {
+			client := http.Client{
+				Transport: &http.Transport{},
+				Timeout:   5 * time.Second,
+			}
 			resp, e = client.Get(fmt.Sprintf("http://xmlcalendar.ru/data/%s/%d/calendar.json", country, t.Year()))
 			if e == nil {
 				defer resp.Body.Close()

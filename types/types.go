@@ -9,6 +9,15 @@ type Config struct {
 		Addr string `json:"addr"`
 		Port int    `json:"port"`
 	} `json:"proxy"`
+	CheckDomains []string    `json:"check_domains"`
+	Checks       []string    `json:"checks"`
+	CFChecks     []string    `json:"cf_checks"`
+	ZSrv         []ZSrvWatch `json:"zsrv"`
+}
+
+type ZSrvWatch struct {
+	Url     string `json:"url"`
+	Caption string `json:"caption"`
 }
 
 type MsgType int

@@ -13,9 +13,7 @@ import (
 
 type Planner map[time.Time]string
 
-/*
-Ratings подготавливает различные motivation-рейтинги сотрудников за период
-*/
+// Ratings подготавливает различные motivation-рейтинги сотрудников за период
 func Ratings(db *sql.DB, dut Planner, kind int, t time.Time) (res string) {
 	type rt struct {
 		s string
