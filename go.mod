@@ -1,4 +1,4 @@
-module zombot
+module github.com/jesc7/zombot
 
 go 1.25.0
 
