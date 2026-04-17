@@ -42,9 +42,33 @@ func main() {
 	})
 
 	//run http server
+
+	//пропущенные звонки http-сервер принимает на порту :8089
+	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
+	chCalls := make(chan string)
+	defer close(chCalls)
+	fnCalls := func(w http.ResponseWriter, r *http.Request) {
+		if v, ok := r.URL.Query()["phone"]; ok {
+			chCalls <- v[0]
+		}
+	}
+
+	//различные сообщения от ZSrv, например, не обновляются прайсы, долго нет заказов и т.д. формат: 'ip:8089/zsrv', body json
+	chZSrv := make(chan types.ZSrvMessage)
+	defer close(chZSrv)
+	fnZSrv := func(w http.ResponseWriter, r *http.Request) {
+		var msg types.ZSrvMessage
+		if e := json.NewDecoder(r.Body).Decode(&msg); e != nil {
+			http.Error(w, e.Error(), http.StatusBadRequest)
+			return
+		}
+		chZSrv <- msg
+		w.WriteHeader(http.StatusOK)
+	}
+
 	mux := &http.ServeMux{}
 	mux.HandleFunc("/call", fnCalls) //пропущенные звонки
-	mux.HandleFunc("/zsrv", fnZsrv)  //сообщения от ZSrv
+	mux.HandleFunc("/zsrv", fnZSrv)  //сообщения от ZSrv
 	srv := &http.Server{
 		Handler: mux,
 		Addr:    ":8089",
@@ -54,7 +78,7 @@ func main() {
 			defer cancel()
 
 			if e := srv.ListenAndServe(); e != http.ErrServerClosed {
-				log.Fatalln("Http server error:", e)
+				log.Println("Http server error:", e)
 			}
 		}()
 		<-ctx.Done()
@@ -63,7 +87,19 @@ func main() {
 		defer srvCancel()
 
 		if e := srv.Shutdown(srvCtx); e != nil {
-			log.Fatalln("Http server shutdown error:", e)
+			log.Println("Http server shutdown error:", e)
+		}
+	})
+
+	wg.Go(func() {
+	out:
+		for {
+			select {
+			case <-ctx.Done():
+				break out
+
+			case call := <-chCalls:
+			}
 		}
 	})
 
