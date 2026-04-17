@@ -9,6 +9,7 @@ import (
 
 	"github.com/jesc7/zombot/types"
 	max "github.com/max-messenger/max-bot-api-client-go"
+	"github.com/max-messenger/max-bot-api-client-go/schemes"
 )
 
 type TextMsg struct {
@@ -64,7 +65,11 @@ out:
 			_ = msg
 
 		case upd := <-b.bot.GetUpdates(ctx):
+			switch ut := upd.(type) {
+			case *schemes.MessageCreatedUpdate:
+				msg := max.NewMessage().
+					SetUser()
+			}
 		}
 	}
-	b.bot.GetUpdates()
 }
