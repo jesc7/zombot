@@ -16,7 +16,6 @@ type TextMsg struct {
 }
 type Bot struct {
 	bot    *max.Api
-	ctx    context.Context
 	income chan *max.Message
 }
 
@@ -36,10 +35,9 @@ func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
 			},
 		))
 	}
-	b, e := max.New(cfg.Max.Token, options...)
+	bot, e := max.New(cfg.Max.Token, options...)
 	return &Bot{
-		ctx: ctx,
-		bot: b,
+		bot: bot,
 	}, e
 }
 
@@ -55,15 +53,18 @@ func (b *Bot) SendZSrv(msg types.ZSrvMessage) {
 	//b.income <- max.NewMessage().SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone))
 }
 
-func (b *Bot) Run() {
+func (b *Bot) Run(ctx context.Context) {
 out:
 	for {
 		select {
-		case <-b.ctx.Done():
+		case <-ctx.Done():
 			break out
 
 		case msg := <-b.income:
 			_ = msg
 		}
+
+	case upd := <-b.bot.
 	}
+	b.bo
 }

@@ -41,7 +41,7 @@ func main() {
 			log.Println("Max bot has been stopped")
 			cancel()
 		}()
-		bot.Run()
+		bot.Run(ctx)
 	})
 
 	//run WebServer
