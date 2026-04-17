@@ -16,7 +16,7 @@ import (
 )
 
 func Rnd(min, max int) int {
-	return min + rand.Intn(max-min)
+	return min + rand.IntN(max-min)
 }
 
 func RndFrom(a ...string) string {

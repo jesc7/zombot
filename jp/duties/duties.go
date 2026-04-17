@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jesc7/zombot/daytypes"
 	"github.com/jesc7/zombot/types"
 )
 
@@ -78,7 +79,7 @@ func Duties(db *sql.DB, daysCount int, dut Planner, who string) string {
 	case 1, 2:
 		who = ""
 	default:
-		who = funcs.Words(who, "")[0]
+		who = types.Words(who, "")[0]
 		daysCount = 365
 	}
 	if dut == nil {
@@ -100,7 +101,7 @@ func Duties(db *sql.DB, daysCount int, dut Planner, who string) string {
 			if i <= d {
 				res += s
 			}
-			if funcs.ContainsWord(empl, who) {
+			if types.ContainsWord(empl, who) {
 				resWho += s
 			}
 		}
@@ -108,7 +109,7 @@ func Duties(db *sql.DB, daysCount int, dut Planner, who string) string {
 	if len(res+resWho) != 0 {
 		switch who {
 		case "":
-			res = "👷 <b>Дежурные</b>\n" + funcs.Iif(strings.Count(res, "\n") > 1, "\n", "") + res
+			res = "👷 <b>Дежурные</b>\n" + types.Iif(strings.Count(res, "\n") > 1, "\n", "") + res
 		default:
 			if resWho != "" {
 				res = fmt.Sprintf("<b>%s дежурит:</b>\n%s", who, resWho)
@@ -187,9 +188,9 @@ func MissDuties(db *sql.DB, days int) (res string) {
 		if dutCount < count {
 			switch dutCount {
 			case 0:
-				ds = append(ds, needs{t, funcs.Iif(count == 1, "", " - 2 чел, работают "+strings.Join(countries, ","))})
+				ds = append(ds, needs{t, types.Iif(count == 1, "", " - 2 чел, работают "+strings.Join(countries, ","))})
 			default:
-				ds = append(ds, needs{t, funcs.Iif(count == 1, "", " - доп.дежурный, работают "+strings.Join(countries, ","))})
+				ds = append(ds, needs{t, types.Iif(count == 1, "", " - доп.дежурный, работают "+strings.Join(countries, ","))})
 			}
 		}
 	}
