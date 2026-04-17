@@ -14,6 +14,7 @@ import (
 
 	maxbot "github.com/jesc7/zombot/max/bot"
 	"github.com/jesc7/zombot/types"
+	"github.com/jesc7/zombot/webapi"
 )
 
 func main() {
@@ -43,6 +44,15 @@ func main() {
 			cancel()
 		}()
 		bot.Run()
+	})
+
+	server := webapi.NewServer(ctx, cfg, bot)
+	wg.Go(func() {
+		defer func() {
+			log.Println("WebServer has been stopped")
+			cancel()
+		}()
+		server.Run(ctx)
 	})
 
 	//run http server
