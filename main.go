@@ -5,15 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
-	"net/url"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"syscall"
 
+	maxBot "github.com/jesc7/zombot/max/bot"
 	"github.com/jesc7/zombot/types"
-	max "github.com/max-messenger/max-bot-api-client-go"
 )
 
 func main() {
@@ -26,27 +24,13 @@ func main() {
 		log.Fatalln("Can't unmarshal the json:", e)
 	}
 
-	var options []max.Option
-	if cfg.Proxy.Addr != "" {
-		var proxy *url.URL
-		if proxy, e = url.Parse(fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port)); e == nil {
-			options = append(options, max.WithHTTPClient(
-				&http.Client{
-					Transport: &http.Transport{
-						Proxy: http.ProxyURL(proxy),
-					},
-				},
-			))
-		}
-	}
-	bot, e := max.New(cfg.Max.Token, options...)
-	if e != nil {
-		log.Fatalln("Can't create bot:", e)
-	}
-
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
 	defer cancel()
 
+	bot, e := maxBot.NewBot(ctx, cfg)
+	if e != nil {
+		log.Fatalln("Can't create Max bot:", e)
+	}
 	info, e := bot.Bots.GetBot(ctx)
 	fmt.Printf("Get me: %#v %#v", info, e)
 }
