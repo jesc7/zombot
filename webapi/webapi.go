@@ -48,16 +48,16 @@ func NewServer(ctx context.Context, cfg types.Config, bot *maxbot.Bot) *WebServe
 
 func (s *WebServer) Run(ctx context.Context) {
 	go func() {
-		if e := srv.ListenAndServe(); e != http.ErrServerClosed {
+		if e := s.srv.ListenAndServe(); e != http.ErrServerClosed {
 			log.Println("Http server error:", e)
 		}
 	}()
 	<-ctx.Done()
 
-	srvCtx, srvCancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer srvCancel()
+	ctx_, cancel_ := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel_()
 
-	if e := srv.Shutdown(srvCtx); e != nil {
+	if e := s.srv.Shutdown(ctx_); e != nil {
 		log.Println("Http server shutdown error:", e)
 	}
 }
