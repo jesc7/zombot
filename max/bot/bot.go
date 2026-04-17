@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/jesc7/zombot/types"
@@ -87,7 +88,18 @@ out:
 				}
 
 				switch upd.GetCommand() {
-					case "/"
+				case "/duty":
+				case "/absent":
+				case "/birthday":
+				case "/ratings":
+				case "/ci":
+				case "/chatid":
+					if e := b.bot.Messages.Send(ctx, max.NewMessage().
+						SetChat(upd.GetChatID()).
+						SetText("ChatID: "+strconv.FormatInt(upd.GetChatID(), 64))); e != nil {
+						log.Println("Send message error:", e)
+					}
+				default:
 				}
 
 				m := upd.Message
