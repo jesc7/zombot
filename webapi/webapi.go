@@ -17,7 +17,6 @@ type WebServer struct {
 
 func NewServer(ctx context.Context, cfg types.Config, bot *maxbot.Bot) *WebServer {
 	mux := &http.ServeMux{}
-	//пропущенные звонки http-сервер принимает на порту :8089
 	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
 	mux.HandleFunc("/call", func(w http.ResponseWriter, r *http.Request) {
 		v, ok := r.URL.Query()["phone"]
@@ -38,6 +37,7 @@ func NewServer(ctx context.Context, cfg types.Config, bot *maxbot.Bot) *WebServe
 		w.WriteHeader(http.StatusOK)
 	})
 
+	//запускаем сервер на порту 8089
 	return &WebServer{
 		srv: &http.Server{
 			Handler: mux,
