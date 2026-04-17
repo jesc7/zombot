@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -43,7 +45,6 @@ func main() {
 	})
 
 	//run http server
-
 	//пропущенные звонки http-сервер принимает на порту :8089
 	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
 	chCalls := make(chan string)
@@ -100,8 +101,10 @@ func main() {
 				break out
 
 			case call := <-chCalls:
+				bot.SendText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(call, "8800 "), " на 8800", ""), call))
 
 			case msgZSrv := <-chZSrv:
+				_ = msgZSrv
 			}
 		}
 	})

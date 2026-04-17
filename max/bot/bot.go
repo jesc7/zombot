@@ -16,7 +16,7 @@ type TextMsg struct {
 type Bot struct {
 	bot    *max.Api
 	ctx    context.Context
-	income chan TextMsg
+	income chan *max.Message
 }
 
 func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
@@ -40,6 +40,10 @@ func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
 		ctx: ctx,
 		bot: b,
 	}, e
+}
+
+func (b *Bot) SendText(text string) {
+	b.income <- max.NewMessage().SetText(text)
 }
 
 func (b *Bot) Run() {
