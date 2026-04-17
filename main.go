@@ -3,18 +3,16 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
-	"strings"
 	"sync"
 	"syscall"
 	"time"
 
-	"github.com/jesc7/zombot/max/bot"
+	maxbot "github.com/jesc7/zombot/max/bot"
 	"github.com/jesc7/zombot/types"
 )
 
@@ -31,7 +29,7 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
 	defer cancel()
 
-	Bot, e := bot.NewBot(ctx, cfg)
+	bot, e := maxbot.NewBot(ctx, cfg)
 	if e != nil {
 		log.Fatalln("Can't create Max bot:", e)
 	}
@@ -44,20 +42,10 @@ func main() {
 			log.Println("Max bot has been stopped")
 			cancel()
 		}()
-		Bot.Run()
+		bot.Run()
 	})
 
 	//run http server
-	//пропущенные звонки http-сервер принимает на порту :8089
-	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
-	calls := func(w http.ResponseWriter, r *http.Request) {
-		v, ok := r.URL.Query()["phone"]
-		if !ok {
-			return
-		}
-		Bot.SendCall(v[0])
-	}
-
 	//различные сообщения от ZSrv, например, не обновляются прайсы, долго нет заказов и т.д. формат: 'ip:8089/zsrv', body json
 	chZSrv := make(chan types.ZSrvMessage)
 	defer close(chZSrv)
@@ -72,7 +60,15 @@ func main() {
 	}
 
 	mux := &http.ServeMux{}
-	mux.HandleFunc("/call", calls)  //пропущенные звонки
+	//пропущенные звонки http-сервер принимает на порту :8089
+	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
+	mux.HandleFunc("/call", func(w http.ResponseWriter, r *http.Request) {
+		v, ok := r.URL.Query()["phone"]
+		if !ok {
+			return
+		}
+		bot.SendCall(v[0])
+	})
 	mux.HandleFunc("/zsrv", fnZSrv) //сообщения от ZSrv
 	srv := &http.Server{
 		Handler: mux,
@@ -104,9 +100,6 @@ func main() {
 			select {
 			case <-ctx.Done():
 				break out
-
-			case call := <-chCalls:
-				bot.SendText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(call, "8800 "), " на 8800", ""), call))
 
 			case msgZSrv := <-chZSrv:
 				_ = msgZSrv

@@ -2,8 +2,10 @@ package webapi
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
+	maxbot "github.com/jesc7/zombot/max/bot"
 	"github.com/jesc7/zombot/types"
 )
 
@@ -11,13 +13,33 @@ type WebServer struct {
 	srv *http.Server
 }
 
-func NewServer(ctx context.Context, cfg types.Config) (*WebServer, error) {
+func NewServer(ctx context.Context, cfg types.Config, bot *maxbot.Bot) (*WebServer, error) {
 	mux := &http.ServeMux{}
-	mux.HandleFunc("/call", fnCalls) //пропущенные звонки
-	mux.HandleFunc("/zsrv", fnZSrv)  //сообщения от ZSrv
-	srv := &http.Server{
-		Handler: mux,
-		Addr:    ":8089",
-	}
+	//пропущенные звонки http-сервер принимает на порту :8089
+	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
+	mux.HandleFunc("/call", func(w http.ResponseWriter, r *http.Request) {
+		v, ok := r.URL.Query()["phone"]
+		if !ok {
+			return
+		}
+		bot.SendCall(v[0])
+	})
 
+	//сообщения от ZSrv
+	mux.HandleFunc("/zsrv", func(w http.ResponseWriter, r *http.Request) {
+		var msg types.ZSrvMessage
+		if e := json.NewDecoder(r.Body).Decode(&msg); e != nil {
+			http.Error(w, e.Error(), http.StatusBadRequest)
+			return
+		}
+		bot.SendZSrv(msg)
+		chZSrv <- msg
+		w.WriteHeader(http.StatusOK)
+	})
+	return &WebServer{
+		srv: &http.Server{
+			Handler: mux,
+			Addr:    ":8089",
+		},
+	}, nil
 }

@@ -51,6 +51,10 @@ func (b *Bot) SendCall(phone string) {
 	b.income <- max.NewMessage().SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone))
 }
 
+func (b *Bot) SendZSrv(msg types.ZSrvMessage) {
+	//b.income <- max.NewMessage().SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone))
+}
+
 func (b *Bot) Run() {
 out:
 	for {
