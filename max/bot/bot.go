@@ -48,7 +48,9 @@ out:
 		select {
 		case <-b.ctx.Done():
 			break out
+
+		case msg := <-b.income:
+			_ = msg
 		}
 	}
-	//
 }
