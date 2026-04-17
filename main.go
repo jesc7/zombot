@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -31,6 +30,6 @@ func main() {
 	if e != nil {
 		log.Fatalln("Can't create Max bot:", e)
 	}
-	info, e := bot.Bots.GetBot(ctx)
-	fmt.Printf("Get me: %#v %#v", info, e)
+
+	_ = bot
 }
