@@ -21,14 +21,6 @@ import (
 	_ "github.com/nakagami/firebirdsql"
 )
 
-/*var client = &http.Client{
-	Transport: &http.Transport{
-		//DisableKeepAlives: true,
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	},
-	Timeout: 10 * time.Second,
-}*/
-
 // checkResources check urls pool (GET requests only)
 func CheckResources(sl []string) string {
 	client := &http.Client{
@@ -229,6 +221,13 @@ func CheckWhois(sl []string, days int) string {
 
 			buf := new(bytes.Buffer)
 			if e = func(b *bytes.Buffer) error {
+				client := &http.Client{
+					Transport: &http.Transport{
+						TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+					},
+					Timeout: 10 * time.Second,
+				}
+
 				resp, e := client.Get(fmt.Sprintf(url, domain))
 				if e != nil {
 					return e
