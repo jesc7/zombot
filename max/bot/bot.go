@@ -10,10 +10,13 @@ import (
 	max "github.com/max-messenger/max-bot-api-client-go"
 )
 
+type TextMsg struct {
+	Text string
+}
 type Bot struct {
-	bot *max.Api
-	ctx context.Context
-	//Out chan
+	bot    *max.Api
+	ctx    context.Context
+	income chan TextMsg
 }
 
 func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
@@ -40,5 +43,12 @@ func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
 }
 
 func (b *Bot) Run() {
+out:
+	for {
+		select {
+		case <-b.ctx.Done():
+			break out
+		}
+	}
 	//
 }

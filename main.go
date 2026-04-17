@@ -38,6 +38,7 @@ func main() {
 
 	//run Max bot
 	wg.Go(func() {
+		defer cancel()
 		bot.Run()
 	})
 
@@ -99,6 +100,8 @@ func main() {
 				break out
 
 			case call := <-chCalls:
+
+			case msgZSrv := <-chZSrv:
 			}
 		}
 	})
