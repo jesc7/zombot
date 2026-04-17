@@ -20,6 +20,8 @@ type Bot struct {
 	income chan *max.Message
 }
 
+var MaxBot *Bot
+
 func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
 	var options []max.Option
 	if cfg.Proxy.Addr != "" {

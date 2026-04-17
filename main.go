@@ -14,7 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	maxBot "github.com/jesc7/zombot/max/bot"
+	"github.com/jesc7/zombot/max/bot"
 	"github.com/jesc7/zombot/types"
 )
 
@@ -31,7 +31,7 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
 	defer cancel()
 
-	bot, e := maxBot.NewBot(ctx, cfg)
+	bot.MaxBot, e = bot.NewBot(ctx, cfg)
 	if e != nil {
 		log.Fatalln("Can't create Max bot:", e)
 	}
@@ -44,7 +44,7 @@ func main() {
 			log.Println("Max bot has been stopped")
 			cancel()
 		}()
-		bot.Run()
+		bot.MaxBot.Run()
 	})
 
 	//run http server
@@ -52,7 +52,7 @@ func main() {
 	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
 	calls := func(w http.ResponseWriter, r *http.Request) {
 		v, ok := r.URL.Query()["phone"]
-		if ok {
+		if !ok {
 			return
 		}
 		bot.SendCall(v[0])
