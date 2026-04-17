@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/jesc7/zombot/types"
 	max "github.com/max-messenger/max-bot-api-client-go"
 )
 
@@ -21,7 +20,7 @@ func main() {
 	if e != nil {
 		log.Fatalln("Can't read config file:", e)
 	}
-	var cfg types.Config
+	var cfg t.Config
 	if e = json.Unmarshal(f, &cfg); e != nil {
 		log.Fatalln("Can't unmarshal the json:", e)
 	}
