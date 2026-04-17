@@ -1,40 +1,63 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
-  <title id="title">Original zombie app icon</title>
-  <desc id="desc">A white app icon background with an original cartoon walking zombie inspired by classic game art but not copied from any specific source.</desc>
+  <title id="title">Zombie app icon</title>
+  <desc id="desc">Original side-view cartoon zombie icon on a white background, inspired by classic shambling zombie art without copying a specific illustration.</desc>
+  <style>
+    .outline {
+      stroke: #151515;
+      stroke-width: 12;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+    }
+    .detail {
+      fill: none;
+      stroke: #151515;
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+    }
+  </style>
   <rect width="1024" height="1024" fill="#FFFFFF"/>
-  <g stroke="#111111" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
-    <path fill="#95B84C" d="M249 232C267 145 347 92 435 108C518 123 569 196 550 275C534 342 465 388 387 386C300 384 229 321 249 232Z"/>
-    <path fill="#7E983E" d="M282 160C304 134 343 118 386 119C357 142 338 173 329 210C306 206 291 189 282 160Z"/>
-    <path fill="#7E983E" d="M255 246C222 254 202 275 205 302C208 330 238 346 275 339C281 310 286 278 255 246Z"/>
-    <path fill="#B9D86A" d="M330 151C366 126 421 126 460 147C435 172 423 206 421 241C382 233 347 201 330 151Z"/>
-    <ellipse cx="391" cy="217" rx="68" ry="53" fill="#FFF8D7"/>
-    <ellipse cx="473" cy="226" rx="29" ry="22" fill="#E9E6C8"/>
-    <path fill="none" d="M320 194C347 168 386 159 424 167"/>
-    <path fill="none" d="M447 197C468 186 494 188 513 201"/>
-    <path fill="#7C2030" d="M374 271C404 250 450 250 488 268L483 322C449 343 402 346 366 326L359 287Z"/>
-    <path fill="#FFFFFF" d="M379 272L399 269L394 296L373 299Z"/>
-    <path fill="#FFFFFF" d="M410 269L430 269L427 299L405 299Z"/>
-    <path fill="#FFFFFF" d="M440 270L459 272L457 298L437 297Z"/>
-    <path fill="#FFFFFF" d="M467 275L484 280L481 304L463 300Z"/>
-    <path fill="#95B84C" d="M444 301C470 312 491 334 501 359L452 378C438 358 416 344 392 341L401 307Z"/>
-    <path fill="#95B84C" d="M400 365L465 365L465 425L394 425Z"/>
-    <path fill="#C7CBC3" d="M340 387C379 363 437 358 486 369C539 381 575 414 588 462L557 600C505 623 419 630 353 611L306 477C305 434 319 401 340 387Z"/>
-    <path fill="#A2A79F" d="M502 378C544 387 576 416 588 462L557 600C527 613 485 620 442 620C503 578 525 488 502 378Z"/>
-    <path fill="#95B84C" d="M473 410C550 395 641 405 727 436L717 493C628 500 544 484 469 459Z"/>
-    <path fill="#95B84C" d="M719 435C766 442 812 454 846 475L833 532C797 529 758 518 713 494Z"/>
-    <path fill="#95B84C" d="M816 476L865 488L847 550L801 537Z"/>
-    <path fill="#95B84C" d="M431 462C509 476 596 520 664 576L619 626C531 590 456 546 399 497Z"/>
-    <path fill="#95B84C" d="M619 576C649 589 675 607 695 632L653 676C626 664 601 646 579 623Z"/>
-    <path fill="#2A4D67" d="M362 606C418 620 466 622 520 611L525 703C491 731 451 748 408 750L343 726L321 655Z"/>
-    <path fill="#223D54" d="M478 616L525 611L525 703C496 728 462 744 426 749C467 714 484 668 478 616Z"/>
-    <path fill="#2A4D67" d="M408 698C451 708 489 738 516 787L469 908C425 925 372 924 334 902L349 811Z"/>
-    <path fill="#95B84C" d="M300 799C339 790 381 797 414 816L395 901C358 925 298 927 262 903L253 847Z"/>
-    <path fill="#95B84C" d="M438 742C493 733 548 757 592 803L560 905C517 930 459 930 420 906L424 820Z"/>
-    <path fill="#95B84C" d="M232 891C284 875 343 877 391 897L378 948C327 965 269 963 223 940Z"/>
-    <path fill="#95B84C" d="M411 899C470 882 536 883 588 907L578 955C523 971 454 971 403 950Z"/>
-    <path fill="none" d="M319 611C344 615 366 615 391 609"/>
-    <path fill="none" d="M548 443C597 451 648 456 707 454"/>
-    <path fill="none" d="M434 786C461 785 491 793 517 809"/>
-    <path fill="none" d="M281 851C319 842 358 845 391 858"/>
+  <g transform="translate(24 22) rotate(-4 420 500)">
+    <g class="outline">
+      <path fill="#A8C45A" d="M262 166C313 125 385 107 458 119C525 130 577 172 592 227C604 271 594 325 560 367C525 410 472 428 408 426C337 424 273 394 236 345C211 313 201 272 208 233C215 203 232 180 262 166Z"/>
+      <path fill="#8AA13F" d="M289 165C319 139 357 124 404 121C373 145 353 176 346 213C320 209 301 192 289 165Z"/>
+      <path fill="#8AA13F" d="M220 252C191 262 171 282 167 309C163 336 184 361 218 369C232 339 233 301 220 252Z"/>
+      <path fill="#F7F0C8" d="M353 195C391 167 445 163 484 185C471 218 470 250 478 282C438 291 393 283 356 256C334 239 332 214 353 195Z"/>
+      <ellipse cx="456" cy="235" rx="34" ry="26" transform="rotate(-8 456 235)" fill="#EFE4B7"/>
+      <path fill="#742434" d="M362 275C403 245 465 246 527 278L516 333C470 364 411 369 365 347L352 305Z"/>
+      <path fill="#FFF7E4" d="M364 278L386 276L383 307L360 309Z"/>
+      <path fill="#FFF7E4" d="M394 274L416 274L415 307L391 307Z"/>
+      <path fill="#FFF7E4" d="M424 274L446 276L445 307L421 305Z"/>
+      <path fill="#FFF7E4" d="M454 277L476 281L474 311L451 307Z"/>
+      <path fill="#FFF7E4" d="M484 282L505 288L501 317L479 311Z"/>
+      <path fill="#A8C45A" d="M350 347C378 335 409 333 440 336L432 391C395 390 363 398 336 416L320 381C326 366 336 354 350 347Z"/>
+      <path fill="#B5B7AE" d="M317 391C350 370 397 365 441 372C486 379 521 399 543 431L533 585C496 608 444 622 392 625C354 626 318 621 284 607L281 454C283 423 296 401 317 391Z"/>
+      <path fill="#969992" d="M454 376C494 385 525 404 543 431L533 585C506 602 473 614 435 620C454 566 460 484 454 376Z"/>
+      <path fill="#A8C45A" d="M430 414C508 399 603 407 695 434L688 486C594 497 507 489 418 462Z"/>
+      <path fill="#A8C45A" d="M685 435C733 439 780 453 820 476L810 528C767 526 721 514 678 489Z"/>
+      <path fill="#A8C45A" d="M804 475C826 478 847 486 869 500L860 542C836 542 811 537 789 524Z"/>
+      <path fill="#A8C45A" d="M391 454C443 473 495 505 543 548L509 590C454 573 405 546 358 508Z"/>
+      <path fill="#A8C45A" d="M509 548C540 562 567 581 590 606L557 644C528 635 503 619 481 596Z"/>
+      <path fill="#35526C" d="M329 613C375 621 420 622 470 616L473 689C447 716 414 738 377 752C339 766 302 767 269 755L257 687L281 616Z"/>
+      <path fill="#24394A" d="M434 616L473 616L473 689C447 716 414 738 377 752C419 716 438 672 434 616Z"/>
+      <path fill="#35526C" d="M312 687C278 726 240 770 196 818L172 843L128 842L168 791C210 737 253 691 298 654Z"/>
+      <path fill="#A8C45A" d="M116 831C153 819 201 819 242 833L237 883C201 905 151 907 114 892L109 856Z"/>
+      <path fill="#35526C" d="M385 693C426 711 464 745 499 795L470 831C429 816 392 790 360 758L357 716Z"/>
+      <path fill="#A8C45A" d="M458 787C497 777 546 785 588 813L578 864C543 885 493 888 453 872L442 824Z"/>
+      <path fill="#A8C45A" d="M106 881C147 867 198 869 241 885L232 926C190 944 137 946 98 931L93 900Z"/>
+      <path fill="#A8C45A" d="M446 870C494 857 548 859 595 878L588 921C543 938 488 940 443 927L437 896Z"/>
+    </g>
+    <g class="detail">
+      <path d="M338 192C361 175 392 167 425 169"/>
+      <path d="M431 204C451 198 475 201 493 212"/>
+      <path d="M465 240C488 253 502 272 508 296"/>
+      <path d="M380 337C414 348 450 347 483 334"/>
+      <path d="M297 608C325 613 355 613 384 607"/>
+      <path d="M516 440C571 448 625 451 678 449"/>
+      <path d="M361 744C392 747 423 760 449 783"/>
+      <path d="M144 851C176 843 211 844 240 854"/>
+    </g>
   </g>
 </svg>
