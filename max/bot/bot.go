@@ -101,13 +101,6 @@ out:
 					}
 				default:
 				}
-
-				m := upd.Message
-				if e := b.bot.Messages.Send(ctx, max.NewMessage().
-					SetChat(m.Recipient.ChatId).
-					SetText(m.Body.Text)); e != nil {
-					log.Println("Send message error:", e)
-				}
 			}
 		}
 	}
