@@ -86,7 +86,9 @@ out:
 					break
 				}
 
-				switch upd.GetChat()
+				switch upd.GetCommand() {
+					case "/"
+				}
 
 				m := upd.Message
 				if e := b.bot.Messages.Send(ctx, max.NewMessage().
