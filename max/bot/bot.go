@@ -3,6 +3,7 @@ package bot
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -67,8 +68,11 @@ out:
 		case upd := <-b.bot.GetUpdates(ctx):
 			switch ut := upd.(type) {
 			case *schemes.MessageCreatedUpdate:
-				msg := max.NewMessage().
-					SetUser()
+				if e := b.bot.Messages.Send(ctx, max.NewMessage().
+					SetUser(ut.Message.Sender.UserId).
+					SetText(ut.Message.Body.Text)); e != nil {
+					log.Println("Send message error:", e)
+				}
 			}
 		}
 	}
