@@ -78,15 +78,17 @@ out:
 		case msg := <-b.income:
 			_ = msg
 
-		case upd := <-b.bot.GetUpdates(ctx):
-			switch ut := upd.(type) {
+		case update := <-b.bot.GetUpdates(ctx):
+			switch upd := update.(type) {
 			case *schemes.MessageCreatedUpdate:
-				m := ut.Message
 				//только групповой чат из настроек
-				if m.Recipient.ChatType != schemes.CHAT || m.Recipient.ChatId != b.chatID {
+				if upd.Message.Recipient.ChatType != schemes.CHAT || upd.GetChatID() != b.chatID {
 					break
 				}
 
+				switch upd.GetChat()
+
+				m := upd.Message
 				if e := b.bot.Messages.Send(ctx, max.NewMessage().
 					SetChat(m.Recipient.ChatId).
 					SetText(m.Body.Text)); e != nil {
