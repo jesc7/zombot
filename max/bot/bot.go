@@ -2,6 +2,7 @@ package bot
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -22,6 +23,7 @@ type Bot struct {
 	bot    *max.Api
 	income chan *max.Message
 	chatID int64
+	db     *sql.DB
 }
 
 func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
@@ -40,9 +42,16 @@ func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
 			},
 		))
 	}
+
+	db, e := sql.Open(cfg.DB.Driver, cfg.DB.ConnStr)
+	if e != nil {
+		return nil, e
+	}
+
 	bot, e := max.New(cfg.Max.Token, options...)
 	return &Bot{
 		bot:    bot,
+		db:     db,
 		chatID: cfg.Max.ChatID,
 	}, e
 }

@@ -9,6 +9,10 @@ type Config struct {
 		Addr string `json:"addr"`
 		Port int    `json:"port"`
 	} `json:"proxy"`
+	DB struct {
+		Driver  string `json:"driver"`
+		ConnStr string `json:"connstr"`
+	} `json:"db"`
 	CheckDomains []string    `json:"check_domains"`
 	Checks       []string    `json:"checks"`
 	CFChecks     []string    `json:"cf_checks"`
