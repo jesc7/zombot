@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jesc7/zombot/jp/duties"
 	"github.com/jesc7/zombot/types"
 	max "github.com/max-messenger/max-bot-api-client-go"
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
@@ -91,6 +92,13 @@ out:
 
 				switch upd.GetCommand() {
 				case "/duty":
+					dut, _ := duties.DutiesList(db)
+					if i, e := strconv.Atoi(chat.Arg); e == nil && i > 0 && i < 365 {
+						reply = duties.Duties(db, i, dut, "")
+					} else {
+						reply = duties.Duties(db, 7, dut, chat.Arg)
+					}
+
 				case "/absent":
 				case "/birthday":
 				case "/ratings":
@@ -101,6 +109,7 @@ out:
 						SetText("ChatID: "+strconv.FormatInt(upd.GetChatID(), 64))); e != nil {
 						log.Println("Send message error:", e)
 					}
+
 				default:
 				}
 			}
