@@ -109,11 +109,7 @@ out:
 				case "/duty":
 					var text string
 					dut, _ := duties.DutiesList(b.db)
-					//if i, e := strconv.Atoi(chat.Arg); e == nil && i > 0 && i < 365 {
-					//	text = duties.Duties(b.db, i, dut, "")
-					//} else {
-					text = duties.Duties(b.db, 7, dut, "" /*chat.Arg*/)
-					//}
+					text = duties.Duties(b.db, 7, dut, "")
 					if e := b.bot.Messages.Send(ctx, max.NewMessage().
 						SetChat(upd.GetChatID()).
 						SetText(text)); e != nil {
