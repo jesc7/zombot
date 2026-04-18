@@ -46,6 +46,7 @@ func DutiesList(db *sql.DB) (res Planner, delta string) {
 		return
 	}
 
+	lastDuties = CurDuties
 	CurDuties = res
 	if lastDuties != nil {
 		for i := 1; i <= 100; i++ {
