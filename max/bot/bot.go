@@ -92,11 +92,17 @@ out:
 
 				switch upd.GetCommand() {
 				case "/duty":
+					var text string
 					dut, _ := duties.DutiesList(db)
 					if i, e := strconv.Atoi(chat.Arg); e == nil && i > 0 && i < 365 {
-						reply = duties.Duties(db, i, dut, "")
+						text = duties.Duties(db, i, dut, "")
 					} else {
-						reply = duties.Duties(db, 7, dut, chat.Arg)
+						text = duties.Duties(db, 7, dut, chat.Arg)
+					}
+					if e := b.bot.Messages.Send(ctx, max.NewMessage().
+						SetChat(upd.GetChatID()).
+						SetText(text)); e != nil {
+						log.Println("Send message error:", e)
 					}
 
 				case "/absent":
