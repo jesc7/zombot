@@ -39,6 +39,7 @@ func main() {
 	wg.Go(func() {
 		defer func() {
 			log.Println("Max bot has been stopped")
+			bot.Free()
 			cancel()
 		}()
 		bot.Run(ctx)

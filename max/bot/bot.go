@@ -56,6 +56,12 @@ func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
 	}, e
 }
 
+func (b *Bot) Free() {
+	if b.db != nil {
+		b.db.Close()
+	}
+}
+
 func (b *Bot) SendText(text string) {
 	b.income <- max.NewMessage().SetText(text)
 }
@@ -102,12 +108,12 @@ out:
 				switch upd.GetCommand() {
 				case "/duty":
 					var text string
-					dut, _ := duties.DutiesList(db)
-					if i, e := strconv.Atoi(chat.Arg); e == nil && i > 0 && i < 365 {
-						text = duties.Duties(db, i, dut, "")
-					} else {
-						text = duties.Duties(db, 7, dut, chat.Arg)
-					}
+					dut, _ := duties.DutiesList(b.db)
+					//if i, e := strconv.Atoi(chat.Arg); e == nil && i > 0 && i < 365 {
+					//	text = duties.Duties(b.db, i, dut, "")
+					//} else {
+					text = duties.Duties(b.db, 7, dut, "" /*chat.Arg*/)
+					//}
 					if e := b.bot.Messages.Send(ctx, max.NewMessage().
 						SetChat(upd.GetChatID()).
 						SetText(text)); e != nil {
