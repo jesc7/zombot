@@ -77,7 +77,9 @@ out:
 			break out
 
 		case msg := <-b.income:
-			_ = msg
+			if e := b.bot.Messages.Send(ctx, msg.SetChat(b.chatID)); e != nil {
+				log.Println("Send message error:", e)
+			}
 
 		case update := <-b.bot.GetUpdates(ctx):
 			switch upd := update.(type) {
