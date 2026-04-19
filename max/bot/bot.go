@@ -106,7 +106,7 @@ out:
 				}
 
 				switch upd.GetCommand() {
-				case "/duty":
+				case "/duty": //дежурства
 					text := upd.GetParam()
 					dut, _ := duties.DutiesList(b.db)
 					if i, e := strconv.Atoi(text); e == nil && i > 0 && i < 365 {
