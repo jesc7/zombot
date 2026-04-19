@@ -120,6 +120,7 @@ out:
 				case "/birthday":
 				case "/ratings":
 				case "/ci":
+
 				case "/chatid":
 					if e := b.bot.Messages.Send(ctx, max.NewMessage().
 						SetChat(upd.GetChatID()).
