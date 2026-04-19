@@ -17,11 +17,18 @@ type Config struct {
 	Checks       []string    `json:"checks"`
 	CFChecks     []string    `json:"cf_checks"`
 	ZSrv         []ZSrvWatch `json:"zsrv"`
+	EC           EC          `json:"ec"`
 }
 
 type ZSrvWatch struct {
 	Url     string `json:"url"`
 	Caption string `json:"caption"`
+}
+
+type EC struct {
+	Driver  string `json:"driver"`
+	ConnStr string `json:"connstr"`
+	Pwd     string `json:"pwd"`
 }
 
 type MsgType int
