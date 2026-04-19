@@ -107,9 +107,13 @@ out:
 
 				switch upd.GetCommand() {
 				case "/duty":
-					var text string
+					text := upd.GetParam()
 					dut, _ := duties.DutiesList(b.db)
-					text = duties.Duties(b.db, 7, dut, "")
+					if i, e := strconv.Atoi(text); e == nil && i > 0 && i < 365 {
+						text = duties.Duties(b.db, i, dut, "")
+					} else {
+						text = duties.Duties(b.db, 7, dut, text)
+					}
 					if e := b.bot.Messages.Send(ctx, max.NewMessage().
 						SetChat(upd.GetChatID()).
 						SetText(text)); e != nil {
