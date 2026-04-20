@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/jesc7/zombot/queuewait/queue"
+	"github.com/jesc7/zombot/queue"
 	"golang.org/x/time/rate"
 )
 

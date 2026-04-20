@@ -10,23 +10,23 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jesc7/zombot/jp/duties"
-	"github.com/jesc7/zombot/queuewait"
-	"github.com/jesc7/zombot/queuewait/queue"
-	"github.com/jesc7/zombot/types"
 	max "github.com/max-messenger/max-bot-api-client-go"
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
 	_ "github.com/nakagami/firebirdsql"
 	"golang.org/x/time/rate"
+
+	"github.com/jesc7/zombot/jp/duties"
+	"github.com/jesc7/zombot/queue"
+	"github.com/jesc7/zombot/queue/queuewait"
+	"github.com/jesc7/zombot/types"
 )
 
 type TextMsg struct {
 	Text string
 }
 type Bot struct {
-	bot   *max.Api
-	QWait *queuewait.QWait
-	//income chan *max.Message
+	bot    *max.Api
+	QWait  *queuewait.QWait
 	chatID int64
 	db     *sql.DB
 }
