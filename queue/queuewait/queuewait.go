@@ -9,10 +9,9 @@ import (
 )
 
 type QWaitObj struct {
-	o     any
-	evt   func(args ...any)
-	onPop func(args ...any) (res any, e error)
-	wg    *sync.WaitGroup
+	o    any
+	onOk func(args ...any) (res any)
+	wg   *sync.WaitGroup
 }
 
 func (o *QWaitObj) Done() {
@@ -23,8 +22,8 @@ type QWait struct {
 	*queue.Queue
 }
 
-func NewQWait(ctx context.Context, limit rate.Limit) QWait {
-	return QWait{
+func NewQWait(ctx context.Context, limit rate.Limit) *QWait {
+	return &QWait{
 		Queue: queue.NewQ(ctx, limit),
 	}
 }

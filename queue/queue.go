@@ -67,6 +67,7 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 			}
 		}
 	}()
+
 	return q
 }
 

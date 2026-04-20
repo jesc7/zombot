@@ -11,18 +11,21 @@ import (
 	"strings"
 
 	"github.com/jesc7/zombot/jp/duties"
+	"github.com/jesc7/zombot/queue/queuewait"
 	"github.com/jesc7/zombot/types"
 	max "github.com/max-messenger/max-bot-api-client-go"
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
 	_ "github.com/nakagami/firebirdsql"
+	"golang.org/x/time/rate"
 )
 
 type TextMsg struct {
 	Text string
 }
 type Bot struct {
-	bot    *max.Api
-	income chan *max.Message
+	bot   *max.Api
+	QWait *queuewait.QWait
+	//income chan *max.Message
 	chatID int64
 	db     *sql.DB
 }
@@ -50,6 +53,7 @@ func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
 	bot, e := max.New(cfg.Max.Token, options...)
 	return &Bot{
 		bot:    bot,
+		QWait:  queuewait.NewQWait(ctx, rate.Limit(5)),
 		db:     db,
 		chatID: cfg.Max.ChatID,
 	}, e
