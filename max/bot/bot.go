@@ -107,12 +107,6 @@ out:
 		case <-ctx.Done():
 			break out
 
-		/*case msg := <-b.income:
-		if e := b.bot.Messages.Send(ctx, msg.SetChat(b.chatID)); e != nil {
-			log.Println("Send message error:", e)
-		}
-		*/
-
 		case m := <-b.QWait.Q:
 			wo, ok := m.(*queue.WaitObj)
 			if !ok {
