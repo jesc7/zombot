@@ -7,6 +7,7 @@ require (
 	github.com/max-messenger/max-bot-api-client-go v1.6.14
 	github.com/nakagami/firebirdsql v0.9.18
 	golang.org/x/text v0.36.0
+	golang.org/x/time v0.15.0
 )
 
 require (
