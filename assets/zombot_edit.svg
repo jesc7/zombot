@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1024"
+   height="1024"
+   viewBox="0 0 1024 1024"
+   fill="none"
+   version="1.1"
+   id="svg26"
+   sodipodi:docname="zombot_edit.svg"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs26" />
+  <sodipodi:namedview
+     id="namedview26"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.099487305"
+     inkscape:cx="-1723.838"
+     inkscape:cy="-276.41718"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="5"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg26" />
+  <path
+     d="m 252.13013,451.94004 -33.94871,-26.16579 -36.49984,3.02295 -17.47477,70.51169 44.68063,87.43956 24.32245,-1.70259 20.88136,-44.99111 z"
+     fill="#7bb54a"
+     stroke="#13201c"
+     stroke-width="19.8175"
+     id="path1"
+     style="stroke-linecap:round;stroke-linejoin:round"
+     sodipodi:nodetypes="cccccccc" />
+  <path
+     d="m 758,462 78,-26 26.96778,112.75438 -33.41403,42.12595 L 748,544 Z"
+     fill="#7bb54a"
+     stroke="#13201c"
+     stroke-width="20"
+     id="path2"
+     style="stroke-linecap:round;stroke-linejoin:round"
+     sodipodi:nodetypes="cccccc" />
+  <path
+     d="M 300,328 C 246,216 392,148 526,188 716,148 822,314 780,530 756,732 558,840 384,758 226,688 206,472 300,328 Z"
+     fill="#85ca4f"
+     stroke="#13201c"
+     stroke-width="24"
+     id="path3"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <ellipse
+     cx="450"
+     cy="330"
+     rx="180"
+     ry="136"
+     fill="#d0fa98"
+     fill-opacity="0.45"
+     id="ellipse3"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <ellipse
+     cx="614"
+     cy="656"
+     rx="152"
+     ry="110"
+     fill="#466123"
+     fill-opacity="0.18"
+     id="ellipse4"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 394,272 182,28"
+     stroke="#3e6120"
+     stroke-width="14"
+     id="path4"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 420,254 -10,60"
+     stroke="#13201c"
+     stroke-width="9"
+     id="path5"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 458,254 -10,60"
+     stroke="#13201c"
+     stroke-width="9"
+     id="path6"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 498,252 -10,62"
+     stroke="#13201c"
+     stroke-width="9"
+     id="path7"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 540,254 -10,60"
+     stroke="#13201c"
+     stroke-width="9"
+     id="path8"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 666,520 62,28"
+     stroke="#3e6120"
+     stroke-width="14"
+     id="path9"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 684,502 -10,40"
+     stroke="#13201c"
+     stroke-width="9"
+     id="path10"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 714,516 -10,40"
+     stroke="#13201c"
+     stroke-width="9"
+     id="path11"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <circle
+     cx="398"
+     cy="422"
+     fill="#fff9f1"
+     stroke="#13201c"
+     stroke-width="18"
+     id="ellipse11"
+     r="118"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <ellipse
+     cx="639"
+     cy="420"
+     rx="91"
+     ry="94"
+     fill="#fff9f1"
+     stroke="#13201c"
+     stroke-width="18"
+     id="ellipse12"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <ellipse
+     cx="355"
+     cy="470"
+     rx="29"
+     ry="40"
+     fill="#412a46"
+     id="ellipse13"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <ellipse
+     cx="672"
+     cy="387"
+     rx="22"
+     ry="33"
+     fill="#412a46"
+     id="ellipse14"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <circle
+     cx="342"
+     cy="450"
+     r="7"
+     fill="#fff9f1"
+     id="circle14"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <circle
+     cx="664"
+     cy="367"
+     r="6"
+     fill="#fff9f1"
+     id="circle15"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 290,334 c 40,-20 85,-18 108,-16"
+     stroke="#55762e"
+     stroke-width="14"
+     id="path15"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 560,350 c 30,-12 62,-14 89,-12"
+     stroke="#55762e"
+     stroke-width="14"
+     id="path16"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 564,374 c 34,-28 92,-30 142,-24"
+     stroke="#5e8334"
+     stroke-width="12"
+     id="path17"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <ellipse
+     cx="479"
+     cy="520"
+     rx="18"
+     ry="30"
+     fill="#304622"
+     fill-opacity="0.7"
+     id="ellipse17"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <ellipse
+     cx="531"
+     cy="512"
+     rx="15"
+     ry="24"
+     fill="#304622"
+     fill-opacity="0.7"
+     id="ellipse18"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 350,620 44,-24 52,-4 112,-2 86,16 42,28 -14,66 -100,20 -142,-2 -70,-22 z"
+     fill="#542530"
+     stroke="#13201c"
+     stroke-width="18"
+     id="path18"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <ellipse
+     cx="506"
+     cy="677"
+     rx="80"
+     ry="27"
+     fill="#8d475b"
+     fill-opacity="0.6"
+     id="ellipse19"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 384,600 h 36 l -2,50 -30,2 z"
+     fill="#fff1d5"
+     stroke="#13201c"
+     stroke-width="8"
+     id="path19"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 438,592 h 38 l -2,84 -30,-2 z"
+     fill="#fff1d5"
+     stroke="#13201c"
+     stroke-width="8"
+     id="path20"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 496,590 36,2 -2,88 -30,-2 z"
+     fill="#fff1d5"
+     stroke="#13201c"
+     stroke-width="8"
+     id="path21"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 554,594 36,4 -2,72 h -28 z"
+     fill="#fff1d5"
+     stroke="#13201c"
+     stroke-width="8"
+     id="path22"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+  <path
+     d="m 612,602 34,8 -4,52 -26,-2 z"
+     fill="#fff1d5"
+     stroke="#13201c"
+     stroke-width="8"
+     id="path23"
+     style="stroke-linecap:round;stroke-linejoin:round" />
+</svg>
