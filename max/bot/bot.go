@@ -12,6 +12,7 @@ import (
 
 	"github.com/jesc7/zombot/jp/duties"
 	"github.com/jesc7/zombot/queuewait"
+	"github.com/jesc7/zombot/queuewait/queue"
 	"github.com/jesc7/zombot/types"
 	max "github.com/max-messenger/max-bot-api-client-go"
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
@@ -66,11 +67,19 @@ func (b *Bot) Free() {
 }
 
 func (b *Bot) SendText(text string) {
-	b.income <- max.NewMessage().SetText(text)
+	b.QWait.Add(
+		max.NewMessage().
+			SetText(text).
+			SetFormat(schemes.HTML),
+		queue.PRIORITY_NORMAL)
 }
 
 func (b *Bot) SendCall(phone string) {
-	b.income <- max.NewMessage().SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone))
+	b.QWait.Add(
+		max.NewMessage().
+			SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone)).
+			SetFormat(schemes.HTML),
+		queue.PRIORITY_NORMAL)
 }
 
 func (b *Bot) SendZSrv(msg types.ZSrvMessage) {
@@ -85,7 +94,11 @@ func (b *Bot) SendZSrv(msg types.ZSrvMessage) {
 	default:
 		msg.Text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", msg.Caption, msg.Text)
 	}
-	b.income <- max.NewMessage().SetText(msg.Text)
+	b.QWait.Add(
+		max.NewMessage().
+			SetText(msg.Text).
+			SetFormat(schemes.HTML),
+		queue.PRIORITY_NORMAL)
 }
 
 func (b *Bot) Run(ctx context.Context) {
