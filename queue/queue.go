@@ -70,22 +70,22 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 	return q
 }
 
-func (q *Queue) Append(obj any, priority Priority) {
+func (q *Queue) Add(o any, priority Priority) {
 	if !q.stop {
 		q.mu.Lock()
 		defer q.mu.Unlock()
 
 		switch priority {
 		case PRIORITY_CRITICAL:
-			q.q = append([]any{obj}, q.q...)
+			q.q = append([]any{o}, q.q...)
 		case PRIORITY_HIGH:
 			if half := len(q.q) / 2; half == 0 {
-				q.q = append(q.q, obj)
+				q.q = append(q.q, o)
 			} else {
-				q.q = append(q.q[0:half], append([]any{obj}, q.q[half:]...)...)
+				q.q = append(q.q[0:half], append([]any{o}, q.q[half:]...)...)
 			}
 		default:
-			q.q = append(q.q, obj)
+			q.q = append(q.q, o)
 		}
 	}
 }

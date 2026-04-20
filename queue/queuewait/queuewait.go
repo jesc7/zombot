@@ -9,7 +9,7 @@ import (
 )
 
 type QWaitObj struct {
-	obj any
+	o   any
 	evt func(res ...any)
 	wg  *sync.WaitGroup
 }
@@ -24,9 +24,9 @@ func NewQWait(ctx context.Context, limit rate.Limit) QWait {
 	}
 }
 
-func (q QWait) Wait(o QWaitObj, priority queue.Priority) {
+func (q QWait) Wait(o *QWaitObj, priority queue.Priority) {
 	o.wg = &sync.WaitGroup{}
 	o.wg.Add(1)
-	q.Append(o, priority)
+	q.Add(o, priority)
 	o.wg.Wait()
 }
