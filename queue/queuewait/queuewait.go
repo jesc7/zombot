@@ -18,15 +18,15 @@ type QueueWait struct {
 	*queue.Queue
 }
 
+func NewQWait(ctx context.Context, limit rate.Limit) QueueWait {
+	return QueueWait{
+		Queue: queue.NewQ(ctx, limit),
+	}
+}
+
 func (q QueueWait) Wait(obj Obj, priority queue.Priority) {
 	obj.wg = &sync.WaitGroup{}
 	obj.wg.Add(1)
 	q.Append(obj, priority)
 	obj.wg.Wait()
-}
-
-func NewQWait(ctx context.Context, limit rate.Limit) QueueWait {
-	return QueueWait{
-		Queue: queue.NewQ(ctx, limit),
-	}
 }
