@@ -67,11 +67,11 @@ func (b *Bot) Free() {
 }
 
 func (b *Bot) SendText(text string) {
-	b.QWait.Add(
-		max.NewMessage().
+	b.QWait.Add(queuewait.QWaitObj{
+		O: max.NewMessage().
 			SetText(text).
 			SetFormat(schemes.HTML),
-		queue.PRIORITY_NORMAL)
+	}, queue.PRIORITY_NORMAL)
 }
 
 func (b *Bot) SendCall(phone string) {
@@ -113,9 +113,9 @@ out:
 				log.Println("Send message error:", e)
 			}
 
-		case msg := <-b.QWait.Q:
-			m := msg.(*max.Message)
-			_ = m
+		case m := <-b.QWait.Q:
+			m2 := m.(*max.Message)
+			_ = m2
 
 		case update := <-b.bot.GetUpdates(ctx):
 			switch upd := update.(type) {
