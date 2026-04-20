@@ -30,17 +30,15 @@ func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
 	var options []max.Option
 	if cfg.Proxy.Addr != "" {
 		proxy, e := url.Parse(fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port))
-		if e != nil {
-			return nil, e
-		}
-
-		options = append(options, max.WithHTTPClient(
-			&http.Client{
-				Transport: &http.Transport{
-					Proxy: http.ProxyURL(proxy),
+		if e == nil {
+			options = append(options, max.WithHTTPClient(
+				&http.Client{
+					Transport: &http.Transport{
+						Proxy: http.ProxyURL(proxy),
+					},
 				},
-			},
-		))
+			))
+		}
 	}
 
 	db, e := sql.Open(cfg.DB.Driver, cfg.DB.ConnStr)
