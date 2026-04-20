@@ -100,6 +100,10 @@ out:
 				log.Println("Send message error:", e)
 			}
 
+		case msg := <-b.QWait.Q:
+			m := msg.(*max.Message)
+			_ = m
+
 		case update := <-b.bot.GetUpdates(ctx):
 			switch upd := update.(type) {
 			case *schemes.MessageCreatedUpdate:
