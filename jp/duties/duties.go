@@ -17,6 +17,7 @@ var (
 )
 
 func DutiesList(db *sql.DB) (res Planner, delta string) {
+	res = make(Planner)
 	rows, e := db.Query(`
 		select t.dt, list(u.username, ', ')
 		from tabel t
