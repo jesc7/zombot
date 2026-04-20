@@ -10,8 +10,12 @@ import (
 
 type QWaitObj struct {
 	o   any
-	evt func(res ...any)
+	evt func(args ...any)
 	wg  *sync.WaitGroup
+}
+
+func (o *QWaitObj) Done() {
+	o.wg.Done()
 }
 
 type QWait struct {
