@@ -114,8 +114,15 @@ out:
 		*/
 
 		case m := <-b.QWait.Q:
-			m2 := m.(*queue.WaitObj).O.(*max.Message)
-			m2.O
+			wo, ok := m.(*queue.WaitObj)
+			if !ok {
+				break
+			}
+			msg, ok := wo.O.(*max.Message)
+			if !ok {
+				break
+			}
+			_ = msg
 
 		case update := <-b.bot.GetUpdates(ctx):
 			switch upd := update.(type) {
