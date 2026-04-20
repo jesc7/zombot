@@ -8,25 +8,25 @@ import (
 	"golang.org/x/time/rate"
 )
 
-type Obj struct {
+type QWaitObj struct {
 	obj any
 	evt func(res ...any)
 	wg  *sync.WaitGroup
 }
 
-type QueueWait struct {
+type QWait struct {
 	*queue.Queue
 }
 
-func NewQWait(ctx context.Context, limit rate.Limit) QueueWait {
-	return QueueWait{
+func NewQWait(ctx context.Context, limit rate.Limit) QWait {
+	return QWait{
 		Queue: queue.NewQ(ctx, limit),
 	}
 }
 
-func (q QueueWait) Wait(obj Obj, priority queue.Priority) {
-	obj.wg = &sync.WaitGroup{}
-	obj.wg.Add(1)
-	q.Append(obj, priority)
-	obj.wg.Wait()
+func (q QWait) Wait(o QWaitObj, priority queue.Priority) {
+	o.wg = &sync.WaitGroup{}
+	o.wg.Add(1)
+	q.Append(o, priority)
+	o.wg.Wait()
 }
