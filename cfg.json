@@ -8,9 +8,9 @@
 		"connstr": "SYSDBA:masterkey@192.168.67.111/C:/Standart-N/base/ZSNSPACEBASE.FDB"
 	},
 	"zsrv":[
-		{"url":"http://192.168.67.117:8080","caption":"Россия"},
-		{"url":"http://192.168.67.163:8080","caption":"Казахстан"},
-		{"url":"http://192.168.67.110:8012","caption":"Чувашия"}
+		{"url":"http://192.168.67.117:8080","caption":"Р РѕСЃСЃРёСЏ"},
+		{"url":"http://192.168.67.163:8080","caption":"РљР°Р·Р°С…СЃС‚Р°РЅ"},
+		{"url":"http://192.168.67.110:8012","caption":"Р§СѓРІР°С€РёСЏ"}
 	],
 	"check_domains":[
 		"standart-n.ru"

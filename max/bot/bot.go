@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/jesc7/zombot/jp/duties"
-	"github.com/jesc7/zombot/queue/queuewait"
+	"github.com/jesc7/zombot/queuewait"
 	"github.com/jesc7/zombot/types"
 	max "github.com/max-messenger/max-bot-api-client-go"
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
