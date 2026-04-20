@@ -63,18 +63,23 @@
            style="stroke-linecap:round;stroke-linejoin:round" />
       </g>
     </g>
-    <ellipse
-       cx="450"
-       cy="330"
-       rx="180"
-       ry="136"
+    <path
        fill="#d0fa98"
        fill-opacity="0.45"
        id="ellipse3"
-       style="stroke-linecap:round;stroke-linejoin:round" />
+       style="stroke-linecap:round;stroke-linejoin:round"
+       sodipodi:type="arc"
+       sodipodi:cx="461.30798"
+       sodipodi:cy="311.15338"
+       sodipodi:rx="166.17914"
+       sodipodi:ry="107.10184"
+       sodipodi:start="6.2521748"
+       sodipodi:end="6.2479992"
+       sodipodi:arc-type="slice"
+       d="M 627.40722,307.83263 A 166.17914,107.10184 0 0 1 466.63385,418.2002 166.17914,107.10184 0 0 1 295.21986,314.69762 a 166.17914,107.10184 0 0 1 160.4155,-110.58366 166.17914,107.10184 0 0 1 171.7489,103.2717 l -166.07628,3.76772 z" />
     <ellipse
-       cx="614"
-       cy="656"
+       cx="587.61475"
+       cy="644.69202"
        rx="152"
        ry="110"
        fill="#466123"
