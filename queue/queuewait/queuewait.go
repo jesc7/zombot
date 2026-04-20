@@ -9,11 +9,10 @@ import (
 )
 
 type QWaitObj struct {
-	o      any
-	evt    func(args ...any)
-	onPush func(args ...any) (res any, e error)
-	onPop  func(args ...any) (res any, e error)
-	wg     *sync.WaitGroup
+	o     any
+	evt   func(args ...any)
+	onPop func(args ...any) (res any, e error)
+	wg    *sync.WaitGroup
 }
 
 func (o *QWaitObj) Done() {
