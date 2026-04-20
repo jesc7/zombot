@@ -8,6 +8,14 @@ import (
 	"golang.org/x/time/rate"
 )
 
+type Priority int
+
+const (
+	PRIORITY_NORMAL Priority = iota
+	PRIORITY_HIGH
+	PRIORITY_CRITICAL
+)
+
 // Queue очередь с ограничителем частоты выборки
 type Queue struct {
 	Q    chan any
@@ -16,14 +24,6 @@ type Queue struct {
 	mu   sync.Mutex
 	lim  *rate.Limiter
 }
-
-type Priority int
-
-const (
-	PRIORITY_NORMAL Priority = iota
-	PRIORITY_HIGH
-	PRIORITY_CRITICAL
-)
 
 func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 	q := &Queue{
@@ -89,4 +89,21 @@ func (q *Queue) Add(o any, priority Priority) {
 			q.q = append(q.q, o)
 		}
 	}
+}
+
+type WaitObj struct {
+	O    any
+	OnOk func(args ...any) (res any)
+	wg   *sync.WaitGroup
+}
+
+func (o *WaitObj) Done() {
+	o.wg.Done()
+}
+
+func (q *Queue) Wait(o *WaitObj, priority Priority) {
+	o.wg = &sync.WaitGroup{}
+	o.wg.Add(1)
+	q.Add(o, priority)
+	o.wg.Wait()
 }
