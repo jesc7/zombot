@@ -117,6 +117,9 @@ out:
 				break
 			}
 			_ = msg
+			if wo.OnOk != nil {
+				wo.OnOk()
+			}
 
 		case update := <-b.bot.GetUpdates(ctx):
 			switch upd := update.(type) {

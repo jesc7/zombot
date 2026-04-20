@@ -93,7 +93,7 @@ func (q *Queue) Add(o any, priority Priority) {
 
 type WaitObj struct {
 	O    any
-	OnOk func(args ...any) (res any)
+	OnOk func(args ...any)
 	wg   *sync.WaitGroup
 }
 
