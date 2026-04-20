@@ -67,7 +67,7 @@ func (b *Bot) Free() {
 }
 
 func (b *Bot) SendText(text string) {
-	b.QWait.Add(queuewait.QWaitObj{
+	b.QWait.Wait(&queuewait.QWaitObj{
 		O: max.NewMessage().
 			SetText(text).
 			SetFormat(schemes.HTML),
