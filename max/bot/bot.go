@@ -67,7 +67,7 @@ func (b *Bot) Free() {
 }
 
 func (b *Bot) SendText(text string) {
-	b.QWait.Wait(&queuewait.QWaitObj{
+	b.QWait.Add(&queuewait.QWaitObj{
 		O: max.NewMessage().
 			SetText(text).
 			SetFormat(schemes.HTML),
@@ -75,11 +75,11 @@ func (b *Bot) SendText(text string) {
 }
 
 func (b *Bot) SendCall(phone string) {
-	b.QWait.Add(
-		max.NewMessage().
+	b.QWait.Add(&queuewait.QWaitObj{
+		O: max.NewMessage().
 			SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone)).
 			SetFormat(schemes.HTML),
-		queue.PRIORITY_NORMAL)
+	}, queue.PRIORITY_NORMAL)
 }
 
 func (b *Bot) SendZSrv(msg types.ZSrvMessage) {
@@ -94,11 +94,11 @@ func (b *Bot) SendZSrv(msg types.ZSrvMessage) {
 	default:
 		msg.Text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", msg.Caption, msg.Text)
 	}
-	b.QWait.Add(
-		max.NewMessage().
+	b.QWait.Add(&queuewait.QWaitObj{
+		O: max.NewMessage().
 			SetText(msg.Text).
 			SetFormat(schemes.HTML),
-		queue.PRIORITY_NORMAL)
+	}, queue.PRIORITY_NORMAL)
 }
 
 func (b *Bot) Run(ctx context.Context) {
