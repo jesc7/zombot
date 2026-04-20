@@ -101,9 +101,9 @@ func (o *WaitObj) Done() {
 	o.wg.Done()
 }
 
-func (q *Queue) Wait(o *WaitObj, priority Priority) {
-	o.wg = &sync.WaitGroup{}
-	o.wg.Add(1)
-	q.Add(o, priority)
-	o.wg.Wait()
+func (q *Queue) Wait(wo *WaitObj, priority Priority) {
+	wo.wg = &sync.WaitGroup{}
+	wo.wg.Add(1)
+	q.Add(wo, priority)
+	wo.wg.Wait()
 }
