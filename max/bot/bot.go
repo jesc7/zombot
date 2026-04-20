@@ -17,7 +17,6 @@ import (
 
 	"github.com/jesc7/zombot/jp/duties"
 	"github.com/jesc7/zombot/queue"
-	"github.com/jesc7/zombot/queue/queuewait"
 	"github.com/jesc7/zombot/types"
 )
 
@@ -26,7 +25,7 @@ type TextMsg struct {
 }
 type Bot struct {
 	bot    *max.Api
-	QWait  *queuewait.QWait
+	QWait  *queue.Queue
 	chatID int64
 	db     *sql.DB
 }
@@ -54,7 +53,7 @@ func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
 	bot, e := max.New(cfg.Max.Token, options...)
 	return &Bot{
 		bot:    bot,
-		QWait:  queuewait.NewQWait(ctx, rate.Limit(5)),
+		QWait:  queue.NewQ(ctx, rate.Limit(5)),
 		db:     db,
 		chatID: cfg.Max.ChatID,
 	}, e
@@ -67,7 +66,7 @@ func (b *Bot) Free() {
 }
 
 func (b *Bot) SendText(text string) {
-	b.QWait.Add(&queuewait.QWaitObj{
+	b.QWait.Add(&queue.WaitObj{
 		O: max.NewMessage().
 			SetText(text).
 			SetFormat(schemes.HTML),
@@ -75,7 +74,7 @@ func (b *Bot) SendText(text string) {
 }
 
 func (b *Bot) SendCall(phone string) {
-	b.QWait.Add(&queuewait.QWaitObj{
+	b.QWait.Add(&queue.WaitObj{
 		O: max.NewMessage().
 			SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone)).
 			SetFormat(schemes.HTML),
@@ -94,7 +93,7 @@ func (b *Bot) SendZSrv(msg types.ZSrvMessage) {
 	default:
 		msg.Text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", msg.Caption, msg.Text)
 	}
-	b.QWait.Add(&queuewait.QWaitObj{
+	b.QWait.Add(&queue.WaitObj{
 		O: max.NewMessage().
 			SetText(msg.Text).
 			SetFormat(schemes.HTML),
@@ -108,10 +107,11 @@ out:
 		case <-ctx.Done():
 			break out
 
-		case msg := <-b.income:
-			if e := b.bot.Messages.Send(ctx, msg.SetChat(b.chatID)); e != nil {
-				log.Println("Send message error:", e)
-			}
+		/*case msg := <-b.income:
+		if e := b.bot.Messages.Send(ctx, msg.SetChat(b.chatID)); e != nil {
+			log.Println("Send message error:", e)
+		}
+		*/
 
 		case m := <-b.QWait.Q:
 			m2 := m.(*max.Message)
