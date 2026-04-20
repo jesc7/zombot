@@ -114,6 +114,7 @@ out:
 						text = duties.Duties(b.db, 7, dut, text)
 					}
 					if e := b.bot.Messages.Send(ctx, max.NewMessage().
+						SetFormat(schemes.HTML).
 						SetChat(upd.GetChatID()).
 						SetText(text)); e != nil {
 						log.Println("Send message error:", e)
@@ -126,6 +127,7 @@ out:
 
 				case "/chatid":
 					if e := b.bot.Messages.Send(ctx, max.NewMessage().
+						SetFormat(schemes.HTML).
 						SetChat(upd.GetChatID()).
 						SetText("ChatID: "+strconv.FormatInt(upd.GetChatID(), 64))); e != nil {
 						log.Println("Send message error:", e)

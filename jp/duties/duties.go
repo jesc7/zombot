@@ -111,12 +111,12 @@ func Duties(db *sql.DB, daysCount int, dut Planner, who string) string {
 	if len(res+resWho) != 0 {
 		switch who {
 		case "":
-			res = "👷 <b>Дежурные</b>\n" + types.Iif(strings.Count(res, "\n") > 1, "\n", "") + res
+			res = fmt.Sprintf("👷 <b>Дежурные</b>\n%s", types.Iif(strings.Count(res, "\n") > 1, "\n", "")+res)
 		default:
 			if resWho != "" {
-				res = fmt.Sprintf("<b>%s дежурит:</b>\n%s", who, resWho)
+				res = fmt.Sprintf("👷 <b>%s дежурит:</b>\n%s", who, types.Iif(strings.Count(resWho, "\n") > 1, "\n", "")+resWho)
 			} else {
-				res = fmt.Sprintf("<b>%s хз когда дежурит, а вообще вот:</b>\n%s", who, res)
+				res = fmt.Sprintf("👷 <b>%s хз когда дежурит, а вообще вот:</b>\n%s", who, types.Iif(strings.Count(res, "\n") > 1, "\n", "")+res)
 			}
 		}
 	}
