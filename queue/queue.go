@@ -11,7 +11,7 @@ import (
 // Queue очередь с ограничителем частоты выборки
 type Queue struct {
 	Q    chan any
-	sl   []any
+	q    []any
 	stop bool
 	mu   sync.Mutex
 	lim  *rate.Limiter
@@ -46,15 +46,15 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 
 			default:
 			out:
-				switch len(q.sl) != 0 {
+				switch len(q.q) != 0 {
 				case true:
-					for i := 1; len(q.sl) != 0; i++ {
+					for i := 1; len(q.q) != 0; i++ {
 						func() {
 							q.lim.Wait(ctx)
 							q.mu.Lock()
 							defer q.mu.Unlock()
-							q.Q <- q.sl[0]
-							q.sl = q.sl[1:]
+							q.Q <- q.q[0]
+							q.q = q.q[1:]
 						}()
 						if i%10 == 0 || ctx.Err() != nil {
 							break out
@@ -77,15 +77,15 @@ func (q *Queue) Append(obj any, priority Priority) {
 
 		switch priority {
 		case PRIORITY_CRITICAL:
-			q.sl = append([]any{obj}, q.sl...)
+			q.q = append([]any{obj}, q.q...)
 		case PRIORITY_HIGH:
-			if half := len(q.sl) / 2; half == 0 {
-				q.sl = append(q.sl, obj)
+			if half := len(q.q) / 2; half == 0 {
+				q.q = append(q.q, obj)
 			} else {
-				q.sl = append(q.sl[0:half], append([]any{obj}, q.sl[half:]...)...)
+				q.q = append(q.q[0:half], append([]any{obj}, q.q[half:]...)...)
 			}
 		default:
-			q.sl = append(q.sl, obj)
+			q.q = append(q.q, obj)
 		}
 	}
 }
