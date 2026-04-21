@@ -107,7 +107,7 @@ out:
 		case <-ctx.Done():
 			break out
 
-		case m := <-b.QWait.Q:
+		case m := <-b.QWait.Q: //разгребаем локальную очередь сообщений
 			wo, ok := m.(*queue.WaitObj)
 			if !ok {
 				break
@@ -121,7 +121,7 @@ out:
 				wo.OnOk()
 			}
 
-		case update := <-b.bot.GetUpdates(ctx):
+		case update := <-b.bot.GetUpdates(ctx): //приехали апдейты с сервера
 			switch upd := update.(type) {
 			case *schemes.MessageCreatedUpdate:
 				//только групповой чат из настроек
@@ -138,12 +138,12 @@ out:
 					} else {
 						text = duties.Duties(b.db, 7, dut, text)
 					}
-					if e := b.bot.Messages.Send(ctx, max.NewMessage().
-						SetFormat(schemes.HTML).
-						SetChat(upd.GetChatID()).
-						SetText(text)); e != nil {
-						log.Println("Send message error:", e)
-					}
+					b.QWait.Add(&queue.WaitObj{
+						O: max.NewMessage().
+							SetFormat(schemes.HTML).
+							SetChat(upd.GetChatID()).
+							SetText(text),
+					}, queue.PRIORITY_NORMAL)
 
 				case "/absent":
 				case "/birthday":
