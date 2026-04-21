@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -151,12 +150,12 @@ out:
 				case "/ci":
 
 				case "/chatid":
-					if e := b.bot.Messages.Send(ctx, max.NewMessage().
-						SetFormat(schemes.HTML).
-						SetChat(upd.GetChatID()).
-						SetText("ChatID: "+strconv.FormatInt(upd.GetChatID(), 64))); e != nil {
-						log.Println("Send message error:", e)
-					}
+					b.QWait.Add(&queue.WaitObj{
+						O: max.NewMessage().
+							SetFormat(schemes.HTML).
+							SetChat(upd.GetChatID()).
+							SetText("ChatID: " + strconv.FormatInt(upd.GetChatID(), 64)),
+					}, queue.PRIORITY_NORMAL)
 
 				default:
 				}
