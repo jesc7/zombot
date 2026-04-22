@@ -35,7 +35,7 @@ func (p *program) run(ctx context.Context) {
 		}
 	}()
 
-	if e := client.Run(ctx, !service.Interactive()); e != nil {
+	if e := client.Start(ctx, !service.Interactive()); e != nil {
 		logger.Error(e)
 	}
 }

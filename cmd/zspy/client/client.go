@@ -2,23 +2,30 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 )
 
-func Run(ctx context.Context, service bool) error {
-	var e error
+type Config struct {
+	Addr string
+	Port int
+}
 
-	exe_path, e := runPath(service)
+func Start(ctx context.Context, service bool) error {
+	bin, e := runPath(service)
 	if e != nil {
 		return e
 	}
 
-	f, e := os.ReadFile(filepath.Join(filepath.Dir(exe_path), "cfg.json"))
+	f, e := os.ReadFile(filepath.Join(filepath.Dir(bin), "cfg.json"))
 	if e != nil {
 		return e
 	}
-	_ = f
+	var cfg Config
+	if e = json.Unmarshal(f, &cfg); e != nil {
+		return e
+	}
 
 	return e
 }
