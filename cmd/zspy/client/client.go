@@ -70,6 +70,11 @@ func handleConnection(ctx context.Context, conn *websocket.Conn) {
 	defer conn.Close()
 	done := make(chan struct{})
 
+	_read := func(conn *websocket.Conn) (m Message, raw string, e error) {
+		_, buf, e := conn.ReadMessage()
+		//
+	}
+
 	go func() {
 		defer close(done)
 
