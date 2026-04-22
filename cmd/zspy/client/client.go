@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 )
 
-func Run(ctx context.Context, interactive bool) error {
+func Run(ctx context.Context, service bool) error {
 	var e error
 
-	exe_path, e := runPath(!interactive)
+	exe_path, e := runPath(service)
 	if e != nil {
 		return e
 	}

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jesc7/zombot/cmd/spy/client"
+	"github.com/jesc7/zombot/cmd/zspy/client"
 	"github.com/kardianos/service"
 )
 

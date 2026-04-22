@@ -6,9 +6,9 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-func runPath(interactive bool) (string, error) {
+func runPath(service bool) (string, error) {
 	res := os.Args[0]
-	if !interactive {
+	if service {
 		key, e := registry.OpenKey(registry.LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Services\\zspy", registry.QUERY_VALUE)
 		if e != nil {
 			return "", e
