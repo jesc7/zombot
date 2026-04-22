@@ -24,11 +24,8 @@ const (
 )
 
 type Message struct {
-	Type    MessageType `json:"type"`
-	Payload []struct {
-		Key   string `json:"key,omitzero"`
-		Value string `json:"val,omitzero"`
-	} `json:"pay,omitzero"`
+	Type MessageType
+	Pay  any
 }
 
 func Start(ctx context.Context, service bool) error {
