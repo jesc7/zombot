@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -73,25 +72,20 @@ func handleConnection(ctx context.Context, conn *websocket.Conn) {
 		}
 	}()
 
-	ticker := time.NewTicker(10 * time.Second)
-	defer ticker.Stop()
+	tPing := time.NewTicker(10 * time.Second)
+	defer tPing.Stop()
 
 	for {
 		select {
-		case <-ctx.Done():
-			// Изящное закрытие (Close Handshake)
-			log.Println("Закрытие соединения по контексту...")
-			err := conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-			if err != nil {
-				log.Println("Ошибка при закрытии:", err)
-			}
+		case <-ctx.Done(): //выход по контексту
+			conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			return
-		case <-done:
-			log.Println("Соединение разорвано сервером")
+
+		case <-done: //сервер закрыл соединение
 			return
-		case <-ticker.C:
-			if err := conn.WriteMessage(websocket.TextMessage, []byte("ping")); err != nil {
-				log.Printf("Ошибка записи: %v", err)
+
+		case <-tPing.C: //ошибка отправки сообщения ping
+			if e := conn.WriteMessage(websocket.TextMessage, []byte("ping")); e != nil {
 				return
 			}
 		}
