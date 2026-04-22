@@ -25,7 +25,6 @@ const (
 
 type Message struct {
 	Type MessageType
-	Pay  any
 }
 
 func Start(ctx context.Context, service bool) error {
@@ -75,7 +74,7 @@ func handleConnection(ctx context.Context, conn *websocket.Conn) {
 		defer close(done)
 
 		for {
-			_, msg, e := conn.ReadMessage()
+			_, msg, e := conn.ReadJSON()
 			if e != nil {
 				return
 			}
