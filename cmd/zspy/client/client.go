@@ -83,12 +83,12 @@ func handleConnection(ctx context.Context, conn *websocket.Conn) {
 	go func() {
 		defer close(done)
 
-		var msg Message
 		for {
-			if e := conn.ReadJSON(&msg); e != nil {
+			msg, raw, e := _read(conn) //conn.ReadJSON(&msg)
+			if e != nil {
 				return
 			}
-			_ = msg
+			_, _ = msg, raw
 		}
 	}()
 
