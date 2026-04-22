@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/url"
 	"os"
@@ -71,12 +72,20 @@ func handleConnection(ctx context.Context, conn *websocket.Conn) {
 	done := make(chan struct{})
 
 	_read := func(conn *websocket.Conn) (m Message, raw []byte, e error) {
-		_, raw, e = conn.ReadMessage() // ReadMessage и так возвращает []byte
+		mt, raw, e := conn.ReadMessage()
 		if e != nil {
 			return
 		}
-		e = json.Unmarshal(raw, &m)
-		return m, raw, e
+		switch mt {
+		case websocket.TextMessage:
+			e = json.Unmarshal(raw, &m)
+			return m, raw, e
+
+		case websocket.PongMessage:
+
+		default:
+			return m, raw, errors.New("Undefined message")
+		}
 	}
 
 	go func() {
