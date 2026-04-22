@@ -99,6 +99,7 @@ func handleConnection(ctx context.Context, conn *websocket.Conn) {
 			if e != nil {
 				return
 			}
+
 			switch msg.Type {
 			case MT_PING:
 			default:
@@ -119,7 +120,7 @@ func handleConnection(ctx context.Context, conn *websocket.Conn) {
 		case <-done: //сервер закрыл соединение
 			return
 
-		case <-tPing.C: //ошибка отправки сообщения ping
+		case <-tPing.C: //ping соединения
 			if e := conn.WriteMessage(websocket.PingMessage, nil); e != nil {
 				return
 			}
