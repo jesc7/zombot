@@ -4,8 +4,10 @@ import (
 	"context"
 	"log"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/jesc7/zombot/cmd/zspy/client"
@@ -21,7 +23,8 @@ type program struct {
 
 func (p *program) Start(s service.Service) error {
 	var ctx context.Context
-	ctx, p.cancel = context.WithCancel(context.Background())
+	ctx, p.cancel = signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
+
 	go p.run(ctx)
 	return nil
 }

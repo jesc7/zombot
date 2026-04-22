@@ -62,44 +62,53 @@ func Start(ctx context.Context, service bool) error {
 					continue
 				}
 			}
-			handleConnection(ctx, conn)
+			handleConn(ctx, conn)
 		}
 	}
 }
 
-func handleConnection(ctx context.Context, conn *websocket.Conn) {
+func write(conn *websocket.Conn, v any) error {
+	raw, e := json.Marshal(v)
+	if e != nil {
+		return e
+	}
+	return conn.WriteMessage(websocket.TextMessage, raw)
+}
+
+func read(conn *websocket.Conn) (m Message, raw []byte, e error) {
+	mt, raw, e := conn.ReadMessage()
+	if e != nil {
+		return
+	}
+	switch mt {
+	case websocket.TextMessage:
+		e = json.Unmarshal(raw, &m)
+		return m, raw, e
+
+	case websocket.PingMessage, websocket.PongMessage:
+		m.Type = MT_UNDEFINED
+		return
+
+	default:
+		return m, raw, errors.New("Undefined message")
+	}
+}
+
+func handleConn(ctx context.Context, conn *websocket.Conn) {
 	defer conn.Close()
 	done := make(chan struct{})
-
-	_read := func(conn *websocket.Conn) (m Message, raw []byte, e error) {
-		mt, raw, e := conn.ReadMessage()
-		if e != nil {
-			return
-		}
-		switch mt {
-		case websocket.TextMessage:
-			e = json.Unmarshal(raw, &m)
-			return m, raw, e
-
-		case websocket.PongMessage:
-			m.Type = MT_UNDEFINED
-			return
-
-		default:
-			return m, raw, errors.New("Undefined message")
-		}
-	}
 
 	go func() {
 		defer close(done)
 
 		for {
-			msg, raw, e := _read(conn)
+			msg, raw, e := read(conn)
 			if e != nil {
 				return
 			}
 
 			switch msg.Type {
+			case MT_UNDEFINED:
 			default:
 				_ = raw
 			}
@@ -118,7 +127,7 @@ func handleConnection(ctx context.Context, conn *websocket.Conn) {
 		case <-done: //сервер закрыл соединение
 			return
 
-		case <-tPing.C: //ping соединения
+		case <-tPing.C: //пингуем соединение
 			if e := conn.WriteMessage(websocket.PingMessage, nil); e != nil {
 				return
 			}
