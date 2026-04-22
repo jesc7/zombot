@@ -17,6 +17,20 @@ type Config struct {
 	Token string
 }
 
+type MessageType int
+
+const (
+	MT_PING MessageType = iota
+)
+
+type Message struct {
+	Type    MessageType `json:"type"`
+	Payload []struct {
+		Key   string `json:"key,omitzero"`
+		Value string `json:"val,omitzero"`
+	} `json:"pay,omitzero"`
+}
+
 func Start(ctx context.Context, service bool) error {
 	bin, e := runPath(service)
 	if e != nil {
