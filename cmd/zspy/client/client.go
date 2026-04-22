@@ -55,24 +55,21 @@ func Start(ctx context.Context, service bool) error {
 			handleConnection(ctx, conn)
 		}
 	}
-
-	return nil
 }
 
 func handleConnection(ctx context.Context, conn *websocket.Conn) {
 	defer conn.Close()
 	done := make(chan struct{})
 
-	// Горутина чтения
 	go func() {
 		defer close(done)
+
 		for {
-			_, msg, err := conn.ReadMessage()
-			if err != nil {
-				log.Printf("Ошибка чтения: %v", err)
+			_, msg, e := conn.ReadMessage()
+			if e != nil {
 				return
 			}
-			log.Printf("Сообщение: %s", msg)
+			_ = msg
 		}
 	}()
 
