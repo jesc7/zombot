@@ -14,8 +14,8 @@ import (
 )
 
 type Config struct {
-	Addr string
-	Port int
+	Addr  string
+	Token string
 }
 
 func Start(ctx context.Context, service bool) error {
@@ -33,37 +33,30 @@ func Start(ctx context.Context, service bool) error {
 		return e
 	}
 
-	return e
-}
-
-func runWSClient(ctx context.Context, addr, jwtToken string) {
-	u := url.URL{Scheme: "ws", Host: addr, Path: "/ws"}
-	header := http.Header{"Authorization": []string{"Bearer " + jwtToken}}
+	u := url.URL{Scheme: "ws", Host: cfg.Addr, Path: "/ws"}
+	header := http.Header{"Authorization": []string{"Bearer " + cfg.Token}}
 
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("Завершение работы: контекст отменен")
-			return
-		default:
-			// Попытка подключения
-			log.Printf("Подключение к %s...", u.String())
-			conn, _, err := websocket.DefaultDialer.DialContext(ctx, u.String(), header)
-			if err != nil {
-				log.Printf("Ошибка: %v. Повтор через %v", err, 5*time.Second)
+			return ctx.Err()
 
-				// Ждем перед реконнектом, но следим за контекстом
+		default:
+			conn, _, e := websocket.DefaultDialer.DialContext(ctx, u.String(), header)
+			if e != nil {
 				select {
 				case <-ctx.Done():
-					return
+					return ctx.Err()
+
 				case <-time.After(5 * time.Second):
 					continue
 				}
 			}
-
 			handleConnection(ctx, conn)
 		}
 	}
+
+	return nil
 }
 
 func handleConnection(ctx context.Context, conn *websocket.Conn) {
