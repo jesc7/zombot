@@ -120,7 +120,7 @@ func handleConnection(ctx context.Context, conn *websocket.Conn) {
 			return
 
 		case <-tPing.C: //ошибка отправки сообщения ping
-			if e := conn.WriteMessage(websocket.TextMessage, []byte("ping")); e != nil {
+			if e := conn.WriteMessage(websocket.PingMessage, nil); e != nil {
 				return
 			}
 		}
