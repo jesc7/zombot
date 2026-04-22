@@ -73,9 +73,9 @@ func handleConnection(ctx context.Context, conn *websocket.Conn) {
 	go func() {
 		defer close(done)
 
+		var msg Message
 		for {
-			_, msg, e := conn.ReadJSON()
-			if e != nil {
+			if e := conn.ReadJSON(&msg); e != nil {
 				return
 			}
 			_ = msg
