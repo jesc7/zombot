@@ -1,6 +1,7 @@
 package client
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -72,7 +73,11 @@ func handleConnection(ctx context.Context, conn *websocket.Conn) {
 
 	_read := func(conn *websocket.Conn) (m Message, raw string, e error) {
 		_, buf, e := conn.ReadMessage()
-		//
+		if e != nil {
+			return
+		}
+		e = json.NewDecoder(bytes.NewReader(buf)).Decode(&m)
+		return m, string(buf), e
 	}
 
 	go func() {
