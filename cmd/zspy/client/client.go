@@ -72,8 +72,6 @@ func handleConnection(ctx context.Context, conn *websocket.Conn) {
 	defer conn.Close()
 	done := make(chan struct{})
 
-	conn.SetPongHandler(nil)
-
 	_read := func(conn *websocket.Conn) (m Message, raw []byte, e error) {
 		mt, raw, e := conn.ReadMessage()
 		if e != nil {
