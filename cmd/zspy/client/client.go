@@ -22,7 +22,6 @@ type MessageType int
 
 const (
 	MT_UNDEFINED MessageType = iota - 1
-	MT_PING
 )
 
 type Message struct {
@@ -101,7 +100,6 @@ func handleConnection(ctx context.Context, conn *websocket.Conn) {
 			}
 
 			switch msg.Type {
-			case MT_PING:
 			default:
 				_ = raw
 			}
