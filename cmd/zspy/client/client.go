@@ -21,7 +21,8 @@ type Config struct {
 type MessageType int
 
 const (
-	MT_PING MessageType = iota
+	MT_UNDEFINED MessageType = iota - 1
+	MT_PING
 )
 
 type Message struct {
@@ -82,6 +83,8 @@ func handleConnection(ctx context.Context, conn *websocket.Conn) {
 			return m, raw, e
 
 		case websocket.PongMessage:
+			m.Type = MT_UNDEFINED
+			return
 
 		default:
 			return m, raw, errors.New("Undefined message")
