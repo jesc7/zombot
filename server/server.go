@@ -31,31 +31,28 @@ func Start(ctx context.Context, service bool) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	bot, e := maxbot.NewBot(ctx, cfg)
+	srv := ws.NewWS(ctx, cfg)
+	bot, e := maxbot.NewBot(ctx, cfg, srv)
 	if e != nil {
 		log.Fatalln("Can't create Max bot:", e)
 	}
 
 	wg := &sync.WaitGroup{}
-
-	//run WebSocket server
-	srv := ws.NewWS(ctx, cfg, bot)
-	wg.Go(func() {
+	wg.Go(func() { //run WebSocket server
 		defer func() {
 			log.Println("WebSocket server has been stopped")
 			cancel()
 		}()
-		srv.Run(ctx)
+		srv.Run()
 	})
 
-	//run Max bot
-	wg.Go(func() {
+	wg.Go(func() { //run Max bot
 		defer func() {
 			log.Println("Max bot has been stopped")
 			bot.Free()
 			cancel()
 		}()
-		bot.Run(ctx)
+		bot.Run()
 	})
 
 	wg.Wait()
