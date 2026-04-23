@@ -40,20 +40,21 @@ func (s *WS) Write(pay []byte) error {
 }
 
 type connType int
+type connInfo struct {
+	Type connType
+}
 
 const (
 	CT_ZSPY connType = iota
 )
 
-
-type connInfo struct {
-	Type int
-	InstCount uint8
+var typesCnt = map[connType]uint8{
+	CT_ZSPY: 1,
 }
 
 var (
 	upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
-	conns = make(map[*websocket.Conn])
+	conns    = map[*websocket.Conn]connInfo{}
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
