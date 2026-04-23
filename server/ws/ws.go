@@ -24,9 +24,8 @@ type WS struct {
 	out chan Message
 }
 
-func NewWS(ctx context.Context, cfg types.Config) *WS {
+func NewWS(cfg types.Config) *WS {
 	return &WS{
-		ctx: ctx,
 		cfg: cfg,
 		in:  make(chan Message),
 		out: make(chan Message),
@@ -107,7 +106,7 @@ func handler(s *WS, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *WS) Run() {
+func (s *WS) Run(ctx context.Context) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		handler(s, w, r)
@@ -118,7 +117,13 @@ func (s *WS) Run() {
 		Handler: mux,
 	}
 
-	<-s.ctx.Done()
+	go func() {
+		if e := server.ListenAndServe(); e != nil && e != http.ErrServerClosed {
+			log.Fatalf("WebSocket server error: %v", e)
+		}
+	}()
+
+	<-ctx.Done()
 
 	close(s.in)
 	close(s.out)
@@ -126,10 +131,9 @@ func (s *WS) Run() {
 	ctxClose, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := server.Shutdown(ctxClose); err != nil {
-		log.Fatalf("Ошибка при выключении: %v", err)
+	if e := server.Shutdown(ctxClose); e != nil {
+		log.Fatalf("WebSocket server shutdown error: %v", e)
 	}
-	log.Println("Сервер остановлен")
 }
 
 func write(conn *websocket.Conn, v any) error {
