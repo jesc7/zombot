@@ -10,7 +10,7 @@ import (
 
 	maxbot "github.com/jesc7/zombot/server/max/bot"
 	"github.com/jesc7/zombot/server/types"
-	"github.com/jesc7/zombot/server/webapi"
+	"github.com/jesc7/zombot/server/ws"
 )
 
 func Start(ctx context.Context, service bool) error {
@@ -48,11 +48,11 @@ func Start(ctx context.Context, service bool) error {
 		bot.Run(ctx)
 	})
 
-	//run Web Server
-	srv := webapi.NewServer(ctx, cfg, bot)
+	//run WebSocket server
+	srv := ws.NewWS(ctx, cfg, bot)
 	wg.Go(func() {
 		defer func() {
-			log.Println("Web server has been stopped")
+			log.Println("WebSocket server has been stopped")
 			cancel()
 		}()
 		srv.Run(ctx)
