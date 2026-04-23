@@ -18,7 +18,6 @@ type Message struct {
 }
 
 type WS struct {
-	ctx context.Context
 	cfg types.Config
 	in  chan Message
 	out chan Message
@@ -40,11 +39,11 @@ func (s *WS) Write(pay []byte) error {
 	return nil
 }
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
-}
+var (
+	upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
+)
 
-func handler(s *WS, w http.ResponseWriter, r *http.Request) {
+func handler(w http.ResponseWriter, r *http.Request) {
 	conn, e := upgrader.Upgrade(w, r, nil)
 	if e != nil {
 		log.Printf("Upgrade error: %v", e)
