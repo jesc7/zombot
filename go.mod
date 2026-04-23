@@ -4,9 +4,11 @@ go 1.25.0
 
 require (
 	github.com/google/uuid v1.6.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/kardianos/service v1.2.4
 	github.com/max-messenger/max-bot-api-client-go v1.6.14
 	github.com/nakagami/firebirdsql v0.9.18
+	golang.org/x/sys v0.34.0
 	golang.org/x/text v0.36.0
 	golang.org/x/time v0.15.0
 )
@@ -20,6 +22,5 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
 	gitlab.com/nyarla/go-crypt v0.0.0-20160106005555-d9a5dc2b789b // indirect
-	golang.org/x/sys v0.34.0 // indirect
 	modernc.org/mathutil v1.4.2-0.20220822142738-b13e5b564332 // indirect
 )

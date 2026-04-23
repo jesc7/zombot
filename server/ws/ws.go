@@ -42,10 +42,11 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-func handler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Printf("Upgrade error: %v", err)
+func handler(s *WS, w http.ResponseWriter, r *http.Request) {
+	conn, e := upgrader.Upgrade(w, r, nil)
+	if e != nil {
+		log.Printf("Upgrade error: %v", e)
+		w.WriteHeader(http.StatusUpgradeRequired)
 		return
 	}
 	defer conn.Close()
