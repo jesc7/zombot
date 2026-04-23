@@ -53,9 +53,9 @@ var (
 	typesCnt = map[connType]uint8{
 		CT_ZSPY: 1,
 	}
-	types2   = map[connType]uint8{}
-	upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
-	conns    = map[*websocket.Conn]connInfo{}
+	connTypes = map[connType]uint8{}
+	upgrader  = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
+	conns     = map[*websocket.Conn]connInfo{}
 )
 
 func typeCheck() error {
