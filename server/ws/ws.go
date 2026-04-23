@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -115,7 +114,7 @@ func (s *WS) Run() {
 	})
 
 	server := &http.Server{
-		Addr:    ":" + strconv.Itoa(s.cfg.WS.Port),
+		Addr:    fmt.Sprintf(":%d", s.cfg.WS.Port),
 		Handler: mux,
 	}
 
