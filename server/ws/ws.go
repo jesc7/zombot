@@ -21,17 +21,21 @@ type Message struct {
 type WS struct {
 	ctx context.Context
 	cfg types.Config
-	In  chan Message
-	Out chan Message
+	in  chan Message
+	out chan Message
 }
 
 func NewWS(ctx context.Context, cfg types.Config) *WS {
 	return &WS{
 		ctx: ctx,
 		cfg: cfg,
-		In:  make(chan Message),
-		Out: make(chan Message),
+		in:  make(chan Message),
+		out: make(chan Message),
 	}
+}
+
+func (s *WS) Read() ([]byte, error) {
+	return nil, nil
 }
 
 func (s *WS) Write(pay []byte) error {
@@ -117,8 +121,8 @@ func (s *WS) Run() {
 
 	<-s.ctx.Done()
 
-	close(s.In)
-	close(s.Out)
+	close(s.in)
+	close(s.out)
 
 	ctxClose, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
