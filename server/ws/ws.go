@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/jesc7/zombot/server/types"
 )
 
 type Message struct {
@@ -53,9 +52,12 @@ var typesCnt = map[connType]uint8{
 }
 
 var (
+	types    = map[connType]uint8{}
 	upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 	conns    = map[*websocket.Conn]connInfo{}
 )
+
+func connCheck()
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	conn, e := upgrader.Upgrade(w, r, nil)
