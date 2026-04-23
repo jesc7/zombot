@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/jesc7/zombot/server/types"
 )
 
 type Message struct {
@@ -39,25 +40,27 @@ func (s *WS) Write(pay []byte) error {
 }
 
 type connType int
-type connInfo struct {
-	Type connType
-}
 
 const (
 	CT_ZSPY connType = iota
 )
 
-var typesCnt = map[connType]uint8{
-	CT_ZSPY: 1,
+type connInfo struct {
+	Type connType
 }
 
 var (
-	types    = map[connType]uint8{}
+	typesCnt = map[connType]uint8{
+		CT_ZSPY: 1,
+	}
+	types2   = map[connType]uint8{}
 	upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 	conns    = map[*websocket.Conn]connInfo{}
 )
 
-func connCheck()
+func typeCheck() error {
+	return nil
+}
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	conn, e := upgrader.Upgrade(w, r, nil)
