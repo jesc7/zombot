@@ -38,16 +38,6 @@ func Start(ctx context.Context, service bool) error {
 
 	wg := &sync.WaitGroup{}
 
-	//run Max bot
-	wg.Go(func() {
-		defer func() {
-			log.Println("Max bot has been stopped")
-			bot.Free()
-			cancel()
-		}()
-		bot.Run(ctx)
-	})
-
 	//run WebSocket server
 	srv := ws.NewWS(ctx, cfg, bot)
 	wg.Go(func() {
@@ -56,6 +46,16 @@ func Start(ctx context.Context, service bool) error {
 			cancel()
 		}()
 		srv.Run(ctx)
+	})
+
+	//run Max bot
+	wg.Go(func() {
+		defer func() {
+			log.Println("Max bot has been stopped")
+			bot.Free()
+			cancel()
+		}()
+		bot.Run(ctx)
 	})
 
 	wg.Wait()
