@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	maxbot "github.com/jesc7/zombot/max/bot"
-	"github.com/jesc7/zombot/types"
+	maxbot "github.com/jesc7/zombot/server/max/bot"
+	"github.com/jesc7/zombot/server/types"
 )
 
 type WebServer struct {

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jesc7/zombot/types"
+	"github.com/jesc7/zombot/server/types"
 )
 
 type DayType int

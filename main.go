@@ -2,59 +2,88 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"os"
 	"os/signal"
 	"path/filepath"
-	"sync"
+	"strings"
 	"syscall"
+	"time"
 
-	maxbot "github.com/jesc7/zombot/max/bot"
-	"github.com/jesc7/zombot/types"
-	"github.com/jesc7/zombot/webapi"
+	"github.com/jesc7/zombot/server"
+	"github.com/kardianos/service"
 )
 
+var logger service.Logger
+
+type program struct {
+	service service.Service
+	cancel  context.CancelFunc
+}
+
+func (p *program) Start(s service.Service) error {
+	var ctx context.Context
+	ctx, p.cancel = signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
+
+	go p.run(ctx)
+	return nil
+}
+
+func (p *program) run(ctx context.Context) {
+	defer func() {
+		if service.Interactive() {
+			p.Stop(p.service)
+		} else {
+			p.service.Stop()
+		}
+	}()
+
+	if e := server.Start(ctx, !service.Interactive()); e != nil {
+		logger.Error(e)
+	}
+}
+
+func (p *program) Stop(s service.Service) error {
+	p.cancel()
+	time.Sleep(500 * time.Millisecond)
+	if service.Interactive() {
+		os.Exit(0)
+	}
+	return nil
+}
+
 func main() {
-	f, e := os.ReadFile(filepath.Join(filepath.Dir(os.Args[0]), "cfg.json"))
+	//настроим логирование
+	flog, e := os.OpenFile(strings.TrimSuffix(os.Args[0], filepath.Ext(os.Args[0]))+".log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if e != nil {
-		log.Fatalln("Can't read config file:", e)
+		log.Fatalln(e)
 	}
-	var cfg types.Config
-	if e = json.Unmarshal(f, &cfg); e != nil {
-		log.Fatalln("Can't unmarshal the json:", e)
-	}
+	defer flog.Close()
+	log.SetOutput(flog)
 
-	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
-	defer cancel()
-
-	bot, e := maxbot.NewBot(ctx, cfg)
+	//конфиг сервиса
+	p := &program{}
+	s, e := service.New(p, &service.Config{
+		Name:        "zspy",
+		DisplayName: "Zombot spy service",
+		Description: "Zombot spy service",
+	})
 	if e != nil {
-		log.Fatalln("Can't create Max bot:", e)
+		log.Fatal(e)
+	}
+	p.service = s
+
+	if len(os.Args) > 1 {
+		if e := service.Control(s, os.Args[1]); e != nil {
+			log.Fatal(e)
+		}
+		return
 	}
 
-	wg := &sync.WaitGroup{}
-
-	//run Max bot
-	wg.Go(func() {
-		defer func() {
-			log.Println("Max bot has been stopped")
-			bot.Free()
-			cancel()
-		}()
-		bot.Run(ctx)
-	})
-
-	//run WebServer
-	server := webapi.NewServer(ctx, cfg, bot)
-	wg.Go(func() {
-		defer func() {
-			log.Println("WebServer has been stopped")
-			cancel()
-		}()
-		server.Run(ctx)
-	})
-
-	wg.Wait()
-	log.Println(".")
+	if logger, e = s.Logger(nil); e != nil {
+		log.Fatal(e)
+	}
+	if e = s.Run(); e != nil {
+		logger.Error(e)
+	}
 }
