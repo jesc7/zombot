@@ -29,12 +29,12 @@ type Message struct {
 }
 
 func Start(ctx context.Context, service bool) error {
-	bin, e := runPath(service)
+	cwd, e := runPath(service)
 	if e != nil {
 		return e
 	}
 
-	f, e := os.ReadFile(filepath.Join(filepath.Dir(bin), "cfg.json"))
+	f, e := os.ReadFile(filepath.Join(filepath.Dir(cwd), "cfg.json"))
 	if e != nil {
 		return e
 	}

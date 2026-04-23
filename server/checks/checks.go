@@ -17,7 +17,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jesc7/zombot/types"
+	"github.com/jesc7/zombot/server/types"
 	_ "github.com/nakagami/firebirdsql"
 )
 

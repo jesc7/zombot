@@ -5,10 +5,8 @@ import (
 	"encoding/json"
 	"log"
 	"os"
-	"os/signal"
 	"path/filepath"
 	"sync"
-	"syscall"
 
 	maxbot "github.com/jesc7/zombot/server/max/bot"
 	"github.com/jesc7/zombot/server/types"
@@ -16,16 +14,21 @@ import (
 )
 
 func Start(ctx context.Context, service bool) error {
-	f, e := os.ReadFile(filepath.Join(filepath.Dir(os.Args[0]), "cfg.json"))
+	cwd, e := runPath(service)
 	if e != nil {
-		log.Fatalln("Can't read config file:", e)
+		return e
+	}
+
+	f, e := os.ReadFile(filepath.Join(filepath.Dir(cwd), "cfg.json"))
+	if e != nil {
+		return e
 	}
 	var cfg types.Config
 	if e = json.Unmarshal(f, &cfg); e != nil {
-		log.Fatalln("Can't unmarshal the json:", e)
+		return e
 	}
 
-	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
+	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	bot, e := maxbot.NewBot(ctx, cfg)
@@ -46,15 +49,16 @@ func Start(ctx context.Context, service bool) error {
 	})
 
 	//run WebServer
-	server := webapi.NewServer(ctx, cfg, bot)
+	srv := webapi.NewServer(ctx, cfg, bot)
 	wg.Go(func() {
 		defer func() {
-			log.Println("WebServer has been stopped")
+			log.Println("Web server has been stopped")
 			cancel()
 		}()
-		server.Run(ctx)
+		srv.Run(ctx)
 	})
 
 	wg.Wait()
 	log.Println(".")
+	return ctx.Err()
 }
