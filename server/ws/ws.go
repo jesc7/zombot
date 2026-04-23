@@ -127,7 +127,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func (s *WS) Run(ctx context.Context) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		handler(s, w, r)
+		handler(w, r)
 	})
 
 	server := &http.Server{
