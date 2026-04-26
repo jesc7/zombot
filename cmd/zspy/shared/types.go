@@ -9,9 +9,18 @@ type MessageDuties struct {
 	} `json:"q"`
 	A struct {
 		Duties []struct {
-			DutyType int       `json:"duty_type"`
 			Date     time.Time `json:"date"`
-			Employee string    `json:"Employee"`
-		}
+			Employee string    `json:"employee"`
+		} `json:"duties,omitempty"`
+	} `json:"a"`
+}
+
+type MessageDutyChanges struct {
+	A struct {
+		Duties []struct {
+			ChangeType int       `json:"change_type"`
+			Date       time.Time `json:"date"`
+			Employee   string    `json:"employee"`
+		} `json:"duties,omitempty"`
 	} `json:"a"`
 }
