@@ -24,8 +24,13 @@ type WS struct {
 	connSpy *websocket.Conn
 }
 
+var (
+	jwtKey   []byte
+	upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
+)
+
 func NewWS(cfg types.Config) *WS {
-	jwtKey = []byte(cfg.WS.JWT)
+	jwtKey = []byte(cfg.WS.JwtKey)
 	return &WS{
 		cfg: cfg,
 	}
@@ -38,11 +43,6 @@ func (s *WS) Read() ([]byte, error) {
 func (s *WS) Write(pay []byte) error {
 	return nil
 }
-
-var (
-	jwtKey   []byte
-	upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
-)
 
 type ClientType string
 
@@ -91,7 +91,6 @@ func handler(ws *WS, w http.ResponseWriter, r *http.Request) {
 
 	conn, e := upgrader.Upgrade(w, r, nil)
 	if e != nil {
-		log.Printf("Upgrade error: %v", e)
 		http.Error(w, "Upgrade: WebSocket", http.StatusUpgradeRequired)
 		return
 	}
@@ -171,6 +170,10 @@ func (s *WS) Run(ctx context.Context) {
 			log.Fatalf("WebSocket server error: %v", e)
 		}
 	}()
+	log.Println("WebSocket server started, here tokens:")
+	jwtZSpy, e := jwtGenerate(CT_ZSPY)
+	log.Printf("zspy=%s (%v)\n", jwtZSpy, e)
+
 	<-ctx.Done()
 
 	ctxClose, cancel := context.WithTimeout(context.Background(), 5*time.Second)
