@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/jesc7/zombot/cmd/shared"
 )
 
 type Config struct {
@@ -22,6 +23,7 @@ type MessageType int
 
 const (
 	MT_UNDEFINED MessageType = iota - 1
+	MT_DUTY
 )
 
 type Message struct {
@@ -109,6 +111,9 @@ func handler(ctx context.Context, conn *websocket.Conn) {
 
 			switch msg.Type {
 			case MT_UNDEFINED:
+
+			case MT_DUTY:
+				a := shared.MessageDuties{}
 			default:
 				_ = raw
 			}
