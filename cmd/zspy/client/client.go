@@ -62,7 +62,7 @@ func Start(ctx context.Context, service bool) error {
 					continue
 				}
 			}
-			handleConn(ctx, conn)
+			handler(ctx, conn)
 		}
 	}
 }
@@ -94,7 +94,7 @@ func read(conn *websocket.Conn) (m Message, raw []byte, e error) {
 	}
 }
 
-func handleConn(ctx context.Context, conn *websocket.Conn) {
+func handler(ctx context.Context, conn *websocket.Conn) {
 	defer conn.Close()
 	done := make(chan struct{})
 
