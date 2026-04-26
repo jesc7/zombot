@@ -51,14 +51,14 @@ const (
 )
 
 type Claims struct {
-	CType ClientType `json:"client_type"`
+	Type ClientType `json:"client_type"`
 	jwt.RegisteredClaims
 }
 
 func jwtGenerate(ct ClientType) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256,
 		&Claims{
-			CType: ct,
+			Type: ct,
 			RegisteredClaims: jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 365 * 10)), //10 years
 			},
@@ -81,8 +81,12 @@ func handler(ws *WS, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	switch claims.CType {
+	switch claims.Type {
 	case CT_ZSPY:
+		if ws.connSpy != nil {
+			http.Error(w, "ZSpy already connected", http.StatusNotAcceptable)
+			return
+		}
 	}
 
 	conn, e := upgrader.Upgrade(w, r, nil)
@@ -92,6 +96,11 @@ func handler(ws *WS, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer conn.Close()
+
+	ws.connSpy = conn
+	defer func() {
+		ws.connSpy = nil
+	}()
 
 	// Канал для передачи сообщений от "бизнес-логики" к клиенту
 	outbound := make(chan string)
@@ -149,7 +158,7 @@ func handler(ws *WS, w http.ResponseWriter, r *http.Request) {
 func (s *WS) Run(ctx context.Context) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		handler(w, r)
+		handler(s, w, r)
 	})
 
 	server := &http.Server{
@@ -162,11 +171,7 @@ func (s *WS) Run(ctx context.Context) {
 			log.Fatalf("WebSocket server error: %v", e)
 		}
 	}()
-
 	<-ctx.Done()
-
-	//close(s.in)
-	//close(s.out)
 
 	ctxClose, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
