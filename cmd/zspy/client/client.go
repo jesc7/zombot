@@ -114,7 +114,10 @@ func handler(ctx context.Context, conn *websocket.Conn) {
 
 			case MT_DUTY:
 				var duties shared.MessageDuties
-				e = json.Unmarshal(raw, &duties)
+				if e = json.Unmarshal(raw, &duties); e != nil {
+					continue
+				}
+
 			default:
 				_ = raw
 			}

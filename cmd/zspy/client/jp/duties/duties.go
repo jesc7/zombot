@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jesc7/zombot/server/daytypes"
-	"github.com/jesc7/zombot/server/types"
+	"github.com/jesc7/zombot/cmd/zspy/client/daytypes"
+	"github.com/jesc7/zombot/cmd/zspy/client/types"
 )
 
 type Planner map[time.Time]string
