@@ -10,7 +10,8 @@ type Config struct {
 		Port int    `json:"port"`
 	} `json:"proxy"`
 	WS struct {
-		Port int `json:"port"`
+		Port int    `json:"port"`
+		JWT  string `json:"jwt"`
 	} `json:"ws"`
 	DB struct {
 		Driver  string `json:"driver"`

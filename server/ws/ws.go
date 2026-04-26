@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
+	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/websocket"
 	"github.com/jesc7/zombot/server/types"
 )
@@ -18,17 +20,14 @@ type Message struct {
 }
 
 type WS struct {
-	cfg types.Config
-	//in      chan Message
-	//out     chan Message
+	cfg     types.Config
 	connSpy *websocket.Conn
 }
 
 func NewWS(cfg types.Config) *WS {
+	jwtKey = []byte(cfg.WS.JWT)
 	return &WS{
 		cfg: cfg,
-		//in:  make(chan Message),
-		//out: make(chan Message),
 	}
 }
 
@@ -45,7 +44,47 @@ var (
 	upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 )
 
+type Claims struct {
+	ClientType string `json:"client_type"`
+	jwt.RegisteredClaims
+}
+
+func jwtGenerate() (string, error) {
+	return jwt.NewWithClaims(jwt.SigningMethodHS256,
+		&Claims{
+			ClientType: "zspy",
+			RegisteredClaims: jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 365 * 10)), //10 years
+			},
+		},
+	).SignedString(jwtKey)
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
+	auth := r.Header.Get("Authorization")
+	if auth == "" {
+		http.Error(w, "Authorization header expected", http.StatusUnauthorized)
+		return
+	}
+
+	// 2. Извлекаем токен (ожидаем формат "Bearer <token>")
+	tokenString := strings.TrimPrefix(auth, "Bearer ")
+	if tokenString == auth { // Префикс "Bearer " отсутствовал
+		http.Error(w, "Неверный формат заголовка Authorization", http.StatusUnauthorized)
+		return
+	}
+
+	// 3. Валидация токена
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+
+	if err != nil || !token.Valid {
+		http.Error(w, "Неверный или просроченный токен", http.StatusUnauthorized)
+		return
+	}
+
 	conn, e := upgrader.Upgrade(w, r, nil)
 	if e != nil {
 		log.Printf("Upgrade error: %v", e)
