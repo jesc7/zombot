@@ -44,15 +44,21 @@ var (
 	upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 )
 
+type ClientType string
+
+const (
+	CT_ZSPY ClientType = "zspy"
+)
+
 type Claims struct {
-	ClientType string `json:"client_type"`
+	CType ClientType `json:"client_type"`
 	jwt.RegisteredClaims
 }
 
-func jwtGenerate() (string, error) {
+func jwtGenerate(ct ClientType) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256,
 		&Claims{
-			ClientType: "zspy",
+			CType: ct,
 			RegisteredClaims: jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 365 * 10)), //10 years
 			},
@@ -60,7 +66,7 @@ func jwtGenerate() (string, error) {
 	).SignedString(jwtKey)
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func handler(ws *WS, w http.ResponseWriter, r *http.Request) {
 	auth := r.Header.Get("Authorization")
 	tokenStr := strings.TrimPrefix(auth, "Bearer ")
 	if auth == "" || tokenStr == auth {
@@ -73,6 +79,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	if e != nil || !token.Valid {
 		http.Error(w, "Invalid token", http.StatusUnauthorized)
 		return
+	}
+
+	switch claims.CType {
+	case CT_ZSPY:
 	}
 
 	conn, e := upgrader.Upgrade(w, r, nil)
