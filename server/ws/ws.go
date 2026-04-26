@@ -48,7 +48,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	conn, e := upgrader.Upgrade(w, r, nil)
 	if e != nil {
 		log.Printf("Upgrade error: %v", e)
-		w.WriteHeader(http.StatusUpgradeRequired)
+		http.Error(w, "Upgrade: WebSocket", http.StatusUpgradeRequired)
 		return
 	}
 	defer conn.Close()
