@@ -62,26 +62,16 @@ func jwtGenerate() (string, error) {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	auth := r.Header.Get("Authorization")
-	if auth == "" {
-		http.Error(w, "Authorization header expected", http.StatusUnauthorized)
+	tokenStr := strings.TrimPrefix(auth, "Bearer ")
+	if auth == "" || tokenStr == auth {
+		http.Error(w, "Auth header expected", http.StatusUnauthorized)
 		return
 	}
 
-	// 2. Извлекаем токен (ожидаем формат "Bearer <token>")
-	tokenString := strings.TrimPrefix(auth, "Bearer ")
-	if tokenString == auth { // Префикс "Bearer " отсутствовал
-		http.Error(w, "Неверный формат заголовка Authorization", http.StatusUnauthorized)
-		return
-	}
-
-	// 3. Валидация токена
 	claims := &Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
-		return jwtKey, nil
-	})
-
-	if err != nil || !token.Valid {
-		http.Error(w, "Неверный или просроченный токен", http.StatusUnauthorized)
+	token, e := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (any, error) { return jwtKey, nil })
+	if e != nil || !token.Valid {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
 		return
 	}
 
