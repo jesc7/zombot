@@ -19,15 +19,16 @@ type Message struct {
 
 type WS struct {
 	cfg types.Config
-	in  chan Message
-	out chan Message
+	//in      chan Message
+	//out     chan Message
+	connSpy *websocket.Conn
 }
 
 func NewWS(cfg types.Config) *WS {
 	return &WS{
 		cfg: cfg,
-		in:  make(chan Message),
-		out: make(chan Message),
+		//in:  make(chan Message),
+		//out: make(chan Message),
 	}
 }
 
@@ -40,8 +41,7 @@ func (s *WS) Write(pay []byte) error {
 }
 
 var (
-	upgrader  = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
-	connCount int8
+	upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -125,8 +125,8 @@ func (s *WS) Run(ctx context.Context) {
 
 	<-ctx.Done()
 
-	close(s.in)
-	close(s.out)
+	//close(s.in)
+	//close(s.out)
 
 	ctxClose, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
