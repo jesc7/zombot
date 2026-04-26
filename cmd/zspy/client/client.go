@@ -113,7 +113,8 @@ func handler(ctx context.Context, conn *websocket.Conn) {
 			case MT_UNDEFINED:
 
 			case MT_DUTY:
-				a := shared.MessageDuties{}
+				var duties shared.MessageDuties
+				e = json.Unmarshal(raw, &duties)
 			default:
 				_ = raw
 			}
