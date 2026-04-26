@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/jesc7/zombot/cmd/shared"
+	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
 
 type Config struct {
