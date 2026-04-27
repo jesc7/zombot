@@ -173,12 +173,12 @@ func (s *WS) Run(ctx context.Context) {
 			log.Fatalf("WebSocket server error: %v", e)
 		}
 	}()
-	log.Println("WebSocket server started, here tokens:")
 
-	tokens := map[ClientType]string{CT_ZSPY: "zspy"}
-
-	jwtZSpy, e := jwtGenerate(CT_ZSPY)
-	log.Printf("zspy=%s (%v)\n", jwtZSpy, e)
+	log.Println("WebSocket server started, here the tokens:")
+	for k, v := range map[ClientType]string{CT_ZSPY: "zspy"} {
+		jwt, e := jwtGenerate(k)
+		log.Printf("%s=%s (%v)\n", v, jwt, e)
+	}
 
 	<-ctx.Done()
 
