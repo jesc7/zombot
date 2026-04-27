@@ -17,6 +17,7 @@ type WebSocketClient struct {
 	host   url.URL
 	header http.Header
 	ch     chan shared.MessageText
+	conn   *websocket.Conn
 }
 
 func NewWebSocketClient(cfg types.Config) *WebSocketClient {
@@ -28,6 +29,10 @@ func NewWebSocketClient(cfg types.Config) *WebSocketClient {
 }
 
 func (ws *WebSocketClient) WriteText(ctx context.Context, text string) {
+	defer recover()
+	ws.ch <- shared.MessageText{
+		Text: text,
+	}
 }
 
 func (ws *WebSocketClient) Run(ctx context.Context) {
@@ -37,6 +42,11 @@ func (ws *WebSocketClient) Run(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return
+
+		case msg := <-ws.ch:
+			if ws.conn != nil {
+				write(ws.conn, msg)
+			}
 
 		default:
 			conn, _, e := websocket.DefaultDialer.DialContext(ctx, ws.host.String(), ws.header)
@@ -75,7 +85,6 @@ func handle(ctx context.Context, conn *websocket.Conn) {
 				}
 				//d.A = duties.Duty(db, nil, d.Q)
 				write(conn, d)
-
 			}
 		}
 	}()
