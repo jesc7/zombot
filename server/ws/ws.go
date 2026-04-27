@@ -203,11 +203,9 @@ func read(conn *websocket.Conn) (m Message, raw []byte, e error) {
 	switch mt {
 	case websocket.TextMessage:
 		e = json.Unmarshal(raw, &m)
-		return m, raw, e
-
+		return
 	case websocket.PingMessage, websocket.PongMessage:
 		return
-
 	default:
 		return m, raw, errors.New("Undefined message")
 	}
