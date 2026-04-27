@@ -15,32 +15,40 @@ import (
 	"github.com/jesc7/zombot/server/types"
 )
 
-type Message struct {
+/*type Message struct {
 	Payload []byte
-}
+}*/
 
-type WS struct {
-	cfg     types.Config
+type WebSocketServer struct {
+	srv     *http.Server
+	jwtKey  []byte
 	connSpy *websocket.Conn
 }
 
 var (
-	jwtKey   []byte
 	upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 )
 
-func NewWS(cfg types.Config) *WS {
-	jwtKey = []byte(cfg.WS.JwtKey)
-	return &WS{
-		cfg: cfg,
+func NewWebSocketServer(cfg types.Config) *WebSocketServer {
+	ws := &WebSocketServer{
+		jwtKey: []byte(cfg.WS.JwtKey),
 	}
+	mux := http.NewServeMux()
+	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		handle(ws, w, r)
+	})
+	ws.srv = &http.Server{
+		Handler: mux,
+		Addr:    fmt.Sprintf(":%d", cfg.WS.Port),
+	}
+	return ws
 }
 
-func (s *WS) Read() ([]byte, error) {
+func (ws *WebSocketServer) Read() ([]byte, error) {
 	return nil, nil
 }
 
-func (s *WS) Write(pay []byte) error {
+func (ws *WebSocketServer) Write(pay []byte) error {
 	return nil
 }
 
@@ -55,7 +63,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func jwtGenerate(ct ClientType) (string, error) {
+func jwtGenerate(key []byte, ct ClientType) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256,
 		&Claims{
 			Type: ct,
@@ -63,10 +71,10 @@ func jwtGenerate(ct ClientType) (string, error) {
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 365 * 10)), //10 years
 			},
 		},
-	).SignedString(jwtKey)
+	).SignedString(key)
 }
 
-func handle(ws *WS, w http.ResponseWriter, r *http.Request) {
+func handle(ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
 	auth := r.Header.Get("Authorization")
 	tokenStr := strings.TrimPrefix(auth, "Bearer ")
 	if auth == "" || tokenStr == auth {
@@ -75,7 +83,7 @@ func handle(ws *WS, w http.ResponseWriter, r *http.Request) {
 	}
 
 	claims := &Claims{}
-	token, e := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (any, error) { return jwtKey, nil })
+	token, e := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (any, error) { return ws.jwtKey, nil })
 	if e != nil || !token.Valid {
 		http.Error(w, "Invalid token", http.StatusUnauthorized)
 		return
@@ -157,26 +165,16 @@ func handle(ws *WS, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *WS) Run(ctx context.Context) {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		handle(s, w, r)
-	})
-
-	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", s.cfg.WS.Port),
-		Handler: mux,
-	}
-
+func (ws *WebSocketServer) Run(ctx context.Context) {
 	go func() {
-		if e := server.ListenAndServe(); e != nil && e != http.ErrServerClosed {
+		if e := ws.srv.ListenAndServe(); e != nil && e != http.ErrServerClosed {
 			log.Fatalf("WebSocket server error: %v", e)
 		}
 	}()
 
 	log.Println("WebSocket server started, here the tokens:")
 	for k, v := range map[ClientType]string{CT_ZSPY: "zspy"} {
-		jwt, e := jwtGenerate(k)
+		jwt, e := jwtGenerate(ws.jwtKey, k)
 		log.Printf("%s=%s (%v)\n", v, jwt, e)
 	}
 
@@ -185,7 +183,7 @@ func (s *WS) Run(ctx context.Context) {
 	ctxClose, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if e := server.Shutdown(ctxClose); e != nil {
+	if e := ws.srv.Shutdown(ctxClose); e != nil {
 		log.Fatalf("WebSocket server shutdown error: %v", e)
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -13,15 +12,10 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/jesc7/zombot/cmd/zspy/client/jp/duties"
+	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/client/webapi"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
-
-type Config struct {
-	Addr  string
-	Token string
-}
 
 func Start(ctx context.Context, service bool) error {
 	cwd, e := runPath(service)
@@ -33,7 +27,7 @@ func Start(ctx context.Context, service bool) error {
 	if e != nil {
 		return e
 	}
-	var cfg Config
+	var cfg types.Config
 	if e = json.Unmarshal(f, &cfg); e != nil {
 		return e
 	}
@@ -65,15 +59,12 @@ func Start(ctx context.Context, service bool) error {
 	})
 
 	wa := webapi.NewServer()
-	wg.Go(func() { //run Max bot
-		defer func() {
-			log.Println("Max bot has been stopped")
-		}()
+	wg.Go(func() { //run WebAPI server
 		wa.Run(ctx)
 	})
 
 	wg.Wait()
-	return nil
+	return ctx.Err()
 }
 
 func write(conn *websocket.Conn, v any) error {
@@ -124,7 +115,7 @@ func handle(ctx context.Context, conn *websocket.Conn) {
 				if e = json.Unmarshal(raw, &d); e != nil {
 					continue
 				}
-				d.A = duties.Duty(db, nil, d.Q)
+				//d.A = duties.Duty(db, nil, d.Q)
 				write(conn, d)
 
 			default:

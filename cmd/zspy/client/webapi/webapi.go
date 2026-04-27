@@ -15,7 +15,7 @@ type WebServer struct {
 }
 
 func NewServer() *WebServer {
-	mux := &http.ServeMux{}
+	mux := http.NewServeMux()
 	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
 	mux.HandleFunc("/call", func(w http.ResponseWriter, r *http.Request) {
 		v, ok := r.URL.Query()["phone"]
@@ -45,9 +45,9 @@ func NewServer() *WebServer {
 	}
 }
 
-func (s *WebServer) Run(ctx context.Context) {
+func (ws *WebServer) Run(ctx context.Context) {
 	go func() {
-		if e := s.srv.ListenAndServe(); e != http.ErrServerClosed {
+		if e := ws.srv.ListenAndServe(); e != http.ErrServerClosed {
 			log.Println("Http server error:", e)
 		}
 	}()
@@ -56,7 +56,7 @@ func (s *WebServer) Run(ctx context.Context) {
 	ctxClose, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if e := s.srv.Shutdown(ctxClose); e != nil {
+	if e := ws.srv.Shutdown(ctxClose); e != nil {
 		log.Println("Http server shutdown error:", e)
 	}
 }

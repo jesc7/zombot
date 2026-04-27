@@ -24,15 +24,14 @@ type TextMsg struct {
 	Text string
 }
 type Bot struct {
-	ctx    context.Context
 	bot    *max.Api
 	QWait  *queue.Queue
 	chatID int64
 	db     *sql.DB
-	srv    *ws.WS
+	srv    *ws.WebSocketServer
 }
 
-func NewBot(ctx context.Context, cfg types.Config, srv *ws.WS) (*Bot, error) {
+func NewBot(ctx context.Context, cfg types.Config, srv *ws.WebSocketServer) (*Bot, error) {
 	var options []max.Option
 	if cfg.Proxy.Addr != "" {
 		proxy, e := url.Parse(fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port))
@@ -54,7 +53,6 @@ func NewBot(ctx context.Context, cfg types.Config, srv *ws.WS) (*Bot, error) {
 
 	bot, e := max.New(cfg.Max.Token, options...)
 	return &Bot{
-		ctx:    ctx,
 		bot:    bot,
 		QWait:  queue.NewQ(ctx, rate.Limit(5)),
 		db:     db,
@@ -106,11 +104,11 @@ func (b *Bot) SendText(text string) {
 	}
 */
 
-func (b *Bot) Run() {
+func (b *Bot) Run(ctx context.Context) {
 out:
 	for {
 		select {
-		case <-b.ctx.Done():
+		case <-ctx.Done():
 			break out
 
 		case m := <-b.QWait.Q: //разгребаем локальную очередь сообщений
@@ -127,7 +125,7 @@ out:
 				wo.OnOk()
 			}
 
-		case update := <-b.bot.GetUpdates(b.ctx): //приехали апдейты с сервера
+		case update := <-b.bot.GetUpdates(ctx): //приехали апдейты с сервера
 			switch upd := update.(type) {
 			case *schemes.MessageCreatedUpdate:
 				//только групповой чат из настроек

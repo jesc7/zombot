@@ -15,6 +15,11 @@ import (
 	"golang.org/x/text/encoding/charmap"
 )
 
+type Config struct {
+	Addr  string
+	Token string
+}
+
 func Rnd(min, max int) int {
 	return min + rand.IntN(max-min)
 }
