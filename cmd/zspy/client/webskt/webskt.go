@@ -107,24 +107,27 @@ func (ws *WebSocketClient) handle(ctx context.Context) {
 	}
 }
 
-func write(conn *websocket.Conn, v any) error {
-	raw, e := json.Marshal(v)
+func write(conn *websocket.Conn, env shared.Envelope) error {
+	data, e := json.Marshal(env)
 	if e != nil {
 		return e
 	}
-	return conn.WriteMessage(websocket.TextMessage, raw)
+	return conn.WriteMessage(websocket.TextMessage, data)
 }
 
-func read(conn *websocket.Conn) (raw []byte, e error) {
-	mt, raw, e := conn.ReadMessage()
+func read(conn *websocket.Conn) (shared.Envelope, error) {
+	mt, data, e := conn.ReadMessage()
 	if e != nil {
-		return
+		return shared.Envelope{}, e
 	}
+
 	switch mt {
 	case websocket.TextMessage:
-		return
+		var env shared.Envelope
+		e = json.Unmarshal(data, &env)
+		return env, e
 
 	default:
-		return []byte{}, nil
+		return shared.Envelope{}, nil
 	}
 }

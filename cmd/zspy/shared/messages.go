@@ -1,23 +1,37 @@
 package shared
 
-import "time"
-
-/*type MessageType int
-
-const (
-	MT_UNDEFINED MessageType = iota - 1
-	MT_DUTY
+import (
+	"encoding/json"
+	"time"
 )
 
-type Message struct {
-	Type MessageType
+type Envelope struct {
+	Type    string          `json:"type"`
+	Payload json.RawMessage `json:"payload"`
 }
-*/
+
+func Pack[T any](msgType string, data T) (Envelope, error) {
+	payloadBytes, e := json.Marshal(data)
+	if e != nil {
+		return Envelope{}, e
+	}
+	return Envelope{
+		Type:    msgType,
+		Payload: payloadBytes,
+	}, nil
+}
+
+func Unpack[T any](env Envelope) (T, error) {
+	var data T
+	e := json.Unmarshal(env.Payload, &data)
+	return data, e
+}
+
 type MessageText struct {
 	Text string `json:"text"`
 }
 
-type DutyQuery struct {
+type MessageDutyQuery struct {
 	Name string `json:"name"`
 	Days int    `json:"days"`
 }
@@ -28,8 +42,8 @@ type Duty struct {
 }
 
 type MessageDuties struct {
-	Q DutyQuery `json:"q"`
-	A []Duty    `json:"a,omitempty"`
+	Q MessageDutyQuery `json:"q"`
+	A []Duty           `json:"a,omitempty"`
 }
 
 type MessageDutyChanges struct {
