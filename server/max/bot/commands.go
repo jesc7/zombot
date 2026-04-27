@@ -7,4 +7,8 @@ var (
 )
 
 func isDutyCommand(value string) (bool, string, int) {
-	reDuty.FindAllString()
+	res := reDuty.FindStringSubmatch(value)
+	if res == nil {
+		return false, "", 0
+	}
+}
