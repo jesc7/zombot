@@ -34,17 +34,3 @@ type EC struct {
 	ConnStr string `json:"connstr"`
 	Pwd     string `json:"pwd"`
 }
-
-type MsgType int
-
-const (
-	ZMSG_INFO MsgType = iota
-	ZMSG_WARN
-	ZMSG_PANIC
-)
-
-type ZSrvMessage struct {
-	Status  MsgType `json:"status"`
-	Caption string  `json:"caption"`
-	Text    string  `json:"text"`
-}

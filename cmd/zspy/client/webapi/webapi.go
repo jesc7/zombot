@@ -7,11 +7,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/jesc7/zombot/cmd/zspy/client/webskt"
 	"github.com/jesc7/zombot/server/types"
 )
 
 type WebServer struct {
 	srv *http.Server
+	skt *webskt.WebSocketClient
 }
 
 func NewWebServer() *WebServer {
@@ -45,7 +47,7 @@ func NewWebServer() *WebServer {
 	}
 }
 
-func (ws *WebServer) Run(ctx context.Context) {
+func (ws *WebServer) Run(ctx context.Context, skt *webskt.WebSocketClient) {
 	go func() {
 		if e := ws.srv.ListenAndServe(); e != http.ErrServerClosed {
 			log.Println("Http server error:", e)

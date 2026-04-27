@@ -32,13 +32,13 @@ func Start(ctx context.Context, service bool) error {
 	defer cancel()
 
 	wg := &sync.WaitGroup{}
-	wsc := webskt.NewWebSocketClient(cfg)
+	skt := webskt.NewWebSocketClient(cfg)
 	wg.Go(func() { //run WebSocket server
 		defer func() {
 			log.Println("WebSocket server has been stopped")
 			cancel()
 		}()
-		wsc.Run(ctx)
+		skt.Run(ctx)
 	})
 
 	wa := webapi.NewWebServer()
@@ -47,7 +47,7 @@ func Start(ctx context.Context, service bool) error {
 			log.Println("WebAPI server has been stopped")
 			cancel()
 		}()
-		wa.Run(ctx)
+		wa.Run(ctx, skt)
 	})
 
 	wg.Wait()

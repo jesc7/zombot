@@ -40,3 +40,17 @@ type MessageDutyChanges struct {
 		} `json:"duties,omitempty"`
 	} `json:"a"`
 }
+
+type ZSrvType int
+
+const (
+	ZSRV_INFO ZSrvType = iota
+	ZSRV_WARN
+	ZSRV_PANIC
+)
+
+type MessageZSRV struct {
+	Status  ZSrvType `json:"status"`
+	Caption string   `json:"caption"`
+	Text    string   `json:"text"`
+}
