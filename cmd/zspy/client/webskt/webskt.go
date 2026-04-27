@@ -78,9 +78,19 @@ func (ws *WebSocketClient) handle(ctx context.Context) {
 
 			switch env.Type {
 			case "MessageDuties":
-				d, _ := shared.Unpack[shared.MessageDuties](env)
-				d.A, _ = duties.Duty(db, nil, d.Q)
-				write(ws.conn, d)
+				d, e := shared.Unpack[shared.MessageDuties](env)
+				if e != nil {
+					continue
+				}
+				d.A, e = duties.Duty(db, d.Q)
+				if e != nil {
+					continue
+				}
+				env, e = shared.Pack(env.Type, d)
+				if e != nil {
+					continue
+				}
+				write(ws.conn, env)
 			}
 		}
 	}()
