@@ -87,6 +87,9 @@ func handler(ws *WS, w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "ZSpy already connected", http.StatusNotAcceptable)
 			return
 		}
+
+	default:
+		return
 	}
 
 	conn, e := upgrader.Upgrade(w, r, nil)

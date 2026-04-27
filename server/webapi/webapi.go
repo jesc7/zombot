@@ -1,5 +1,6 @@
 package webapi
 
+/*
 import (
 	"context"
 	"encoding/json"
@@ -60,3 +61,4 @@ func (s *WebServer) Run(ctx context.Context) {
 		log.Println("Http server shutdown error:", e)
 	}
 }
+*/
