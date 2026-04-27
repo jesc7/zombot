@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/jesc7/zombot/cmd/zspy/client/jp/duties"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
@@ -15,7 +16,7 @@ import (
 type WebSocketClient struct {
 	host   url.URL
 	header http.Header
-	ch     chan any
+	ch     chan shared.Envelope
 	conn   *websocket.Conn
 }
 
@@ -23,13 +24,13 @@ func NewWebSocketClient(cfg types.Config) *WebSocketClient {
 	return &WebSocketClient{
 		host:   url.URL{Scheme: "ws", Host: cfg.Addr, Path: "/ws"},
 		header: http.Header{"Authorization": []string{"Bearer " + cfg.Token}},
-		ch:     make(chan any),
+		ch:     make(chan shared.Envelope),
 	}
 }
 
-func (ws *WebSocketClient) Write(msg any) {
+func (ws *WebSocketClient) Write(env shared.Envelope) {
 	defer recover()
-	ws.ch <- msg
+	ws.ch <- env
 }
 
 func (ws *WebSocketClient) Run(ctx context.Context) {
@@ -40,9 +41,9 @@ func (ws *WebSocketClient) Run(ctx context.Context) {
 		case <-ctx.Done():
 			return
 
-		case msg := <-ws.ch:
+		case env := <-ws.ch:
 			if ws.conn != nil {
-				write(ws.conn, msg)
+				write(ws.conn, env)
 			}
 
 		default:
@@ -70,18 +71,15 @@ func (ws *WebSocketClient) handle(ctx context.Context) {
 		defer close(done)
 
 		for {
-			raw, e := read(ws.conn)
+			env, e := read(ws.conn)
 			if e != nil {
 				return
 			}
 
-			switch m := msg.(type) {
-			case shared.MessageDuties:
-				var d shared.MessageDuties
-				if e = json.Unmarshal(raw, &d); e != nil {
-					continue
-				}
-				//d.A = duties.Duty(db, nil, d.Q)
+			switch env.Type {
+			case "MessageDuties":
+				d, _ := shared.Unpack[shared.MessageDuties](env)
+				d.A, _ = duties.Duty(db, nil, d.Q)
 				write(ws.conn, d)
 			}
 		}
