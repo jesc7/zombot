@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/jesc7/zombot/cmd/zspy/client/jp/duties"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
 
@@ -102,12 +103,12 @@ func handle(ctx context.Context, conn *websocket.Conn) {
 			case shared.MT_UNDEFINED:
 
 			case shared.MT_DUTY:
-				var duties shared.MessageDuties
-				if e = json.Unmarshal(raw, &duties); e != nil {
+				var d shared.MessageDuties
+				if e = json.Unmarshal(raw, &d); e != nil {
 					continue
 				}
-				d := duties.
-					write(conn)
+				d.A = duties.Duty(db, nil, d.Q)
+				write(conn, d)
 
 			default:
 				_ = raw
