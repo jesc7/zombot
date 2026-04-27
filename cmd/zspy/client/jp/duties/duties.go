@@ -94,7 +94,7 @@ func Duties(db *sql.DB, daysCount int, dut Planner, who string) string {
 	var res, resWho string
 	for i := start; i <= daysCount; i++ {
 
-		time.Now().Add(24 * time.Hour)
+		time.Now().Truncate(24 * time.Hour)
 
 		t := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day()+i, 0, 0, 0, 0, time.Local)
 		if empl, ok := dut[t]; ok {
