@@ -3,7 +3,6 @@ package webskt
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"net/http"
 	"net/url"
 	"time"
@@ -113,30 +112,5 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 				return
 			}
 		}
-	}
-}
-
-func write(conn *websocket.Conn, env shared.Envelope) error {
-	data, e := json.Marshal(env)
-	if e != nil {
-		return e
-	}
-	return conn.WriteMessage(websocket.TextMessage, data)
-}
-
-func read(conn *websocket.Conn) (shared.Envelope, error) {
-	mt, data, e := conn.ReadMessage()
-	if e != nil {
-		return shared.Envelope{}, e
-	}
-
-	switch mt {
-	case websocket.TextMessage:
-		var env shared.Envelope
-		e = json.Unmarshal(data, &env)
-		return env, e
-
-	default:
-		return shared.Envelope{}, nil
 	}
 }

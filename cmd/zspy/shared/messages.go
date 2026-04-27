@@ -3,6 +3,8 @@ package shared
 import (
 	"encoding/json"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 type Envelope struct {
@@ -25,6 +27,31 @@ func Unpack[T any](env Envelope) (T, error) {
 	var data T
 	e := json.Unmarshal(env.Payload, &data)
 	return data, e
+}
+
+func Read(conn *websocket.Conn) (Envelope, error) {
+	mt, data, e := conn.ReadMessage()
+	if e != nil {
+		return Envelope{}, e
+	}
+
+	switch mt {
+	case websocket.TextMessage:
+		var env Envelope
+		e = json.Unmarshal(data, &env)
+		return env, e
+
+	default:
+		return Envelope{}, nil
+	}
+}
+
+func Write(conn *websocket.Conn, env Envelope) error {
+	data, e := json.Marshal(env)
+	if e != nil {
+		return e
+	}
+	return conn.WriteMessage(websocket.TextMessage, data)
 }
 
 type MessageText struct {
