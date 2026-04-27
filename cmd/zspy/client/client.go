@@ -66,7 +66,7 @@ func write(conn *websocket.Conn, v any) error {
 	return conn.WriteMessage(websocket.TextMessage, raw)
 }
 
-func read(conn *websocket.Conn) (m Message, raw []byte, e error) {
+func read(conn *websocket.Conn) (m shared.Message, raw []byte, e error) {
 	mt, raw, e := conn.ReadMessage()
 	if e != nil {
 		return
@@ -77,7 +77,7 @@ func read(conn *websocket.Conn) (m Message, raw []byte, e error) {
 		return m, raw, e
 
 	case websocket.PingMessage, websocket.PongMessage:
-		m.Type = MT_UNDEFINED
+		m.Type = shared.MT_UNDEFINED
 		return
 
 	default:
@@ -99,9 +99,9 @@ func handle(ctx context.Context, conn *websocket.Conn) {
 			}
 
 			switch msg.Type {
-			case MT_UNDEFINED:
+			case shared.MT_UNDEFINED:
 
-			case MT_DUTY:
+			case shared.MT_DUTY:
 				var duties shared.MessageDuties
 				if e = json.Unmarshal(raw, &duties); e != nil {
 					continue
