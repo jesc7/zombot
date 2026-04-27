@@ -67,8 +67,8 @@ type MessageText struct {
 }
 
 type DutyQuery struct {
-	Name string `json:"name"`
-	Days int    `json:"days"`
+	Name string `json:"name,omitempty"`
+	Days int    `json:"days,omitempty"`
 }
 
 type Duty struct {
@@ -77,17 +77,15 @@ type Duty struct {
 }
 
 type MessageDuties struct {
-	Q DutyQuery `json:"q"`
+	Q DutyQuery `json:"q,omitempty"`
 	A []Duty    `json:"a,omitempty"`
 }
 
 type MessageDutyChanges struct {
-	A struct {
-		Duties []struct {
-			Duty
-			ChangeType int `json:"change_type"`
-		} `json:"duties,omitempty"`
-	} `json:"a"`
+	Changes []struct {
+		Duty
+		ChangeType int `json:"change_type"`
+	} `json:"changes,omitempty"`
 }
 
 type ZSrvType int
