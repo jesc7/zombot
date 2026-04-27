@@ -2,7 +2,7 @@ package shared
 
 import "time"
 
-type MessageType int
+/*type MessageType int
 
 const (
 	MT_UNDEFINED MessageType = iota - 1
@@ -12,7 +12,7 @@ const (
 type Message struct {
 	Type MessageType
 }
-
+*/
 type MessageText struct {
 	Text string `json:"text"`
 }
@@ -53,4 +53,8 @@ type MessageZSRV struct {
 	Status  ZSrvType `json:"status"`
 	Caption string   `json:"caption"`
 	Text    string   `json:"text"`
+}
+
+type MessageCall struct {
+	Phone string `json:"phone"`
 }

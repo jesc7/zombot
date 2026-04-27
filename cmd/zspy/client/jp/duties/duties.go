@@ -2,23 +2,16 @@ package duties
 
 import (
 	"database/sql"
-	"fmt"
-	"strings"
 	"time"
 
-	"github.com/jesc7/zombot/cmd/zspy/client/daytypes"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
 
 type Planner map[time.Time]string
 
-var (
-	lastDuties, CurDuties Planner
-)
-
-func DutiesList(db *sql.DB) (pl Planner, delta string) {
-	pl = make(Planner)
+func DutiesList(db *sql.DB) (*Planner, error) {
+	pl := make(Planner)
 	rows, e := db.Query(`
 		select t.dt, list(u.username, ', ')
 		from tabel t
@@ -29,7 +22,7 @@ func DutiesList(db *sql.DB) (pl Planner, delta string) {
 		order by t.dt
 	`)
 	if e != nil {
-		return
+		return nil, e
 	}
 	defer rows.Close()
 
@@ -39,46 +32,19 @@ func DutiesList(db *sql.DB) (pl Planner, delta string) {
 			s string
 		)
 		if e = rows.Scan(&t, &s); e != nil {
-			return
+			return nil, e
 		}
 		pl[t] = s
 	}
-
-	if len(pl) == 0 {
-		return
-	}
-
-	lastDuties = CurDuties
-	CurDuties = pl
-	if lastDuties != nil {
-		for i := 1; i <= 100; i++ {
-			daytip := ""
-			if i <= 3 {
-				daytip = []string{" (сегодня)", " (завтра)", " (послезавтра)", " (через 2 дня)"}[i]
-			}
-			t := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day()+i, 0, 0, 0, 0, time.Local)
-			e1, ok1 := lastDuties[t]
-			e2, ok2 := CurDuties[t]
-			switch {
-			case !ok1 && ok2: //новое дежурство
-				delta += fmt.Sprintf("⭐ %s%s: %s\n", t.Format("02.01"), daytip, e2)
-			case ok1 && !ok2: //отмена
-				delta += fmt.Sprintf("🚫 %s%s: %s\n", t.Format("02.01"), daytip, e1)
-			case ok1 && ok2 && (e1 != e2): //замена
-				delta += fmt.Sprintf("🔄 %s%s: %s\n", t.Format("02.01"), daytip, e2)
-			}
-		}
-		if len(delta) != 0 {
-			delta = "👷 <b>Изменения дежурств</b>\n" + types.Iif(strings.Count(delta, "\n") > 1, "\n", "") + delta
-		}
-	}
-	return
+	return &pl, nil
 }
 
-func Duty(db *sql.DB, pl Planner, q shared.DutyQuery) []shared.Duty {
-	if pl == nil {
-		pl, _ = DutiesList(db)
+func Duty(db *sql.DB, q shared.DutyQuery) (*[]shared.Duty, error) {
+	pl, e := DutiesList(db)
+	if e != nil {
+		return nil, e
 	}
+
 	start := 1
 	if time.Now().Hour() < 17 {
 		start = 0
@@ -90,94 +56,12 @@ func Duty(db *sql.DB, pl Planner, q shared.DutyQuery) []shared.Duty {
 	var res []shared.Duty
 	for i := start; i <= q.Days; i++ {
 		t := time.Now().Truncate(24 * time.Hour)
-		if d, ok := pl[t]; ok && (q.Name == "" || types.ContainsWord(d, q.Name)) {
+		if d, ok := (*pl)[t]; ok && (q.Name == "" || types.ContainsWord(d, q.Name)) {
 			res = append(res, shared.Duty{
 				Date: t,
 				Name: d,
 			})
 		}
 	}
-	return res
-}
-
-func HolidaysCount(db *sql.DB) (res int) {
-	dut, _ := DutiesList(db)
-	t := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local)
-	if _, ok := dut[t]; ok { //если мы уже внутри выходных, то не реагируем
-		return
-	}
-	for i := 1; i <= 20; i++ {
-		if _, ok := dut[t.AddDate(0, 0, i)]; !ok {
-			break
-		}
-		res++
-	}
-	if res == 2 && t.AddDate(0, 0, 1).Weekday() == time.Saturday { //если впереди 2 выходных и завтра суббота, то не реагируем
-		res = 0
-	}
-	return
-}
-
-func MissDuties(db *sql.DB, days int) (res string) {
-	dr := strings.NewReplacer(
-		"Jan", "января", "Feb", "февраля", "Mar", "марта", "Apr", "апреля", "May", "мая", "Jun", "июня",
-		"Jul", "июля", "Aug", "августа", "Sep", "сентября", "Oct", "октября", "Nov", "ноября", "Dec", "декабря",
-		"Mon", "понедельник", "Tue", "вторник", "Wed", "среда", "Thu", "четверг", "Fri", "пятница", "Sat", "суббота", "Sun", "воскресенье",
-	)
-
-	if CurDuties == nil {
-		DutiesList(db)
-	}
-
-	type needs struct {
-		t time.Time
-		s string
-	}
-
-	now, ds := time.Now(), []needs{}
-	for i := 1; ; i++ {
-		t := time.Date(now.Year(), now.Month(), now.Day()+i, 0, 0, 0, 0, time.Local)
-		count, dutCount, countries := 0, 0, []string{}
-
-	out:
-		for i, v := range []string{"ru", "kz"} { //by, ua, uz
-			dt, _ := daytypes.GetDayType(v, t)
-			switch i == 0 {
-			case true:
-				if dt != daytypes.DtHoliday {
-					break out
-				}
-				count++
-			default:
-				if dt != daytypes.DtHoliday {
-					count++
-					countries = append(countries, strings.ToUpper(v))
-				}
-			}
-		}
-		if count == 0 {
-			if i > days {
-				break
-			}
-			continue
-		}
-		if dut, ok := CurDuties[t]; ok {
-			dutCount = strings.Count(dut, ",") + 1
-		}
-		if dutCount < count {
-			switch dutCount {
-			case 0:
-				ds = append(ds, needs{t, types.Iif(count == 1, "", " - 2 чел, работают "+strings.Join(countries, ","))})
-			default:
-				ds = append(ds, needs{t, types.Iif(count == 1, "", " - доп.дежурный, работают "+strings.Join(countries, ","))})
-			}
-		}
-	}
-	if len(ds) != 0 {
-		res = "🤖 <b>Неплохо бы назначить дежурных:</b>"
-		for _, v := range ds {
-			res += dr.Replace(v.t.Format("\n_2 Jan (Mon)")) + v.s
-		}
-	}
-	return
+	return &res, nil
 }

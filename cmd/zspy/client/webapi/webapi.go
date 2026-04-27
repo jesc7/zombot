@@ -3,13 +3,10 @@ package webapi
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
-	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/client/webskt"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
@@ -27,7 +24,7 @@ func NewWebServer(skt *webskt.WebSocketClient) *WebServer {
 		if !ok {
 			return
 		}
-		skt.WriteText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(v[0], "8800 "), " на 8800", ""), v[0]))
+		skt.Write(shared.MessageCall{Phone: v[0]})
 	})
 
 	//сообщения от ZSrv
@@ -37,18 +34,7 @@ func NewWebServer(skt *webskt.WebSocketClient) *WebServer {
 			http.Error(w, e.Error(), http.StatusBadRequest)
 			return
 		}
-		if strings.Count(msg.Text, "\n") != 0 {
-			msg.Text = "\n" + msg.Text
-		}
-		switch msg.Status {
-		case shared.ZMSG_WARN:
-			msg.Text = fmt.Sprintf("⚠️ <i>zsrv %s беспокоится</i>\n%s", msg.Caption, msg.Text)
-		case shared.ZMSG_PANIC:
-			msg.Text = fmt.Sprintf("🆘 <i>zsrv %s паникует</i>\n%s", msg.Caption, msg.Text)
-		default:
-			msg.Text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", msg.Caption, msg.Text)
-		}
-		skt.WriteText(msg.Text)
+		skt.Write(msg)
 		w.WriteHeader(http.StatusOK)
 	})
 

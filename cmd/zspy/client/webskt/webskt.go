@@ -3,7 +3,6 @@ package webskt
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/url"
 	"time"
@@ -47,7 +46,8 @@ func (ws *WebSocketClient) Run(ctx context.Context) {
 			}
 
 		default:
-			conn, _, e := websocket.DefaultDialer.DialContext(ctx, ws.host.String(), ws.header)
+			var e error
+			ws.conn, _, e = websocket.DefaultDialer.DialContext(ctx, ws.host.String(), ws.header)
 			if e != nil {
 				select {
 				case <-ctx.Done():
@@ -57,32 +57,32 @@ func (ws *WebSocketClient) Run(ctx context.Context) {
 					continue
 				}
 			}
-			handle(ctx, conn)
+			ws.handle(ctx)
 		}
 	}
 }
 
-func handle(ctx context.Context, conn *websocket.Conn) {
-	defer conn.Close()
+func (ws *WebSocketClient) handle(ctx context.Context) {
+	defer ws.conn.Close()
 	done := make(chan struct{})
 
 	go func() {
 		defer close(done)
 
 		for {
-			msg, raw, e := read(conn)
+			raw, e := read(ws.conn)
 			if e != nil {
 				return
 			}
 
-			switch msg.Type {
-			case shared.MT_DUTY:
+			switch m := msg.(type) {
+			case shared.MessageDuties:
 				var d shared.MessageDuties
 				if e = json.Unmarshal(raw, &d); e != nil {
 					continue
 				}
 				//d.A = duties.Duty(db, nil, d.Q)
-				write(conn, d)
+				write(ws.conn, d)
 			}
 		}
 	}()
@@ -93,14 +93,14 @@ func handle(ctx context.Context, conn *websocket.Conn) {
 	for {
 		select {
 		case <-ctx.Done(): //выход по контексту
-			conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			ws.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			return
 
 		case <-done: //сервер закрыл соединение
 			return
 
 		case <-tPing.C: //пингуем соединение
-			if e := conn.WriteMessage(websocket.PingMessage, nil); e != nil {
+			if e := ws.conn.WriteMessage(websocket.PingMessage, nil); e != nil {
 				return
 			}
 		}
@@ -115,21 +115,16 @@ func write(conn *websocket.Conn, v any) error {
 	return conn.WriteMessage(websocket.TextMessage, raw)
 }
 
-func read(conn *websocket.Conn) (m shared.Message, raw []byte, e error) {
+func read(conn *websocket.Conn) (raw []byte, e error) {
 	mt, raw, e := conn.ReadMessage()
 	if e != nil {
 		return
 	}
 	switch mt {
 	case websocket.TextMessage:
-		e = json.Unmarshal(raw, &m)
-		return m, raw, e
-
-	case websocket.PingMessage, websocket.PongMessage:
-		m.Type = shared.MT_UNDEFINED
 		return
 
 	default:
-		return m, raw, errors.New("Undefined message")
+		return []byte{}, nil
 	}
 }
