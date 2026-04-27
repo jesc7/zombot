@@ -7,5 +7,5 @@ var (
 )
 
 func isDutyCommand(value string) (bool, string, int) {
-	regexp.MustCompile()
+	reDuty.FindAllStringSubmatch().MatchString(value)
 }
