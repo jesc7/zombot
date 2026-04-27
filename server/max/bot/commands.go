@@ -30,5 +30,6 @@ func isDuty(value string) (bool, string, int) {
 		return b, "", 0
 	}
 	name := (*m)["name"]
-	days, _ := strconv.Atoi((*m)["name"])
+	days, _ := strconv.Atoi((*m)["days"])
+	return b, name, days
 }
