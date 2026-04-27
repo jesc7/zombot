@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -35,28 +36,31 @@ func Start(ctx context.Context, service bool) error {
 		return e
 	}
 
-	u := url.URL{Scheme: "ws", Host: cfg.Addr, Path: "/ws"}
-	header := http.Header{"Authorization": []string{"Bearer " + cfg.Token}}
+	wg := &sync.WaitGroup{}
+	wg.Go(func() { //run WebSocket server
+		u := url.URL{Scheme: "ws", Host: cfg.Addr, Path: "/ws"}
+		header := http.Header{"Authorization": []string{"Bearer " + cfg.Token}}
 
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
+		for {
+			select {
+			case <-ctx.Done():
+				return
 
-		default:
-			conn, _, e := websocket.DefaultDialer.DialContext(ctx, u.String(), header)
-			if e != nil {
-				select {
-				case <-ctx.Done():
-					return ctx.Err()
+			default:
+				conn, _, e := websocket.DefaultDialer.DialContext(ctx, u.String(), header)
+				if e != nil {
+					select {
+					case <-ctx.Done():
+						return
 
-				case <-time.After(5 * time.Second):
-					continue
+					case <-time.After(5 * time.Second):
+						continue
+					}
 				}
+				handle(ctx, conn)
 			}
-			handle(ctx, conn)
 		}
-	}
+	})
 }
 
 func write(conn *websocket.Conn, v any) error {
