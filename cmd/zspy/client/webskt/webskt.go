@@ -28,7 +28,7 @@ func NewWebSocketClient(cfg types.Config) *WebSocketClient {
 	}
 }
 
-func (ws *WebSocketClient) WriteText(ctx context.Context, text string) {
+func (ws *WebSocketClient) WriteText(text string) {
 	defer recover()
 	ws.ch <- shared.MessageText{
 		Text: text,

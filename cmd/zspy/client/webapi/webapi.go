@@ -3,8 +3,10 @@ package webapi
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/jesc7/zombot/cmd/zspy/client/webskt"
@@ -16,7 +18,7 @@ type WebServer struct {
 	skt *webskt.WebSocketClient
 }
 
-func NewWebServer() *WebServer {
+func NewWebServer(skt *webskt.WebSocketClient) *WebServer {
 	mux := http.NewServeMux()
 	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
 	mux.HandleFunc("/call", func(w http.ResponseWriter, r *http.Request) {
@@ -24,8 +26,7 @@ func NewWebServer() *WebServer {
 		if !ok {
 			return
 		}
-		_ = v
-		//bot.SendCall(v[0])
+		skt.WriteText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(v[0], "8800 "), " на 8800", ""), v[0]))
 	})
 
 	//сообщения от ZSrv
@@ -35,6 +36,7 @@ func NewWebServer() *WebServer {
 			http.Error(w, e.Error(), http.StatusBadRequest)
 			return
 		}
+		skt.WriteText(v[0])
 		//bot.SendZSrv(msg)
 		w.WriteHeader(http.StatusOK)
 	})
@@ -47,7 +49,7 @@ func NewWebServer() *WebServer {
 	}
 }
 
-func (ws *WebServer) Run(ctx context.Context, skt *webskt.WebSocketClient) {
+func (ws *WebServer) Run(ctx context.Context) {
 	go func() {
 		if e := ws.srv.ListenAndServe(); e != http.ErrServerClosed {
 			log.Println("Http server error:", e)
