@@ -13,25 +13,26 @@ type Message struct {
 	Type MessageType
 }
 
+type DutyQuery struct {
+	Name string `json:"name"`
+	Days int    `json:"days"`
+}
+
+type DutyAnswer struct {
+	Date time.Time `json:"date"`
+	Name string    `json:"name"`
+}
+
 type MessageDuties struct {
-	Q struct {
-		Days int    `json:"days"`
-		Name string `json:"name"`
-	} `json:"q"`
-	A struct {
-		Duties []struct {
-			Date     time.Time `json:"date"`
-			Employee string    `json:"employee"`
-		} `json:"duties,omitempty"`
-	} `json:"a"`
+	Q DutyQuery    `json:"q"`
+	A []DutyAnswer `json:"a,omitempty"`
 }
 
 type MessageDutyChanges struct {
 	A struct {
 		Duties []struct {
-			ChangeType int       `json:"change_type"`
-			Date       time.Time `json:"date"`
-			Employee   string    `json:"employee"`
+			DutyAnswer
+			ChangeType int `json:"change_type"`
 		} `json:"duties,omitempty"`
 	} `json:"a"`
 }

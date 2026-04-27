@@ -8,6 +8,7 @@ import (
 
 	"github.com/jesc7/zombot/cmd/zspy/client/daytypes"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
+	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
 
 type Planner map[time.Time]string
@@ -72,6 +73,32 @@ func DutiesList(db *sql.DB) (res Planner, delta string) {
 		}
 	}
 	return
+}
+
+func Duty(db *sql.DB, pl Planner, q shared.DutyQuery) []shared.DutyAnswer {
+	if pl == nil {
+		pl, _ = DutiesList(db)
+	}
+	start := 1
+	if time.Now().Hour() < 17 {
+		start = 0
+	}
+	for i := start; i <= q.Days; i++ {
+		t := time.Now().Truncate(24 * time.Hour)
+		if empl, ok := pl[t]; ok {
+			daytip := ""
+			if i <= 3 {
+				daytip = []string{" (сегодня)", " (завтра)", " (послезавтра)", " (через 2 дня)"}[i]
+			}
+			s := fmt.Sprintf("%s%s: %s\n", t.Format("02.01"), daytip, empl)
+			if i <= d {
+				res += s
+			}
+			if types.ContainsWord(empl, who) {
+				resWho += s
+			}
+		}
+	}
 }
 
 func Duties(db *sql.DB, daysCount int, dut Planner, who string) string {
