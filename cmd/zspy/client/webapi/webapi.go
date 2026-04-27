@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	maxbot "github.com/jesc7/zombot/server/max/bot"
 	"github.com/jesc7/zombot/server/types"
 )
 

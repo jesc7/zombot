@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -61,6 +62,8 @@ func Start(ctx context.Context, service bool) error {
 			}
 		}
 	})
+	wg.Wait()
+	log.Println(".")
 }
 
 func write(conn *websocket.Conn, v any) error {
