@@ -66,7 +66,7 @@ func jwtGenerate(ct ClientType) (string, error) {
 	).SignedString(jwtKey)
 }
 
-func handler(ws *WS, w http.ResponseWriter, r *http.Request) {
+func handle(ws *WS, w http.ResponseWriter, r *http.Request) {
 	auth := r.Header.Get("Authorization")
 	tokenStr := strings.TrimPrefix(auth, "Bearer ")
 	if auth == "" || tokenStr == auth {
@@ -160,7 +160,7 @@ func handler(ws *WS, w http.ResponseWriter, r *http.Request) {
 func (s *WS) Run(ctx context.Context) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		handler(s, w, r)
+		handle(s, w, r)
 	})
 
 	server := &http.Server{
