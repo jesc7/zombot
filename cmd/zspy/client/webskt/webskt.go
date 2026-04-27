@@ -59,12 +59,12 @@ func (ws *WebSocketClient) Run(ctx context.Context, db *sql.DB) {
 					continue
 				}
 			}
-			ws.handle(ctx)
+			ws.handle(ctx, db)
 		}
 	}
 }
 
-func (ws *WebSocketClient) handle(ctx context.Context) {
+func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 	defer ws.conn.Close()
 	done := make(chan struct{})
 
@@ -83,7 +83,7 @@ func (ws *WebSocketClient) handle(ctx context.Context) {
 				if e != nil {
 					continue
 				}
-				d.A, e = duties.Duty(db, d.Q)
+				d.A, e = duties.Duty(ctx, db, d.Q)
 				if e != nil {
 					continue
 				}

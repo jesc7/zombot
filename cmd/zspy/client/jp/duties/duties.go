@@ -1,6 +1,7 @@
 package duties
 
 import (
+	"context"
 	"database/sql"
 	"time"
 
@@ -10,9 +11,9 @@ import (
 
 type Planner map[time.Time]string
 
-func DutiesList(db *sql.DB) (*Planner, error) {
+func DutiesList(ctx context.Context, db *sql.DB) (*Planner, error) {
 	pl := make(Planner)
-	rows, e := db.Query(`
+	rows, e := db.QueryContext(ctx, `
 		select t.dt, list(u.username, ', ')
 		from tabel t
 		left join sp$users u on u.id = t.user_id
@@ -39,8 +40,8 @@ func DutiesList(db *sql.DB) (*Planner, error) {
 	return &pl, nil
 }
 
-func Duty(db *sql.DB, q shared.MessageDutyQuery) ([]shared.Duty, error) {
-	pl, e := DutiesList(db)
+func Duty(ctx context.Context, db *sql.DB, q shared.MessageDutyQuery) ([]shared.Duty, error) {
+	pl, e := DutiesList(ctx, db)
 	if e != nil {
 		return nil, e
 	}
