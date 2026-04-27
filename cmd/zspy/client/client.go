@@ -19,17 +19,6 @@ type Config struct {
 	Token string
 }
 
-type MessageType int
-
-const (
-	MT_UNDEFINED MessageType = iota - 1
-	MT_DUTY
-)
-
-type Message struct {
-	Type MessageType
-}
-
 func Start(ctx context.Context, service bool) error {
 	cwd, e := runPath(service)
 	if e != nil {
@@ -64,7 +53,7 @@ func Start(ctx context.Context, service bool) error {
 					continue
 				}
 			}
-			handler(ctx, conn)
+			handle(ctx, conn)
 		}
 	}
 }
@@ -96,7 +85,7 @@ func read(conn *websocket.Conn) (m Message, raw []byte, e error) {
 	}
 }
 
-func handler(ctx context.Context, conn *websocket.Conn) {
+func handle(ctx context.Context, conn *websocket.Conn) {
 	defer conn.Close()
 	done := make(chan struct{})
 

@@ -2,6 +2,17 @@ package shared
 
 import "time"
 
+type MessageType int
+
+const (
+	MT_UNDEFINED MessageType = iota - 1
+	MT_DUTY
+)
+
+type Message struct {
+	Type MessageType
+}
+
 type MessageDuties struct {
 	Q struct {
 		Days int    `json:"days"`
