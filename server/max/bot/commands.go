@@ -7,5 +7,4 @@ var (
 )
 
 func isDutyCommand(value string) (bool, string, int) {
-	reDuty.FindAllStringSubmatch().MatchString(value)
-}
+	reDuty.FindAllString()
