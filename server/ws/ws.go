@@ -2,8 +2,6 @@ package ws
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -152,7 +150,7 @@ func handle(ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
 			log.Println("Завершаем работу: ошибка чтения или клиент ушел")
 			return
 
-		case <-ctx.Done():
+			/*case <-ctx.Done():
 			log.Println("Внешний контекст отменен: закрываем соединение")
 			// Вежливо прощаемся с клиентом
 			conn.WriteControl(
@@ -160,7 +158,7 @@ func handle(ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
 				websocket.FormatCloseMessage(websocket.CloseNormalClosure, "Server Shutdown"),
 				time.Now().Add(time.Second),
 			)
-			return
+			return*/
 		}
 	}
 }
@@ -185,29 +183,5 @@ func (ws *WebSocketServer) Run(ctx context.Context) {
 
 	if e := ws.srv.Shutdown(ctxClose); e != nil {
 		log.Fatalf("WebSocket server shutdown error: %v", e)
-	}
-}
-
-func write(conn *websocket.Conn, v any) error {
-	raw, e := json.Marshal(v)
-	if e != nil {
-		return e
-	}
-	return conn.WriteMessage(websocket.TextMessage, raw)
-}
-
-func read(conn *websocket.Conn) (m Message, raw []byte, e error) {
-	mt, raw, e := conn.ReadMessage()
-	if e != nil {
-		return
-	}
-	switch mt {
-	case websocket.TextMessage:
-		e = json.Unmarshal(raw, &m)
-		return
-	case websocket.PingMessage, websocket.PongMessage:
-		return
-	default:
-		return m, raw, errors.New("Undefined message")
 	}
 }

@@ -9,7 +9,7 @@ var (
 	reDuty = regexp.MustCompile(`(?i)^дежур[а-я]*(?:(?:\s+(?P<name>[а-я]+))?(?:\s+(?P<days>\d+))?)?$`)
 )
 
-func findCommand(re *regexp.Regexp, value string) (bool, *map[string]string) {
+func findCommand(re *regexp.Regexp, value string) (bool, map[string]string) {
 	res := re.FindStringSubmatch(value)
 	if res == nil {
 		return false, nil
@@ -21,7 +21,7 @@ func findCommand(re *regexp.Regexp, value string) (bool, *map[string]string) {
 			groups[name] = res[i]
 		}
 	}
-	return true, &groups
+	return true, groups
 }
 
 func isDuty(value string) (bool, string, int) {
@@ -29,7 +29,7 @@ func isDuty(value string) (bool, string, int) {
 	if !b {
 		return b, "", 0
 	}
-	name := (*m)["name"]
-	days, _ := strconv.Atoi((*m)["days"])
+	name := m["name"]
+	days, _ := strconv.Atoi(m["days"])
 	return b, name, days
 }

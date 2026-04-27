@@ -27,11 +27,8 @@ func DutiesList(ctx context.Context, db *sql.DB) (*Planner, error) {
 	}
 	defer rows.Close()
 
+	t, s := time.Time{}, ""
 	for rows.Next() {
-		var (
-			t time.Time
-			s string
-		)
 		if e = rows.Scan(&t, &s); e != nil {
 			return nil, e
 		}
