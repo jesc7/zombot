@@ -22,20 +22,20 @@ type DutyQuery struct {
 	Days int    `json:"days"`
 }
 
-type DutyAnswer struct {
+type Duty struct {
 	Date time.Time `json:"date"`
 	Name string    `json:"name"`
 }
 
 type MessageDuties struct {
-	Q DutyQuery    `json:"q"`
-	A []DutyAnswer `json:"a,omitempty"`
+	Q DutyQuery `json:"q"`
+	A []Duty    `json:"a,omitempty"`
 }
 
 type MessageDutyChanges struct {
 	A struct {
 		Duties []struct {
-			DutyAnswer
+			Duty
 			ChangeType int `json:"change_type"`
 		} `json:"duties,omitempty"`
 	} `json:"a"`

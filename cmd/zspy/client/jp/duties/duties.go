@@ -75,7 +75,7 @@ func DutiesList(db *sql.DB) (pl Planner, delta string) {
 	return
 }
 
-func Duty(db *sql.DB, pl Planner, q shared.DutyQuery) []shared.DutyAnswer {
+func Duty(db *sql.DB, pl Planner, q shared.DutyQuery) []shared.Duty {
 	if pl == nil {
 		pl, _ = DutiesList(db)
 	}
@@ -87,11 +87,11 @@ func Duty(db *sql.DB, pl Planner, q shared.DutyQuery) []shared.DutyAnswer {
 		q.Days = 7
 	}
 
-	var res []shared.DutyAnswer
+	var res []shared.Duty
 	for i := start; i <= q.Days; i++ {
 		t := time.Now().Truncate(24 * time.Hour)
 		if d, ok := pl[t]; ok && (q.Name == "" || types.ContainsWord(d, q.Name)) {
-			res = append(res, shared.DutyAnswer{
+			res = append(res, shared.Duty{
 				Date: t,
 				Name: d,
 			})
