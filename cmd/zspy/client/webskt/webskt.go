@@ -16,7 +16,7 @@ import (
 type WebSocketClient struct {
 	host   url.URL
 	header http.Header
-	ch     chan shared.MessageText
+	ch     chan any
 	conn   *websocket.Conn
 }
 
@@ -24,15 +24,13 @@ func NewWebSocketClient(cfg types.Config) *WebSocketClient {
 	return &WebSocketClient{
 		host:   url.URL{Scheme: "ws", Host: cfg.Addr, Path: "/ws"},
 		header: http.Header{"Authorization": []string{"Bearer " + cfg.Token}},
-		ch:     make(chan shared.MessageText),
+		ch:     make(chan any),
 	}
 }
 
-func (ws *WebSocketClient) WriteText(text string) {
+func (ws *WebSocketClient) Write(msg any) {
 	defer recover()
-	ws.ch <- shared.MessageText{
-		Text: text,
-	}
+	ws.ch <- msg
 }
 
 func (ws *WebSocketClient) Run(ctx context.Context) {

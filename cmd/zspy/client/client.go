@@ -41,13 +41,13 @@ func Start(ctx context.Context, service bool) error {
 		skt.Run(ctx)
 	})
 
-	wa := webapi.NewWebServer()
+	wa := webapi.NewWebServer(skt)
 	wg.Go(func() { //run WebAPI server
 		defer func() {
 			log.Println("WebAPI server has been stopped")
 			cancel()
 		}()
-		wa.Run(ctx, skt)
+		wa.Run(ctx)
 	})
 
 	wg.Wait()

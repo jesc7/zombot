@@ -9,8 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/client/webskt"
-	"github.com/jesc7/zombot/server/types"
+	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
 
 type WebServer struct {
@@ -31,13 +32,23 @@ func NewWebServer(skt *webskt.WebSocketClient) *WebServer {
 
 	//сообщения от ZSrv
 	mux.HandleFunc("/zsrv", func(w http.ResponseWriter, r *http.Request) {
-		var msg types.ZSrvMessage
+		var msg shared.MessageZSRV
 		if e := json.NewDecoder(r.Body).Decode(&msg); e != nil {
 			http.Error(w, e.Error(), http.StatusBadRequest)
 			return
 		}
-		skt.WriteText(v[0])
-		//bot.SendZSrv(msg)
+		if strings.Count(msg.Text, "\n") != 0 {
+			msg.Text = "\n" + msg.Text
+		}
+		switch msg.Status {
+		case shared.ZMSG_WARN:
+			msg.Text = fmt.Sprintf("⚠️ <i>zsrv %s беспокоится</i>\n%s", msg.Caption, msg.Text)
+		case shared.ZMSG_PANIC:
+			msg.Text = fmt.Sprintf("🆘 <i>zsrv %s паникует</i>\n%s", msg.Caption, msg.Text)
+		default:
+			msg.Text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", msg.Caption, msg.Text)
+		}
+		skt.WriteText(msg.Text)
 		w.WriteHeader(http.StatusOK)
 	})
 
