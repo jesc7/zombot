@@ -16,8 +16,12 @@ import (
 )
 
 type Config struct {
-	Addr  string
-	Token string
+	Addr  string `json:"addr"`
+	Token string `json:"token"`
+	DB    struct {
+		Driver  string `json:"driver"`
+		ConnStr string `json:"connstr"`
+	} `json:"db"`
 }
 
 func Rnd(min, max int) int {

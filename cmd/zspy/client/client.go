@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"log"
 	"os"
@@ -28,6 +29,12 @@ func Start(ctx context.Context, service bool) error {
 		return e
 	}
 
+	db, e := sql.Open(cfg.DB.Driver, cfg.DB.ConnStr)
+	if e != nil {
+		return e
+	}
+	defer db.Close()
+
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -38,7 +45,7 @@ func Start(ctx context.Context, service bool) error {
 			log.Println("WebSocket server has been stopped")
 			cancel()
 		}()
-		skt.Run(ctx)
+		skt.Run(ctx, db)
 	})
 
 	wa := webapi.NewWebServer(skt)

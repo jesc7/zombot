@@ -2,6 +2,7 @@ package webskt
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"net/url"
@@ -33,7 +34,7 @@ func (ws *WebSocketClient) Write(env shared.Envelope) {
 	ws.ch <- env
 }
 
-func (ws *WebSocketClient) Run(ctx context.Context) {
+func (ws *WebSocketClient) Run(ctx context.Context, db *sql.DB) {
 	defer close(ws.ch)
 
 	for {
