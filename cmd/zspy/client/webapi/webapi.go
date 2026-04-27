@@ -14,7 +14,7 @@ type WebServer struct {
 	srv *http.Server
 }
 
-func NewServer(ctx context.Context, cfg types.Config, bot *maxbot.Bot) *WebServer {
+func NewServer() *WebServer {
 	mux := &http.ServeMux{}
 	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
 	mux.HandleFunc("/call", func(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +22,8 @@ func NewServer(ctx context.Context, cfg types.Config, bot *maxbot.Bot) *WebServe
 		if !ok {
 			return
 		}
-		bot.SendCall(v[0])
+		_ = v
+		//bot.SendCall(v[0])
 	})
 
 	//сообщения от ZSrv
@@ -32,7 +33,7 @@ func NewServer(ctx context.Context, cfg types.Config, bot *maxbot.Bot) *WebServe
 			http.Error(w, e.Error(), http.StatusBadRequest)
 			return
 		}
-		bot.SendZSrv(msg)
+		//bot.SendZSrv(msg)
 		w.WriteHeader(http.StatusOK)
 	})
 
@@ -52,10 +53,10 @@ func (s *WebServer) Run(ctx context.Context) {
 	}()
 	<-ctx.Done()
 
-	ctx_, cancel_ := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel_()
+	ctxClose, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	if e := s.srv.Shutdown(ctx_); e != nil {
+	if e := s.srv.Shutdown(ctxClose); e != nil {
 		log.Println("Http server shutdown error:", e)
 	}
 }

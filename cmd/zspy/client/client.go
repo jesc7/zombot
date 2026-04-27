@@ -14,6 +14,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/jesc7/zombot/cmd/zspy/client/jp/duties"
+	"github.com/jesc7/zombot/cmd/zspy/client/webapi"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
 
@@ -62,8 +63,17 @@ func Start(ctx context.Context, service bool) error {
 			}
 		}
 	})
+
+	wa := webapi.NewServer()
+	wg.Go(func() { //run Max bot
+		defer func() {
+			log.Println("Max bot has been stopped")
+		}()
+		wa.Run(ctx)
+	})
+
 	wg.Wait()
-	log.Println(".")
+	return nil
 }
 
 func write(conn *websocket.Conn, v any) error {
