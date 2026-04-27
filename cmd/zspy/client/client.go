@@ -106,6 +106,8 @@ func handle(ctx context.Context, conn *websocket.Conn) {
 				if e = json.Unmarshal(raw, &duties); e != nil {
 					continue
 				}
+				d := duties.
+					write(conn)
 
 			default:
 				_ = raw
