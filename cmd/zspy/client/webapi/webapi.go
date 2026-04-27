@@ -14,7 +14,7 @@ type WebServer struct {
 	srv *http.Server
 }
 
-func NewServer() *WebServer {
+func NewWebServer() *WebServer {
 	mux := http.NewServeMux()
 	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
 	mux.HandleFunc("/call", func(w http.ResponseWriter, r *http.Request) {

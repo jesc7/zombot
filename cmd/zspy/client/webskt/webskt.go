@@ -1,8 +1,9 @@
-package websocket
+package webskt
 
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/url"
 	"time"
@@ -60,8 +61,6 @@ func handle(ctx context.Context, conn *websocket.Conn) {
 			}
 
 			switch msg.Type {
-			case shared.MT_UNDEFINED:
-
 			case shared.MT_DUTY:
 				var d shared.MessageDuties
 				if e = json.Unmarshal(raw, &d); e != nil {
@@ -70,8 +69,6 @@ func handle(ctx context.Context, conn *websocket.Conn) {
 				//d.A = duties.Duty(db, nil, d.Q)
 				write(conn, d)
 
-			default:
-				_ = raw
 			}
 		}
 	}()
@@ -93,5 +90,32 @@ func handle(ctx context.Context, conn *websocket.Conn) {
 				return
 			}
 		}
+	}
+}
+
+func write(conn *websocket.Conn, v any) error {
+	raw, e := json.Marshal(v)
+	if e != nil {
+		return e
+	}
+	return conn.WriteMessage(websocket.TextMessage, raw)
+}
+
+func read(conn *websocket.Conn) (m shared.Message, raw []byte, e error) {
+	mt, raw, e := conn.ReadMessage()
+	if e != nil {
+		return
+	}
+	switch mt {
+	case websocket.TextMessage:
+		e = json.Unmarshal(raw, &m)
+		return m, raw, e
+
+	case websocket.PingMessage, websocket.PongMessage:
+		m.Type = shared.MT_UNDEFINED
+		return
+
+	default:
+		return m, raw, errors.New("Undefined message")
 	}
 }
