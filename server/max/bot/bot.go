@@ -134,12 +134,13 @@ out:
 					break
 				}
 
-				if b, name, days := isDuty(upd.Message.Body.Text); b {
+				if duty, name, days := isDuty(upd.Message.Body.Text); duty {
 					upd.Message.Body.Text = fmt.Sprintf("/duty:%s#%d", name, days)
 				}
 
 				switch upd.GetCommand() {
 				case "/duty": //дежурства
+					//шлем запрос zspy
 					text := upd.GetParam()
 					dut, _ := duties.DutiesList(b.db)
 					if i, e := strconv.Atoi(text); e == nil && i > 0 && i < 365 {
