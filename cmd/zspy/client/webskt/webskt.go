@@ -43,7 +43,7 @@ func (ws *WebSocketClient) Run(ctx context.Context, db *sql.DB) {
 
 		case env := <-ws.ch:
 			if ws.conn != nil {
-				write(ws.conn, env)
+				shared.Write(ws.conn, env)
 			}
 
 		default:
@@ -71,26 +71,26 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 		defer close(done)
 
 		for {
-			env, e := read(ws.conn)
+			env, e := shared.Read(ws.conn)
 			if e != nil {
 				return
 			}
 
 			switch env.Type {
-			case "MessageDuties":
-				d, e := shared.Unpack[shared.MessageDuties](env)
+			case shared.MT_MessageDuties:
+				dut, e := shared.Unpack[shared.MessageDuties](env)
 				if e != nil {
 					continue
 				}
-				d.A, e = duties.Duty(ctx, db, d.Q)
+				dut.A, e = duties.Duty(ctx, db, dut.Q)
 				if e != nil {
 					continue
 				}
-				env, e = shared.Pack(env.Type, d)
+				env, e = shared.Pack(env.Type, dut)
 				if e != nil {
 					continue
 				}
-				write(ws.conn, env)
+				shared.Write(ws.conn, env)
 			}
 		}
 	}()
@@ -100,14 +100,14 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 
 	for {
 		select {
-		case <-ctx.Done(): //выход по контексту
+		case <-ctx.Done():
 			ws.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			return
 
-		case <-done: //сервер закрыл соединение
+		case <-done:
 			return
 
-		case <-tPing.C: //пингуем соединение
+		case <-tPing.C:
 			if e := ws.conn.WriteMessage(websocket.PingMessage, nil); e != nil {
 				return
 			}

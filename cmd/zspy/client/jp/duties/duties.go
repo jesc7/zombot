@@ -40,7 +40,7 @@ func DutiesList(ctx context.Context, db *sql.DB) (*Planner, error) {
 	return &pl, nil
 }
 
-func Duty(ctx context.Context, db *sql.DB, q shared.MessageDutyQuery) ([]shared.Duty, error) {
+func Duty(ctx context.Context, db *sql.DB, q shared.DutyQuery) ([]shared.Duty, error) {
 	pl, e := DutiesList(ctx, db)
 	if e != nil {
 		return nil, e

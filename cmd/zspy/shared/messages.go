@@ -54,11 +54,19 @@ func Write(conn *websocket.Conn, env Envelope) error {
 	return conn.WriteMessage(websocket.TextMessage, data)
 }
 
+const (
+	MT_MessageText        = "message_text"
+	MT_MessageDuties      = "message_duties"
+	MT_MessageDutyChanges = "message_duty_changes"
+	MT_MessageZSRV        = "message_zsrv"
+	MT_MessageCall        = "message_call"
+)
+
 type MessageText struct {
 	Text string `json:"text"`
 }
 
-type MessageDutyQuery struct {
+type DutyQuery struct {
 	Name string `json:"name"`
 	Days int    `json:"days"`
 }
@@ -69,8 +77,8 @@ type Duty struct {
 }
 
 type MessageDuties struct {
-	Q MessageDutyQuery `json:"q"`
-	A []Duty           `json:"a,omitempty"`
+	Q DutyQuery `json:"q"`
+	A []Duty    `json:"a,omitempty"`
 }
 
 type MessageDutyChanges struct {
