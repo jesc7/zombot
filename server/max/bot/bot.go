@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 
 	max "github.com/max-messenger/max-bot-api-client-go"
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
@@ -15,7 +14,7 @@ import (
 	"golang.org/x/time/rate"
 
 	//"github.com/jesc7/zombot/server/jp/duties"
-	"github.com/jesc7/zombot/jp/duties"
+
 	"github.com/jesc7/zombot/server/queue"
 	"github.com/jesc7/zombot/server/types"
 	"github.com/jesc7/zombot/server/ws"
@@ -78,32 +77,34 @@ func (b *Bot) SendText(text string) {
 	}, queue.PRIORITY_NORMAL)
 }
 
-func (b *Bot) SendCall(phone string) {
-	b.QWait.Add(&queue.WaitObj{
-		O: max.NewMessage().
-			SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone)).
-			SetFormat(schemes.HTML),
-	}, queue.PRIORITY_NORMAL)
-}
+/*
+	func (b *Bot) SendCall(phone string) {
+		b.QWait.Add(&queue.WaitObj{
+			O: max.NewMessage().
+				SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone)).
+				SetFormat(schemes.HTML),
+		}, queue.PRIORITY_NORMAL)
+	}
 
-func (b *Bot) SendZSrv(msg types.ZSrvMessage) {
-	if strings.Count(msg.Text, "\n") != 0 {
-		msg.Text = "\n" + msg.Text
+	func (b *Bot) SendZSrv(msg types.ZSrvMessage) {
+		if strings.Count(msg.Text, "\n") != 0 {
+			msg.Text = "\n" + msg.Text
+		}
+		switch msg.Status {
+		case types.ZMSG_WARN:
+			msg.Text = fmt.Sprintf("⚠️ <i>zsrv %s беспокоится</i>\n%s", msg.Caption, msg.Text)
+		case types.ZMSG_PANIC:
+			msg.Text = fmt.Sprintf("🆘 <i>zsrv %s паникует</i>\n%s", msg.Caption, msg.Text)
+		default:
+			msg.Text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", msg.Caption, msg.Text)
+		}
+		b.QWait.Add(&queue.WaitObj{
+			O: max.NewMessage().
+				SetText(msg.Text).
+				SetFormat(schemes.HTML),
+		}, queue.PRIORITY_NORMAL)
 	}
-	switch msg.Status {
-	case types.ZMSG_WARN:
-		msg.Text = fmt.Sprintf("⚠️ <i>zsrv %s беспокоится</i>\n%s", msg.Caption, msg.Text)
-	case types.ZMSG_PANIC:
-		msg.Text = fmt.Sprintf("🆘 <i>zsrv %s паникует</i>\n%s", msg.Caption, msg.Text)
-	default:
-		msg.Text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", msg.Caption, msg.Text)
-	}
-	b.QWait.Add(&queue.WaitObj{
-		O: max.NewMessage().
-			SetText(msg.Text).
-			SetFormat(schemes.HTML),
-	}, queue.PRIORITY_NORMAL)
-}
+*/
 
 func (b *Bot) Run() {
 out:
@@ -141,13 +142,9 @@ out:
 				switch upd.GetCommand() {
 				case "/duty": //дежурства
 					//шлем запрос zspy
-					text := upd.GetParam()
-					dut, _ := duties.DutiesList(b.db)
-					if i, e := strconv.Atoi(text); e == nil && i > 0 && i < 365 {
-						text = duties.Duties(b.db, i, dut, "")
-					} else {
-						text = duties.Duties(b.db, 7, dut, text)
-					}
+
+					//и только когда придет ответ, шлем его боту
+					text := "Тут текст про дежурства"
 					b.QWait.Add(&queue.WaitObj{
 						O: max.NewMessage().
 							SetFormat(schemes.HTML).
