@@ -16,16 +16,23 @@ import (
 type WebSocketClient struct {
 	host   url.URL
 	header http.Header
+	ch     chan shared.MessageText
 }
 
 func NewWebSocketClient(cfg types.Config) *WebSocketClient {
 	return &WebSocketClient{
 		host:   url.URL{Scheme: "ws", Host: cfg.Addr, Path: "/ws"},
 		header: http.Header{"Authorization": []string{"Bearer " + cfg.Token}},
+		ch:     make(chan shared.MessageText),
 	}
 }
 
+func (ws *WebSocketClient) WriteText(ctx context.Context, text string) {
+}
+
 func (ws *WebSocketClient) Run(ctx context.Context) {
+	defer close(ws.ch)
+
 	for {
 		select {
 		case <-ctx.Done():
