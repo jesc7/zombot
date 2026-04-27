@@ -13,6 +13,10 @@ type Message struct {
 	Type MessageType
 }
 
+type MessageText struct {
+	Text string `json:"text"`
+}
+
 type DutyQuery struct {
 	Name string `json:"name"`
 	Days int    `json:"days"`
