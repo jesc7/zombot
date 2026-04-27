@@ -15,6 +15,7 @@ import (
 	"golang.org/x/time/rate"
 
 	//"github.com/jesc7/zombot/server/jp/duties"
+	"github.com/jesc7/zombot/jp/duties"
 	"github.com/jesc7/zombot/server/queue"
 	"github.com/jesc7/zombot/server/types"
 	"github.com/jesc7/zombot/server/ws"
@@ -131,6 +132,10 @@ out:
 				//только групповой чат из настроек
 				if upd.Message.Recipient.ChatType != schemes.CHAT || upd.GetChatID() != b.chatID {
 					break
+				}
+
+				if b, name, days := isDuty(upd.Message.Body.Text); b {
+					upd.Message.Body.Text = fmt.Sprintf("/duty:%s#%d", name, days)
 				}
 
 				switch upd.GetCommand() {
