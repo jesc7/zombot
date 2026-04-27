@@ -83,22 +83,21 @@ func Duty(db *sql.DB, pl Planner, q shared.DutyQuery) []shared.DutyAnswer {
 	if time.Now().Hour() < 17 {
 		start = 0
 	}
+	if q.Days <= 0 {
+		q.Days = 7
+	}
+
+	var res []shared.DutyAnswer
 	for i := start; i <= q.Days; i++ {
 		t := time.Now().Truncate(24 * time.Hour)
-		if empl, ok := pl[t]; ok {
-			daytip := ""
-			if i <= 3 {
-				daytip = []string{" (сегодня)", " (завтра)", " (послезавтра)", " (через 2 дня)"}[i]
-			}
-			s := fmt.Sprintf("%s%s: %s\n", t.Format("02.01"), daytip, empl)
-			if i <= d {
-				res += s
-			}
-			if types.ContainsWord(empl, who) {
-				resWho += s
-			}
+		if d, ok := pl[t]; ok && (q.Name == "" || types.ContainsWord(d, q.Name)) {
+			res = append(res, shared.DutyAnswer{
+				Date: t,
+				Name: d,
+			})
 		}
 	}
+	return res
 }
 
 func Duties(db *sql.DB, daysCount int, dut Planner, who string) string {
