@@ -174,6 +174,9 @@ func (s *WS) Run(ctx context.Context) {
 		}
 	}()
 	log.Println("WebSocket server started, here tokens:")
+
+	tokens := map[ClientType]string{CT_ZSPY: "zspy"}
+
 	jwtZSpy, e := jwtGenerate(CT_ZSPY)
 	log.Printf("zspy=%s (%v)\n", jwtZSpy, e)
 
