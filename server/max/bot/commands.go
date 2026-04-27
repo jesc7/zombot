@@ -1,12 +1,15 @@
 package bot
 
-import "regexp"
+import (
+	"regexp"
+	"strconv"
+)
 
 var (
 	reDuty = regexp.MustCompile(`(?i)^дежур[а-я]*(?:(?:\s+(?P<name>[а-я]+))?(?:\s+(?P<days>\d+))?)?$`)
 )
 
-func isCommand(re *regexp.Regexp, value string) (bool, *map[string]string) {
+func findCommand(re *regexp.Regexp, value string) (bool, *map[string]string) {
 	res := re.FindStringSubmatch(value)
 	if res == nil {
 		return false, nil
@@ -19,4 +22,13 @@ func isCommand(re *regexp.Regexp, value string) (bool, *map[string]string) {
 		}
 	}
 	return true, &groups
+}
+
+func isDuty(value string) (bool, string, int) {
+	b, m := findCommand(reDuty, value)
+	if !b {
+		return b, "", 0
+	}
+	name := (*m)["name"]
+	days, _ := strconv.Atoi((*m)["name"])
 }
