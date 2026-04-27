@@ -17,8 +17,8 @@ var (
 	lastDuties, CurDuties Planner
 )
 
-func DutiesList(db *sql.DB) (res Planner, delta string) {
-	res = make(Planner)
+func DutiesList(db *sql.DB) (pl Planner, delta string) {
+	pl = make(Planner)
 	rows, e := db.Query(`
 		select t.dt, list(u.username, ', ')
 		from tabel t
@@ -41,15 +41,15 @@ func DutiesList(db *sql.DB) (res Planner, delta string) {
 		if e = rows.Scan(&t, &s); e != nil {
 			return
 		}
-		res[t] = s
+		pl[t] = s
 	}
 
-	if len(res) == 0 {
+	if len(pl) == 0 {
 		return
 	}
 
 	lastDuties = CurDuties
-	CurDuties = res
+	CurDuties = pl
 	if lastDuties != nil {
 		for i := 1; i <= 100; i++ {
 			daytip := ""
@@ -95,58 +95,6 @@ func Duty(db *sql.DB, pl Planner, q shared.DutyQuery) []shared.DutyAnswer {
 				Date: t,
 				Name: d,
 			})
-		}
-	}
-	return res
-}
-
-func Duties(db *sql.DB, daysCount int, dut Planner, who string) string {
-	d := daysCount
-	switch i := len(who); i {
-	case 0:
-	case 1, 2:
-		who = ""
-	default:
-		who = types.Words(who, "")[0]
-		daysCount = 365
-	}
-	if dut == nil {
-		dut, _ = DutiesList(db)
-	}
-	start := 1
-	if time.Now().Hour() < 17 {
-		start = 0
-	}
-	var res, resWho string
-	for i := start; i <= daysCount; i++ {
-
-		time.Now().Truncate(24 * time.Hour)
-
-		t := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day()+i, 0, 0, 0, 0, time.Local)
-		if empl, ok := dut[t]; ok {
-			daytip := ""
-			if i <= 3 {
-				daytip = []string{" (сегодня)", " (завтра)", " (послезавтра)", " (через 2 дня)"}[i]
-			}
-			s := fmt.Sprintf("%s%s: %s\n", t.Format("02.01"), daytip, empl)
-			if i <= d {
-				res += s
-			}
-			if types.ContainsWord(empl, who) {
-				resWho += s
-			}
-		}
-	}
-	if len(res+resWho) != 0 {
-		switch who {
-		case "":
-			res = fmt.Sprintf("👷 <b>Дежурные</b>\n%s", types.Iif(strings.Count(res, "\n") > 1, "\n", "")+res)
-		default:
-			if resWho != "" {
-				res = fmt.Sprintf("👷 <b>%s дежурит:</b>\n%s", who, types.Iif(strings.Count(resWho, "\n") > 1, "\n", "")+resWho)
-			} else {
-				res = fmt.Sprintf("👷 <b>%s хз когда дежурит, а вообще вот:</b>\n%s", who, types.Iif(strings.Count(res, "\n") > 1, "\n", "")+res)
-			}
 		}
 	}
 	return res
