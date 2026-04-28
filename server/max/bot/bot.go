@@ -3,6 +3,7 @@ package bot
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -84,6 +85,19 @@ out:
 						SetFormat(schemes.HTML),
 				}, queue.PRIORITY_NORMAL)
 
+			case shared.TypeMessageDuties:
+				m, e := shared.Unpack[shared.MessageDuties](env)
+				if e != nil {
+					continue
+				}
+				if len(m.A) == 0 {
+					b.QWait.Add(&queue.WaitObj{
+						O: max.NewMessage().
+							SetText(m.Text).
+							SetFormat(schemes.HTML),
+					}, queue.PRIORITY_NORMAL)
+				}
+
 			case shared.TypeMessageZSRV:
 				m, e := shared.Unpack[shared.MessageZSRV](env)
 				if e != nil {
@@ -151,6 +165,9 @@ out:
 					if len(params) > 1 {
 						days, _ = strconv.Atoi(params[1])
 					}
+
+					log.Printf("Duty query: name=%s, days=%d", name, days)
+
 					env, e := shared.Pack(shared.TypeMessageDuties, shared.MessageDuties{
 						Q: shared.DutyQuery{
 							Name: name,
