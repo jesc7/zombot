@@ -82,11 +82,7 @@ out:
 				if e != nil {
 					continue
 				}
-				b.QWait.Add(&queue.WaitObj{
-					O: max.NewMessage().
-						SetText(m.Text).
-						SetFormat(schemes.HTML),
-				}, queue.PRIORITY_NORMAL)
+				b.SendText(m.Text)
 
 			//дежурства
 			case shared.TypeMessageDuties:
@@ -95,11 +91,7 @@ out:
 					continue
 				}
 				if len(m.A) == 0 {
-					b.QWait.Add(&queue.WaitObj{
-						O: max.NewMessage().
-							SetText("😟 Дежурства не найдены").
-							SetFormat(schemes.HTML),
-					}, queue.PRIORITY_NORMAL)
+					b.SendText("😟 Дежурства не найдены")
 					break
 				}
 
@@ -118,11 +110,7 @@ out:
 					}
 					fmt.Fprintf(&sb, "%s%s: %s\n", v.Date.Format("02.01"), tip, v.Name)
 				}
-				b.QWait.Add(&queue.WaitObj{
-					O: max.NewMessage().
-						SetText(sb.String()).
-						SetFormat(schemes.HTML),
-				}, queue.PRIORITY_NORMAL)
+				b.SendText(sb.String())
 
 			//сообщения от площадок
 			case shared.TypeMessageZSRV:
@@ -141,11 +129,7 @@ out:
 				default:
 					m.Text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", m.Caption, m.Text)
 				}
-				b.QWait.Add(&queue.WaitObj{
-					O: max.NewMessage().
-						SetText(m.Text).
-						SetFormat(schemes.HTML),
-				}, queue.PRIORITY_NORMAL)
+				b.SendText(m.Text)
 
 			//звонки
 			case shared.TypeMessageCall:
@@ -153,11 +137,7 @@ out:
 				if e != nil {
 					continue
 				}
-				b.QWait.Add(&queue.WaitObj{
-					O: max.NewMessage().
-						SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(m.Phone, "8800 "), " на 8800", ""), m.Phone)).
-						SetFormat(schemes.HTML),
-				}, queue.PRIORITY_NORMAL)
+				b.SendText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(m.Phone, "8800 "), " на 8800", ""), m.Phone))
 			}
 
 		case msg := <-b.QWait.Q: //разгребаем локальную очередь сообщений
