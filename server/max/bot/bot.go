@@ -78,7 +78,7 @@ out:
 
 			//просто текст
 			case shared.TypeMessageText:
-				log.Println("Bot <-chIn TypeMessageText")
+				log.Println("Bot TypeMessageText")
 
 				m, e := shared.Unpack[shared.MessageText](env)
 				if e != nil {
@@ -88,7 +88,7 @@ out:
 
 			//дежурства
 			case shared.TypeMessageDuties:
-				log.Println("Bot <-chIn TypeMessageDuties")
+				log.Println("Bot TypeMessageDuties")
 
 				m, e := shared.Unpack[shared.MessageDuties](env)
 				if e != nil {
@@ -118,7 +118,7 @@ out:
 
 			//сообщения от площадок
 			case shared.TypeMessageZSRV:
-				log.Println("Bot <-chIn TypeMessageZSRV")
+				log.Println("Bot TypeMessageZSRV")
 
 				m, e := shared.Unpack[shared.MessageZSRV](env)
 				if e != nil {
@@ -139,7 +139,7 @@ out:
 
 			//звонки
 			case shared.TypeMessageCall:
-				log.Println("Bot <-chIn TypeMessageCall")
+				log.Println("Bot TypeMessageCall")
 
 				m, e := shared.Unpack[shared.MessageCall](env)
 				if e != nil {
