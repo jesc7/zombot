@@ -24,7 +24,7 @@ func NewWebServer(skt *webskt.WebSocketClient) *WebServer {
 		if !ok {
 			return
 		}
-		env, _ := shared.Pack("MessageCall", shared.MessageCall{Phone: v[0]})
+		env, _ := shared.Pack(shared.MT_MessageCall, shared.MessageCall{Phone: v[0]})
 		skt.Write(env)
 	})
 
@@ -35,7 +35,7 @@ func NewWebServer(skt *webskt.WebSocketClient) *WebServer {
 			http.Error(w, e.Error(), http.StatusBadRequest)
 			return
 		}
-		env, _ := shared.Pack("MessageZSRV", msg)
+		env, _ := shared.Pack(shared.MT_MessageZSRV, msg)
 		skt.Write(env)
 		w.WriteHeader(http.StatusOK)
 	})
