@@ -35,7 +35,7 @@ func Start(ctx context.Context, service bool) error {
 	skt := webskt.NewWebSocketClient(cfg)
 	wg.Go(func() { //run WebSocket client
 		defer cancel()
-		if e := skt.Run(ctx, cfg); e != nil {
+		if e = skt.Run(ctx, cfg); e != nil {
 			log.Println(e)
 		}
 	})

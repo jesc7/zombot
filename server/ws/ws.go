@@ -10,6 +10,7 @@ import (
 
 	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/websocket"
+	"github.com/jesc7/zombot/cmd/zspy/shared"
 	"github.com/jesc7/zombot/server/types"
 )
 
@@ -21,6 +22,7 @@ type WebSocketServer struct {
 	srv    *http.Server
 	jwtKey []byte
 	spy    *websocket.Conn
+	ch     chan shared.Envelope
 }
 
 var (
@@ -42,7 +44,7 @@ func NewWebSocketServer(cfg types.Config) *WebSocketServer {
 	return ws
 }
 
-func (ws *WebSocketServer) Run(ctx context.Context) {
+func (ws *WebSocketServer) Run(ctx context.Context) error {
 	go func() {
 		if e := ws.srv.ListenAndServe(); e != nil && e != http.ErrServerClosed {
 			log.Fatalf("WebSocket server error: %v", e)
@@ -61,8 +63,9 @@ func (ws *WebSocketServer) Run(ctx context.Context) {
 	defer cancel()
 
 	if e := ws.srv.Shutdown(ctxClose); e != nil {
-		log.Fatalf("WebSocket server shutdown error: %v", e)
+		return e
 	}
+	return ctx.Err()
 }
 
 func handle(ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
