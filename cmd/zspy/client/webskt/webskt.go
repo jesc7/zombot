@@ -61,6 +61,9 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) error {
 }
 
 func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
+
+	log.Printf("Connected: %s / %s", ws.conn.LocalAddr(), ws.conn.RemoteAddr())
+
 	defer ws.conn.Close()
 	readError := make(chan struct{})
 

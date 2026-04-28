@@ -56,7 +56,7 @@ func Write(conn *websocket.Conn, env Envelope) error {
 		return e
 	}
 
-	log.Printf("Read: %#v (%v)", env, e)
+	log.Printf("Write: %#v (%v)", env, e)
 
 	return conn.WriteMessage(websocket.TextMessage, data)
 }

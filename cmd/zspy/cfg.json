@@ -1,7 +1,9 @@
 {
-	"host":"",
-	"token":"",
-	"wa_port":8089,
+	"host":":1234",
+	"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoienNweSIsImV4cCI6MjA5MjY5NDQwMH0.qK4gTH0_97D4N1Q3xFxVZHZlnoLi--2R5wRvHGAk9LY",
+	"wa":{
+		"port":8089
+	},
 	"db":{
 		"driver": "firebirdsql",
 		"connstr": "SYSDBA:masterkey@192.168.67.111/C:/Standart-N/base/ZSNSPACEBASE.FDB"
