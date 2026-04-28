@@ -26,7 +26,7 @@ type Bot struct {
 	QWait  *queue.Queue
 	chatID int64
 	b      *bus.Bus
-	chIn   chan shared.Envelope
+	ch     chan shared.Envelope
 }
 
 func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
@@ -55,7 +55,7 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 		QWait:  queue.NewQ(ctx, rate.Limit(5)),
 		chatID: cfg.Max.ChatID,
 		b:      b,
-		chIn:   ch,
+		ch:     ch,
 	}, e
 }
 
@@ -73,7 +73,7 @@ out:
 		case <-ctx.Done():
 			break out
 
-		case env := <-b.chIn: //разгребаем пакеты, пришедшие боту
+		case env := <-b.ch: //разгребаем пакеты, пришедшие боту
 			switch env.Type {
 
 			//просто текст
