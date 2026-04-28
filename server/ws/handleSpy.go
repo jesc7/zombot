@@ -3,7 +3,6 @@ package ws
 import (
 	"context"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -12,18 +11,8 @@ import (
 
 const ct_ZSPY clientType = "zspy"
 
-func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn) {
-	if ws.zspy != nil {
-		http.Error(w, "ZSpy already connected", http.StatusNotAcceptable)
-		return
-	}
-
-	var e error
-	if ws.zspy, e = upgrader.Upgrade(w, r, nil); e != nil {
-		http.Error(w, "Upgrade: WebSocket", http.StatusUpgradeRequired)
-		return
-	}
-
+func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, ch chan shared.Envelope) {
+	ws.zspy = conn
 	defer func() {
 		ws.zspy.Close()
 		ws.zspy = nil
@@ -35,7 +24,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn) 
 
 		for {
 			env, e := shared.Read(ws.zspy)
-			if e != nil {
+			if e != nil { //ошибка чтения сокета - выходим
 				return
 			}
 			ws.b.Write("bot", env)
@@ -55,7 +44,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn) 
 		case <-readError: //ошибка чтения сокета - выходим
 			return
 
-		case env := <-ws.chIn: //наконец-то делаем что-то полезное
+		case env := <-ch: //наконец-то делаем что-то полезное
 			if e := shared.Write(ws.zspy, env); e != nil {
 				log.Println(e)
 			}

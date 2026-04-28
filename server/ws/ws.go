@@ -18,9 +18,8 @@ import (
 type WebSocketServer struct {
 	srv    *http.Server
 	jwtKey []byte
-	zspy    *websocket.Conn
+	zspy   *websocket.Conn
 	b      *bus.Bus
-	chIn   <-chan shared.Envelope
 }
 
 var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
@@ -33,11 +32,10 @@ func NewWebSocketServer(ctx context.Context, cfg types.Config, b *bus.Bus) (*Web
 
 	ws := &WebSocketServer{
 		jwtKey: []byte(cfg.WS.JwtKey),
-		chIn:   ch,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		ws.handle(ctx, w, r)
+		ws.handle(ctx, w, r, ch)
 	})
 	ws.srv = &http.Server{
 		Handler: mux,
@@ -70,13 +68,7 @@ func (ws *WebSocketServer) Run(ctx context.Context) error {
 	return ctx.Err()
 }
 
-/*func (ws *WebSocketServer) Write(env shared.Envelope) {
-	defer recover()
-	ws.b.Write("")
-	ws.ChOut <- env
-}*/
-
-func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request, ch chan shared.Envelope) {
 	auth := r.Header.Get("Authorization")
 	tokenStr := strings.TrimPrefix(auth, "Bearer ")
 	if auth == "" || tokenStr == auth {
@@ -99,8 +91,11 @@ func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r 
 
 	switch claims.Type {
 	case ct_ZSPY:
-		if ws.zspy
-		ws.handleSpy(ctx, conn)
+		if ws.zspy != nil {
+			http.Error(w, "ZSpy already connected", http.StatusNotAcceptable)
+			return
+		}
+		ws.handleSpy(ctx, conn, ch)
 
 	default:
 		return
