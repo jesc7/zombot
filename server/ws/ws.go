@@ -18,9 +18,9 @@ import (
 }*/
 
 type WebSocketServer struct {
-	srv     *http.Server
-	jwtKey  []byte
-	connSpy *websocket.Conn
+	srv    *http.Server
+	jwtKey []byte
+	spy    *websocket.Conn
 }
 
 var (
@@ -89,7 +89,7 @@ func handle(ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
 
 	switch claims.Type {
 	case CT_ZSPY:
-		if ws.connSpy != nil {
+		if ws.spy != nil {
 			http.Error(w, "ZSpy already connected", http.StatusNotAcceptable)
 			return
 		}
@@ -105,9 +105,9 @@ func handle(ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	ws.connSpy = conn
+	ws.spy = conn
 	defer func() {
-		ws.connSpy = nil
+		ws.spy = nil
 	}()
 
 	// Канал для передачи сообщений от "бизнес-логики" к клиенту
