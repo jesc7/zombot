@@ -43,3 +43,14 @@
 2026/04/28 16:31:55 Bot <-chIn TypeMessageZSRV
 2026/04/28 16:32:07 Bot <-chIn TypeMessageZSRV
 2026/04/28 16:32:50 Bot <-chIn TypeMessageZSRV
+2026/04/28 16:46:43 WebSocket server started, here the tokens:
+2026/04/28 16:46:44 zspy=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoienNweSIsImV4cCI6MjA5MjY5NDQwMH0.qK4gTH0_97D4N1Q3xFxVZHZlnoLi--2R5wRvHGAk9LY (<nil>)
+2026/04/28 16:46:48 Connect: 127.0.0.1:1234 / 127.0.0.1:64302
+2026/04/28 16:47:30 Duty query: name=, days=20
+2026/04/28 16:47:36 Bot <-chIn TypeMessageDuties
+2026/04/28 16:49:23 Connect: 127.0.0.1:1234 / 127.0.0.1:50173
+2026/04/28 16:49:47 Duty query: name=, days=20
+2026/04/28 16:49:48 Bot <-chIn TypeMessageDuties
+2026/04/28 16:54:04 Duty query: name=вася, days=0
+2026/04/28 16:54:04 Bot <-chIn TypeMessageDuties
+2026/04/28 17:08:38 Connect: 127.0.0.1:1234 / 127.0.0.1:51525
