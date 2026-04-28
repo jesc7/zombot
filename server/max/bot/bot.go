@@ -17,7 +17,6 @@ import (
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 	"github.com/jesc7/zombot/server/queue"
 	"github.com/jesc7/zombot/server/types"
-	"github.com/jesc7/zombot/server/ws"
 )
 
 type TextMsg struct {
@@ -27,10 +26,10 @@ type Bot struct {
 	bot    *max.Api
 	QWait  *queue.Queue
 	chatID int64
-	srv    *ws.WebSocketServer
+	chSrv  chan shared.Envelope
 }
 
-func NewBot(ctx context.Context, cfg types.Config, srv *ws.WebSocketServer) (*Bot, error) {
+func NewBot(ctx context.Context, cfg types.Config, ch chan shared.Envelope) (*Bot, error) {
 	var options []max.Option
 	if cfg.Proxy.Addr != "" {
 		proxy, e := url.Parse(fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port))
@@ -50,11 +49,8 @@ func NewBot(ctx context.Context, cfg types.Config, srv *ws.WebSocketServer) (*Bo
 		bot:    bot,
 		QWait:  queue.NewQ(ctx, rate.Limit(5)),
 		chatID: cfg.Max.ChatID,
-		srv:    srv,
+		chSrv:  ch,
 	}, e
-}
-
-func (b *Bot) Free() {
 }
 
 func (b *Bot) SendText(text string) {
@@ -140,17 +136,16 @@ out:
 							Days: days,
 						},
 					})
-					b.srv.Write(env)
-					//шлем запрос zspy
+					b.chSrv <- env
 
 					//и только когда придет ответ, шлем его боту
-					text := "Тут текст про дежурства"
+					/*text := "Тут текст про дежурства"
 					b.QWait.Add(&queue.WaitObj{
 						O: max.NewMessage().
 							SetFormat(schemes.HTML).
 							SetChat(upd.GetChatID()).
 							SetText(text),
-					}, queue.PRIORITY_NORMAL)
+					}, queue.PRIORITY_NORMAL)*/
 
 				case "/absent":
 				case "/birthday":
