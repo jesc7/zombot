@@ -26,3 +26,9 @@
 2026/04/28 15:54:06 Duty query: name=, days=0
 2026/04/28 15:54:06 Write: shared.Envelope{Type:"message_duties", Payload:json.RawMessage{0x7b, 0x22, 0x71, 0x22, 0x3a, 0x7b, 0x7d, 0x7d}} (<nil>)
 2026/04/28 15:54:06 Read: shared.Envelope{Type:"message_duties", Payload:json.RawMessage{0x7b, 0x22, 0x71, 0x22, 0x3a, 0x7b, 0x7d, 0x7d}} (<nil>)
+2026/04/28 15:57:01 Connect: 127.0.0.1:1234 / 127.0.0.1:52094
+2026/04/28 15:57:14 Duty query: name=, days=0
+2026/04/28 15:57:14 Write: shared.Envelope{Type:"message_duties", Payload:json.RawMessage{0x7b, 0x22, 0x71, 0x22, 0x3a, 0x7b, 0x7d, 0x7d}} (<nil>)
+2026/04/28 16:00:11 Read: shared.Envelope{Type:"message_duties", Payload:json.RawMessage{0x7b, 0x22, 0x71, 0x22, 0x3a, 0x7b, 0x7d, 0x7d}} (<nil>)
+2026/04/28 16:00:32 Duty query: name=, days=0
+2026/04/28 16:00:32 Write: shared.Envelope{Type:"message_duties", Payload:json.RawMessage{0x7b, 0x22, 0x71, 0x22, 0x3a, 0x7b, 0x7d, 0x7d}} (<nil>)
