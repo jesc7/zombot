@@ -54,8 +54,7 @@ func Duty(ctx context.Context, db *sql.DB, q shared.DutyQuery) ([]shared.Duty, e
 	var res []shared.Duty
 	for i := start; i <= q.Days; i++ {
 		t := time.Now().Local().Truncate(24 * time.Hour).Add(24 * time.Hour * time.Duration(i))
-		d, ok := (*pl)[t]
-		if ok && (q.Name == "" || types.ContainsWord(d, q.Name)) {
+		if d, ok := (*pl)[t]; ok && (q.Name == "" || types.ContainsWord(d, q.Name)) {
 			res = append(res, shared.Duty{
 				Date: t,
 				Name: d,
