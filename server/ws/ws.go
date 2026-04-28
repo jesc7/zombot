@@ -51,7 +51,7 @@ func (ws *WebSocketServer) Run(ctx context.Context) error {
 	}()
 
 	log.Println("WebSocket server started, here the tokens:")
-	for k, v := range map[ClientType]string{CT_ZSPY: "zspy"} {
+	for k, v := range map[clientType]string{ct_ZSPY: "zspy"} {
 		jwt, e := jwtGenerate(ws.jwtKey, k)
 		log.Printf("%s=%s (%v)\n", v, jwt, e)
 	}
@@ -83,7 +83,7 @@ func handle(ctx context.Context, ws *WebSocketServer, w http.ResponseWriter, r *
 	}
 
 	switch claims.Type {
-	case CT_ZSPY:
+	case ct_ZSPY:
 		if ws.spy != nil {
 			http.Error(w, "ZSpy already connected", http.StatusNotAcceptable)
 			return
@@ -99,14 +99,14 @@ func handle(ctx context.Context, ws *WebSocketServer, w http.ResponseWriter, r *
 		return
 	}
 	switch claims.Type {
-	case CT_ZSPY:
+	case ct_ZSPY:
 		ws.spy = conn
 	}
 
 	defer func() {
 		conn.Close()
 		switch claims.Type {
-		case CT_ZSPY:
+		case ct_ZSPY:
 			ws.spy = nil
 		}
 	}()
@@ -130,8 +130,11 @@ func handle(ctx context.Context, ws *WebSocketServer, w http.ResponseWriter, r *
 	for {
 		select {
 		case <-ctx.Done(): //контекст отменен - выходим
-			conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-			conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "Server Shutdown"), time.Now().Add(time.Second))
+			conn.WriteControl(
+				websocket.CloseMessage,
+				websocket.FormatCloseMessage(websocket.CloseNormalClosure, "Server Shutdown"),
+				time.Now().Add(time.Second),
+			)
 			return
 
 		case <-readError: //ошибка чтения сокета - выходим
@@ -141,32 +144,22 @@ func handle(ctx context.Context, ws *WebSocketServer, w http.ResponseWriter, r *
 			if e := shared.Write(conn, env); e != nil {
 				log.Println(e)
 			}
-
-			/*case <-ctx.Done():
-			log.Println("Внешний контекст отменен: закрываем соединение")
-			// Вежливо прощаемся с клиентом
-			conn.WriteControl(
-				websocket.CloseMessage,
-				websocket.FormatCloseMessage(websocket.CloseNormalClosure, "Server Shutdown"),
-				time.Now().Add(time.Second),
-			)
-			return*/
 		}
 	}
 }
 
-type ClientType string
+type clientType string
 
 const (
-	CT_ZSPY ClientType = "zspy"
+	ct_ZSPY clientType = "zspy"
 )
 
 type Claims struct {
-	Type ClientType `json:"type"`
+	Type clientType `json:"type"`
 	jwt.RegisteredClaims
 }
 
-func jwtGenerate(key []byte, ct ClientType) (string, error) {
+func jwtGenerate(key []byte, ct clientType) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256,
 		&Claims{
 			Type: ct,
