@@ -37,8 +37,8 @@ func Start(ctx context.Context, service bool) error {
 	toSrv := make(chan shared.Envelope)
 	defer close(toSrv)
 
-	srv := ws.NewWebSocketServer(ctx, cfg, toBot)
-	bot, e := maxbot.NewBot(ctx, cfg, toSrv)
+	srv := ws.NewWebSocketServer(ctx, cfg, toSrv, toBot)
+	bot, e := maxbot.NewBot(ctx, cfg, toBot, toSrv)
 	if e != nil {
 		log.Fatalln("Can't create Max bot:", e)
 	}
