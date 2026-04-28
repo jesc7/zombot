@@ -27,7 +27,6 @@ type Bot struct {
 	QWait  *queue.Queue
 	chatID int64
 	ChOut  chan shared.Envelope
-	chIn   <-chan shared.Envelope
 }
 
 func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
@@ -93,7 +92,6 @@ func (b *Bot) SendText(text string) {
 
 func (b *Bot) Run(ctx context.Context, ch <-chan shared.Envelope) {
 	defer close(b.ChOut)
-	b.chIn = ch
 
 out:
 	for {
@@ -102,7 +100,28 @@ out:
 			break out
 
 		case env := <-ch:
-			_ = env
+			switch env.Type {
+			case shared.MT_MessageCall:
+				msg, e := shared.Unpack[shared.MessageCall](env)
+				if e != nil {
+					continue
+				}
+				b.QWait.Add(&queue.WaitObj{
+					O: max.NewMessage().
+						SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone)).
+						SetFormat(schemes.HTML),
+				}, queue.PRIORITY_NORMAL)
+
+				/*
+					func (b *Bot) SendCall(phone string) {
+						b.QWait.Add(&queue.WaitObj{
+							O: max.NewMessage().
+								SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone)).
+								SetFormat(schemes.HTML),
+						}, queue.PRIORITY_NORMAL)
+					}
+				*/
+			}
 
 		case m := <-b.QWait.Q: //разгребаем локальную очередь сообщений
 			wo, ok := m.(*queue.WaitObj)
