@@ -87,7 +87,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 				if e != nil {
 					continue
 				}
-				shared.Write(ws.conn, env)
+				if e = shared.Write(ws.conn, env); e != nil {
+					log.Println(e)
+				}
 			}
 		}
 	}()
@@ -97,21 +99,21 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 
 	for {
 		select {
-		case <-ctx.Done():
+		case <-ctx.Done(): //контекст отменен - выходим
 			ws.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			return
 
-		case <-readError:
+		case <-readError: //ошибка чтения сокета - выходим
 			return
 
-		case env := <-ws.ch:
-			if ws.conn != nil {
-				shared.Write(ws.conn, env)
-			}
-
-		case <-tPing.C:
+		case <-tPing.C: //ошибка отправки ping - выходим
 			if e := ws.conn.WriteMessage(websocket.PingMessage, nil); e != nil {
 				return
+			}
+
+		case env := <-ws.ch:
+			if e := shared.Write(ws.conn, env); e != nil {
+				log.Println(e)
 			}
 		}
 	}
