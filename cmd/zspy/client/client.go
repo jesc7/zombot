@@ -12,6 +12,7 @@ import (
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/client/webapi"
 	"github.com/jesc7/zombot/cmd/zspy/client/webskt"
+	_ "github.com/nakagami/firebirdsql"
 )
 
 func Start(ctx context.Context, service bool) error {

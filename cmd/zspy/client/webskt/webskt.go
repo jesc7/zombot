@@ -3,6 +3,7 @@ package webskt
 import (
 	"context"
 	"database/sql"
+	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -50,11 +51,12 @@ func (ws *WebSocketClient) Run(ctx context.Context, db *sql.DB) {
 			var e error
 			ws.conn, _, e = websocket.DefaultDialer.DialContext(ctx, ws.host.String(), ws.header)
 			if e != nil {
+				log.Println(e)
 				select {
 				case <-ctx.Done():
 					return
 
-				case <-time.After(5 * time.Second):
+				case <-time.After(10 * time.Second):
 					continue
 				}
 			}
