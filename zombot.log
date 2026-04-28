@@ -10,3 +10,13 @@
 2026/04/28 10:09:56 WebSocket server started, here the tokens:
 2026/04/28 10:09:57 zspy=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRfdHlwZSI6InpzcHkiLCJleHAiOjIwOTI3MTY1OTd9.ZO6B1R5YAv0ZWn3H9moNMh534USEVt3qNC38JC17UqE (<nil>)
 2026/04/28 10:09:58 .
+2026/04/28 10:21:48 WebSocket server started, here the tokens:
+2026/04/28 10:21:48 zspy=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoienNweSIsImV4cCI6MjA5MjY5NDQwMH0.qK4gTH0_97D4N1Q3xFxVZHZlnoLi--2R5wRvHGAk9LY (<nil>)
+2026/04/28 10:21:51 .
+2026/04/28 10:21:52 WebSocket server started, here the tokens:
+2026/04/28 10:21:52 zspy=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoienNweSIsImV4cCI6MjA5MjY5NDQwMH0.qK4gTH0_97D4N1Q3xFxVZHZlnoLi--2R5wRvHGAk9LY (<nil>)
+2026/04/28 10:21:54 failed to get updates: context canceled
+2026/04/28 10:21:54 .
+2026/04/28 10:21:56 WebSocket server started, here the tokens:
+2026/04/28 10:21:56 zspy=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoienNweSIsImV4cCI6MjA5MjY5NDQwMH0.qK4gTH0_97D4N1Q3xFxVZHZlnoLi--2R5wRvHGAk9LY (<nil>)
+2026/04/28 10:21:58 .
