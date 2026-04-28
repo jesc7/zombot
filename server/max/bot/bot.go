@@ -65,7 +65,7 @@ out:
 		case <-ctx.Done():
 			break out
 
-		case env := <-ch:
+		case env := <-ch: //разгребаем ответы, пришедшие с клиента
 			switch env.Type {
 			case shared.MT_MessageZSRV:
 				m, e := shared.Unpack[shared.MessageZSRV](env)
@@ -134,12 +134,15 @@ out:
 					if len(params) > 1 {
 						days, _ = strconv.Atoi(params[1])
 					}
-					env, _ := shared.Pack(shared.MT_MessageDuties, shared.MessageDuties{
+					env, e := shared.Pack(shared.MT_MessageDuties, shared.MessageDuties{
 						Q: shared.DutyQuery{
 							Name: name,
 							Days: days,
 						},
 					})
+					if e != nil {
+						break
+					}
 					b.ChOut <- env
 
 				case "/absent":
@@ -154,8 +157,6 @@ out:
 							SetChat(upd.GetChatID()).
 							SetText("ChatID: " + strconv.FormatInt(upd.GetChatID(), 64)),
 					}, queue.PRIORITY_NORMAL)
-
-				default:
 				}
 			}
 		}
