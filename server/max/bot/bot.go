@@ -93,9 +93,15 @@ out:
 				if len(m.A) == 0 {
 					b.QWait.Add(&queue.WaitObj{
 						O: max.NewMessage().
-							SetText(m.Text).
+							SetText("😟 Дежурства не найдены").
 							SetFormat(schemes.HTML),
 					}, queue.PRIORITY_NORMAL)
+					break
+				}
+
+				b := strings.Builder{}
+				for _, v := range m.A {
+
 				}
 
 			case shared.TypeMessageZSRV:
