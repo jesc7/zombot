@@ -57,7 +57,7 @@ const (
 )
 
 type Claims struct {
-	Type ClientType `json:"client_type"`
+	Type ClientType `json:"type"`
 	jwt.RegisteredClaims
 }
 
@@ -66,7 +66,7 @@ func jwtGenerate(key []byte, ct ClientType) (string, error) {
 		&Claims{
 			Type: ct,
 			RegisteredClaims: jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 365 * 10)), //10 years
+				ExpiresAt: jwt.NewNumericDate(time.Now().Truncate(24 * time.Hour).Add(time.Hour * 24 * 365 * 10)), //10 years
 			},
 		},
 	).SignedString(key)
