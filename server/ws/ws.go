@@ -98,15 +98,12 @@ func handle(ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn, e := upgrader.Upgrade(w, r, nil)
-	if e != nil {
+	if ws.spy, e = upgrader.Upgrade(w, r, nil); e != nil {
 		http.Error(w, "Upgrade: WebSocket", http.StatusUpgradeRequired)
 		return
 	}
-	defer conn.Close()
-
-	ws.spy = conn
 	defer func() {
+		ws.spy.Close()
 		ws.spy = nil
 	}()
 
