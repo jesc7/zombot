@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"log"
 	"os"
@@ -12,7 +11,6 @@ import (
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/client/webapi"
 	"github.com/jesc7/zombot/cmd/zspy/client/webskt"
-	_ "github.com/nakagami/firebirdsql"
 )
 
 func Start(ctx context.Context, service bool) error {
@@ -30,12 +28,6 @@ func Start(ctx context.Context, service bool) error {
 		return e
 	}
 
-	db, e := sql.Open(cfg.DB.Driver, cfg.DB.ConnStr)
-	if e != nil {
-		return e
-	}
-	defer db.Close()
-
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -46,7 +38,9 @@ func Start(ctx context.Context, service bool) error {
 			log.Println("WebSocket server has been stopped")
 			cancel()
 		}()
-		skt.Run(ctx, db)
+		if e := skt.Run(ctx, cfg); e != nil {
+			log.Println(e)
+		}
 	})
 
 	wa := webapi.NewWebServer(cfg, skt)

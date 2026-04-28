@@ -12,6 +12,7 @@ import (
 	"github.com/jesc7/zombot/cmd/zspy/client/jp/duties"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
+	_ "github.com/nakagami/firebirdsql"
 )
 
 type WebSocketClient struct {
@@ -34,13 +35,19 @@ func (ws *WebSocketClient) Write(env shared.Envelope) {
 	ws.ch <- env
 }
 
-func (ws *WebSocketClient) Run(ctx context.Context, db *sql.DB) {
+func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) error {
 	defer close(ws.ch)
+
+	db, e := sql.Open(cfg.DB.Driver, cfg.DB.ConnStr)
+	if e != nil {
+		return e
+	}
+	defer db.Close()
 
 	for {
 		select {
 		case <-ctx.Done():
-			return
+			return ctx.Err()
 
 		case env := <-ws.ch:
 			if ws.conn != nil {
@@ -54,7 +61,7 @@ func (ws *WebSocketClient) Run(ctx context.Context, db *sql.DB) {
 				log.Println(e)
 				select {
 				case <-ctx.Done():
-					return
+					return ctx.Err()
 
 				case <-time.After(10 * time.Second):
 					continue
