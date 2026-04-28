@@ -11,6 +11,7 @@ import (
 	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/websocket"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
+	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
 	"github.com/jesc7/zombot/server/types"
 )
 
@@ -18,6 +19,7 @@ type WebSocketServer struct {
 	srv    *http.Server
 	jwtKey []byte
 	spy    *websocket.Conn
+	b      *bus.Bus
 	ChOut  chan shared.Envelope
 	chIn   <-chan shared.Envelope
 }

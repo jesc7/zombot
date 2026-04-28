@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/jesc7/zombot/cmd/zpy/shared/bus"
+	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
 	maxbot "github.com/jesc7/zombot/server/max/bot"
 	"github.com/jesc7/zombot/server/types"
 	"github.com/jesc7/zombot/server/ws"
@@ -35,6 +35,8 @@ func Start(ctx context.Context, service bool) error {
 	myBus := bus.NewBus()
 
 	srv := ws.NewWebSocketServer(ctx, cfg)
+	myBus.Register("ws", srv.ChOut)
+
 	bot, e := maxbot.NewBot(ctx, cfg)
 	if e != nil {
 		log.Fatalln("Can't create Max bot:", e)
