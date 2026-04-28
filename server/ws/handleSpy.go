@@ -12,21 +12,21 @@ import (
 
 const ct_ZSPY clientType = "zspy"
 
-func (ws *WebSocketServer) handleSpy(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	if ws.spy != nil {
+func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn) {
+	if ws.zspy != nil {
 		http.Error(w, "ZSpy already connected", http.StatusNotAcceptable)
 		return
 	}
 
 	var e error
-	if ws.spy, e = upgrader.Upgrade(w, r, nil); e != nil {
+	if ws.zspy, e = upgrader.Upgrade(w, r, nil); e != nil {
 		http.Error(w, "Upgrade: WebSocket", http.StatusUpgradeRequired)
 		return
 	}
 
 	defer func() {
-		ws.spy.Close()
-		ws.spy = nil
+		ws.zspy.Close()
+		ws.zspy = nil
 	}()
 	readError := make(chan struct{})
 
@@ -34,7 +34,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, w http.ResponseWriter,
 		defer close(readError)
 
 		for {
-			env, e := shared.Read(ws.spy)
+			env, e := shared.Read(ws.zspy)
 			if e != nil {
 				return
 			}
@@ -45,7 +45,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, w http.ResponseWriter,
 	for {
 		select {
 		case <-ctx.Done(): //контекст отменен - выходим
-			ws.spy.WriteControl(
+			ws.zspy.WriteControl(
 				websocket.CloseMessage,
 				websocket.FormatCloseMessage(websocket.CloseNormalClosure, "Server Shutdown"),
 				time.Now().Add(time.Second),
@@ -56,7 +56,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, w http.ResponseWriter,
 			return
 
 		case env := <-ws.chIn: //наконец-то делаем что-то полезное
-			if e := shared.Write(ws.spy, env); e != nil {
+			if e := shared.Write(ws.zspy, env); e != nil {
 				log.Println(e)
 			}
 		}

@@ -18,7 +18,7 @@ import (
 type WebSocketServer struct {
 	srv    *http.Server
 	jwtKey []byte
-	spy    *websocket.Conn
+	zspy    *websocket.Conn
 	b      *bus.Bus
 	chIn   <-chan shared.Envelope
 }
@@ -91,9 +91,16 @@ func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r 
 		return
 	}
 
+	conn, e := upgrader.Upgrade(w, r, nil)
+	if e != nil {
+		http.Error(w, "Upgrade: WebSocket", http.StatusUpgradeRequired)
+		return
+	}
+
 	switch claims.Type {
 	case ct_ZSPY:
-		ws.handleSpy(ctx, w, r)
+		if ws.zspy
+		ws.handleSpy(ctx, conn)
 
 	default:
 		return
