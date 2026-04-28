@@ -1,9 +1,9 @@
 {
-	"addr":"",
+	"host":"",
 	"token":"",
 	"db":{
 		"driver": "firebirdsql",
 		"connstr1": "SYSDBA:masterkey@linux4firebird/ssdraid/spacepro/ZSNSPACEBASE.FDB",
 		"connstr": "SYSDBA:masterkey@192.168.67.111/C:/Standart-N/base/ZSNSPACEBASE.FDB"
-	},
+	}
 }

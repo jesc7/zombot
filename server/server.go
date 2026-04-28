@@ -14,12 +14,12 @@ import (
 )
 
 func Start(ctx context.Context, service bool) error {
-	cwd, e := runPath(service)
+	bin, e := runPath(service)
 	if e != nil {
 		return e
 	}
 
-	f, e := os.ReadFile(filepath.Join(filepath.Dir(cwd), "cfg.json"))
+	f, e := os.ReadFile(filepath.Join(filepath.Dir(bin), "cfg.json"))
 	if e != nil {
 		return e
 	}

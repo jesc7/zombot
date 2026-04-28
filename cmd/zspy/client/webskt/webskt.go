@@ -22,7 +22,7 @@ type WebSocketClient struct {
 
 func NewWebSocketClient(cfg types.Config) *WebSocketClient {
 	return &WebSocketClient{
-		host:   url.URL{Scheme: "ws", Host: cfg.Addr, Path: "/ws"},
+		host:   url.URL{Scheme: "ws", Host: cfg.Host, Path: "/ws"},
 		header: http.Header{"Authorization": []string{"Bearer " + cfg.Token}},
 		ch:     make(chan shared.Envelope),
 	}

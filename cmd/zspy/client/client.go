@@ -15,12 +15,12 @@ import (
 )
 
 func Start(ctx context.Context, service bool) error {
-	cwd, e := runPath(service)
+	bin, e := runPath(service)
 	if e != nil {
 		return e
 	}
 
-	f, e := os.ReadFile(filepath.Join(filepath.Dir(cwd), "cfg.json"))
+	f, e := os.ReadFile(filepath.Join(filepath.Dir(bin), "cfg.json"))
 	if e != nil {
 		return e
 	}
@@ -48,7 +48,7 @@ func Start(ctx context.Context, service bool) error {
 		skt.Run(ctx, db)
 	})
 
-	wa := webapi.NewWebServer(skt)
+	wa := webapi.NewWebServer(cfg, skt)
 	wg.Go(func() { //run WebAPI server
 		defer func() {
 			log.Println("WebAPI server has been stopped")

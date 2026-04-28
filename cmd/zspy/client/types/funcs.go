@@ -16,12 +16,13 @@ import (
 )
 
 type Config struct {
-	Addr  string `json:"addr"`
+	Host  string `json:"host"`
 	Token string `json:"token"`
 	DB    struct {
 		Driver  string `json:"driver"`
 		ConnStr string `json:"connstr"`
 	} `json:"db"`
+	WAPort int `json:"wa_port"`
 }
 
 func Rnd(min, max int) int {

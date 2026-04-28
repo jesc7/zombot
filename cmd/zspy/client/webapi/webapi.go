@@ -3,10 +3,12 @@ package webapi
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/client/webskt"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
@@ -16,7 +18,7 @@ type WebServer struct {
 	skt *webskt.WebSocketClient
 }
 
-func NewWebServer(skt *webskt.WebSocketClient) *WebServer {
+func NewWebServer(cfg types.Config, skt *webskt.WebSocketClient) *WebServer {
 	mux := http.NewServeMux()
 	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
 	mux.HandleFunc("/call", func(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +45,7 @@ func NewWebServer(skt *webskt.WebSocketClient) *WebServer {
 	return &WebServer{
 		srv: &http.Server{
 			Handler: mux,
-			Addr:    ":8089",
+			Addr:    fmt.Sprintf(":%d", cfg.WAPort), //8089
 		},
 	}
 }
