@@ -26,7 +26,7 @@ type Bot struct {
 	bot    *max.Api
 	QWait  *queue.Queue
 	chatID int64
-	chOut  chan<- shared.Envelope
+	ChOut  chan shared.Envelope
 }
 
 func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
@@ -49,7 +49,7 @@ func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
 		bot:    bot,
 		QWait:  queue.NewQ(ctx, rate.Limit(5)),
 		chatID: cfg.Max.ChatID,
-		chOut:  make(chan<- shared.Envelope),
+		ChOut:  make(chan shared.Envelope),
 	}, e
 }
 
@@ -90,14 +90,17 @@ func (b *Bot) SendText(text string) {
 	}
 */
 
-func (b *Bot) Run(ctx context.Context) {
+func (b *Bot) Run(ctx context.Context, ch <-chan shared.Envelope) {
+	defer close(b.ChOut)
+
 out:
 	for {
 		select {
 		case <-ctx.Done():
 			break out
 
-		case env := <-b.chIn:
+		case env := <-ch:
+			_ = env
 
 		case m := <-b.QWait.Q: //разгребаем локальную очередь сообщений
 			wo, ok := m.(*queue.WaitObj)
@@ -138,7 +141,7 @@ out:
 							Days: days,
 						},
 					})
-					b.chOut <- env
+					b.ChOut <- env
 
 					//и только когда придет ответ, шлем его боту
 					/*text := "Тут текст про дежурства"

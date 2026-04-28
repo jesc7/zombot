@@ -18,7 +18,8 @@ type WebSocketServer struct {
 	srv    *http.Server
 	jwtKey []byte
 	spy    *websocket.Conn
-	chOut  chan<- shared.Envelope
+	ChOut  chan shared.Envelope
+	chIn   <-chan shared.Envelope
 }
 
 var (
@@ -28,7 +29,7 @@ var (
 func NewWebSocketServer(ctx context.Context, cfg types.Config) *WebSocketServer {
 	ws := &WebSocketServer{
 		jwtKey: []byte(cfg.WS.JwtKey),
-		chOut:  make(chan<- shared.Envelope),
+		ChOut:  make(chan shared.Envelope),
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
@@ -41,9 +42,9 @@ func NewWebSocketServer(ctx context.Context, cfg types.Config) *WebSocketServer 
 	return ws
 }
 
-func (ws *WebSocketServer) Run(ctx context.Context) error {
-	ws.ch = make(chan shared.Envelope)
-	defer close(ws.ch)
+func (ws *WebSocketServer) Run(ctx context.Context, ch <-chan shared.Envelope) error {
+	defer close(ws.ChOut)
+	ws.chIn = ch
 
 	go func() {
 		if e := ws.srv.ListenAndServe(); e != nil && e != http.ErrServerClosed {
@@ -70,7 +71,7 @@ func (ws *WebSocketServer) Run(ctx context.Context) error {
 
 func (ws *WebSocketServer) Write(env shared.Envelope) {
 	defer recover()
-	ws.ch <- env
+	ws.ChOut <- env
 }
 
 func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request) {
