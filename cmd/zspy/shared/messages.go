@@ -81,10 +81,18 @@ type MessageDuties struct {
 	A []Duty    `json:"a,omitempty"`
 }
 
+type DutyChangeType int
+
+const (
+	DCT_NEW DutyChangeType = iota
+	DCT_CANCEL
+	DCT_REPLACE
+)
+
 type MessageDutyChanges struct {
 	Changes []struct {
 		Duty
-		ChangeType int `json:"change_type"`
+		ChangeType DutyChangeType `json:"change_type"`
 	} `json:"changes,omitempty"`
 }
 

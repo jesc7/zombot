@@ -121,7 +121,7 @@ out:
 				log.Println("Bot TypeMessageDutyChanges")
 
 				m, e := shared.Unpack[shared.MessageDutyChanges](env)
-				if e != nil {
+				if e != nil || len(m.Changes) == 0 {
 					continue
 				}
 
