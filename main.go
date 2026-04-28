@@ -14,7 +14,7 @@ import (
 	"github.com/kardianos/service"
 )
 
-var logger service.Logger
+var  logger service.Logger
 
 type program struct {
 	service service.Service
