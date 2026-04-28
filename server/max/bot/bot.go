@@ -26,10 +26,11 @@ type Bot struct {
 	bot    *max.Api
 	QWait  *queue.Queue
 	chatID int64
-	chSrv  chan shared.Envelope
+	chIn   <-chan shared.Envelope
+	chOut  chan<- shared.Envelope
 }
 
-func NewBot(ctx context.Context, cfg types.Config, ch chan shared.Envelope) (*Bot, error) {
+func NewBot(ctx context.Context, cfg types.Config, chIn, chOut chan shared.Envelope) (*Bot, error) {
 	var options []max.Option
 	if cfg.Proxy.Addr != "" {
 		proxy, e := url.Parse(fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port))
@@ -49,7 +50,8 @@ func NewBot(ctx context.Context, cfg types.Config, ch chan shared.Envelope) (*Bo
 		bot:    bot,
 		QWait:  queue.NewQ(ctx, rate.Limit(5)),
 		chatID: cfg.Max.ChatID,
-		chSrv:  ch,
+		chIn:   chIn,
+		chOut:  chOut,
 	}, e
 }
 
@@ -97,6 +99,8 @@ out:
 		case <-ctx.Done():
 			break out
 
+		case env := <-b.chIn:
+
 		case m := <-b.QWait.Q: //разгребаем локальную очередь сообщений
 			wo, ok := m.(*queue.WaitObj)
 			if !ok {
@@ -136,7 +140,7 @@ out:
 							Days: days,
 						},
 					})
-					b.chSrv <- env
+					b.chOut <- env
 
 					//и только когда придет ответ, шлем его боту
 					/*text := "Тут текст про дежурства"
