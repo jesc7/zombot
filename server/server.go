@@ -31,7 +31,7 @@ func Start(ctx context.Context, service bool) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	srv := ws.NewWebSocketServer(cfg)
+	srv := ws.NewWebSocketServer(ctx, cfg)
 	bot, e := maxbot.NewBot(ctx, cfg, srv)
 	if e != nil {
 		log.Fatalln("Can't create Max bot:", e)

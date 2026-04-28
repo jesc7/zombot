@@ -25,13 +25,13 @@ var (
 	upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 )
 
-func NewWebSocketServer(cfg types.Config) *WebSocketServer {
+func NewWebSocketServer(ctx context.Context, cfg types.Config) *WebSocketServer {
 	ws := &WebSocketServer{
 		jwtKey: []byte(cfg.WS.JwtKey),
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		handle(ws, w, r)
+		handle(ctx, ws, w, r)
 	})
 	ws.srv = &http.Server{
 		Handler: mux,
@@ -67,7 +67,7 @@ func (ws *WebSocketServer) Run(ctx context.Context) error {
 	return ctx.Err()
 }
 
-func handle(ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
+func handle(ctx context.Context, ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
 	auth := r.Header.Get("Authorization")
 	tokenStr := strings.TrimPrefix(auth, "Bearer ")
 	if auth == "" || tokenStr == auth {
@@ -129,17 +129,18 @@ func handle(ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
 
 	for {
 		select {
-		case msg := <-outbound:
-			// ОТПРАВКА (Outgoing TextMessage)
-			err := conn.WriteMessage(websocket.TextMessage, []byte(msg))
-			if err != nil {
-				log.Printf("Write error: %v", err)
-				return
-			}
-
-		case <-readError:
-			log.Println("Завершаем работу: ошибка чтения или клиент ушел")
+		case <-ctx.Done(): //контекст отменен - выходим
+			conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "Server Shutdown"), time.Now().Add(time.Second))
 			return
+
+		case <-readError: //ошибка чтения сокета - выходим
+			return
+
+		case env := <-ws.ch: //наконец-то делаем что-то полезное
+			if e := shared.Write(conn, env); e != nil {
+				log.Println(e)
+			}
 
 			/*case <-ctx.Done():
 			log.Println("Внешний контекст отменен: закрываем соединение")
