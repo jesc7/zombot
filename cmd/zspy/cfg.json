@@ -1,9 +1,9 @@
 {
 	"host":"",
 	"token":"",
+	"wa_port":8089,
 	"db":{
 		"driver": "firebirdsql",
-		"connstr1": "SYSDBA:masterkey@linux4firebird/ssdraid/spacepro/ZSNSPACEBASE.FDB",
 		"connstr": "SYSDBA:masterkey@192.168.67.111/C:/Standart-N/base/ZSNSPACEBASE.FDB"
 	}
 }

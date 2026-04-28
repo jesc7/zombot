@@ -9,10 +9,11 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	_ "github.com/nakagami/firebirdsql"
+
 	"github.com/jesc7/zombot/cmd/zspy/client/jp/duties"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
-	_ "github.com/nakagami/firebirdsql"
 )
 
 type WebSocketClient struct {
@@ -26,7 +27,6 @@ func NewWebSocketClient(cfg types.Config) *WebSocketClient {
 	return &WebSocketClient{
 		host:   url.URL{Scheme: "ws", Host: cfg.Host, Path: "/ws"},
 		header: http.Header{"Authorization": []string{"Bearer " + cfg.Token}},
-		ch:     make(chan shared.Envelope),
 	}
 }
 
@@ -36,48 +36,36 @@ func (ws *WebSocketClient) Write(env shared.Envelope) {
 }
 
 func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) error {
-	defer close(ws.ch)
-
 	db, e := sql.Open(cfg.DB.Driver, cfg.DB.ConnStr)
 	if e != nil {
 		return e
 	}
 	defer db.Close()
 
+	ws.ch = make(chan shared.Envelope)
+	defer close(ws.ch)
+
 	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
+		if ws.conn, _, e = websocket.DefaultDialer.DialContext(ctx, ws.host.String(), ws.header); e != nil {
+			log.Println(e)
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
 
-		case env := <-ws.ch:
-			if ws.conn != nil {
-				shared.Write(ws.conn, env)
+			case <-time.After(10 * time.Second):
+				continue
 			}
-
-		default:
-			var e error
-			ws.conn, _, e = websocket.DefaultDialer.DialContext(ctx, ws.host.String(), ws.header)
-			if e != nil {
-				log.Println(e)
-				select {
-				case <-ctx.Done():
-					return ctx.Err()
-
-				case <-time.After(10 * time.Second):
-					continue
-				}
-			}
-			ws.handle(ctx, db)
 		}
+		ws.handle(ctx, db)
 	}
 }
 
 func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 	defer ws.conn.Close()
-	done := make(chan struct{})
+	readError := make(chan struct{})
 
 	go func() {
-		defer close(done)
+		defer close(readError)
 
 		for {
 			env, e := shared.Read(ws.conn)
@@ -113,8 +101,13 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 			ws.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			return
 
-		case <-done:
+		case <-readError:
 			return
+
+		case env := <-ws.ch:
+			if ws.conn != nil {
+				shared.Write(ws.conn, env)
+			}
 
 		case <-tPing.C:
 			if e := ws.conn.WriteMessage(websocket.PingMessage, nil); e != nil {
