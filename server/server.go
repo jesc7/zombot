@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/jesc7/zombot/server/cmd/zpy/shared/bus"
 	maxbot "github.com/jesc7/zombot/server/max/bot"
 	"github.com/jesc7/zombot/server/types"
 	"github.com/jesc7/zombot/server/ws"
@@ -30,6 +31,8 @@ func Start(ctx context.Context, service bool) error {
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+
+	myBus := bus.NewBus()
 
 	srv := ws.NewWebSocketServer(ctx, cfg)
 	bot, e := maxbot.NewBot(ctx, cfg)
