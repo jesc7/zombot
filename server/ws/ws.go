@@ -20,16 +20,20 @@ type WebSocketServer struct {
 	jwtKey []byte
 	spy    *websocket.Conn
 	b      *bus.Bus
-	ChOut  chan shared.Envelope
 	chIn   <-chan shared.Envelope
 }
 
 var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 
-func NewWebSocketServer(ctx context.Context, cfg types.Config) *WebSocketServer {
+func NewWebSocketServer(ctx context.Context, cfg types.Config, b *bus.Bus) (*WebSocketServer, error) {
+	ch, e := b.Register("ws")
+	if e != nil {
+		return nil, e
+	}
+
 	ws := &WebSocketServer{
 		jwtKey: []byte(cfg.WS.JwtKey),
-		ChOut:  make(chan shared.Envelope),
+		chIn:   ch,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
@@ -39,13 +43,10 @@ func NewWebSocketServer(ctx context.Context, cfg types.Config) *WebSocketServer 
 		Handler: mux,
 		Addr:    fmt.Sprintf(":%d", cfg.WS.Port),
 	}
-	return ws
+	return ws, nil
 }
 
-func (ws *WebSocketServer) Run(ctx context.Context, ch <-chan shared.Envelope) error {
-	defer close(ws.ChOut)
-	ws.chIn = ch
-
+func (ws *WebSocketServer) Run(ctx context.Context) error {
 	go func() {
 		if e := ws.srv.ListenAndServe(); e != nil && e != http.ErrServerClosed {
 			log.Fatalf("WebSocket server error: %v", e)
@@ -69,10 +70,11 @@ func (ws *WebSocketServer) Run(ctx context.Context, ch <-chan shared.Envelope) e
 	return ctx.Err()
 }
 
-func (ws *WebSocketServer) Write(env shared.Envelope) {
+/*func (ws *WebSocketServer) Write(env shared.Envelope) {
 	defer recover()
+	ws.b.Write("")
 	ws.ChOut <- env
-}
+}*/
 
 func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	auth := r.Header.Get("Authorization")

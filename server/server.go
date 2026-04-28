@@ -33,11 +33,10 @@ func Start(ctx context.Context, service bool) error {
 	defer cancel()
 
 	myBus := bus.NewBus()
+	defer myBus.Close()
 
-	srv := ws.NewWebSocketServer(ctx, cfg)
-	myBus.Register("ws", srv.ChOut)
-
-	bot, e := maxbot.NewBot(ctx, cfg)
+	srv := ws.NewWebSocketServer(ctx, cfg, myBus)
+	bot, e := maxbot.NewBot(ctx, cfg, myBus)
 	if e != nil {
 		log.Fatalln("Can't create Max bot:", e)
 	}

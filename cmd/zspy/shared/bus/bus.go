@@ -18,15 +18,25 @@ func NewBus() *Bus {
 	}
 }
 
-func (b *Bus) Register(name string, ch chan shared.Envelope) error {
+func (b *Bus) Close() {
+	for _, v := range b.chans {
+		func() {
+			defer recover()
+			close(v)
+		}()
+	}
+}
+
+func (b *Bus) Register(name string) (chan shared.Envelope, error) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
 	if _, ok := b.chans[name]; ok {
-		return errors.New("name already exist")
+		return nil, errors.New("name already exist")
 	}
+	ch := make(chan shared.Envelope)
 	b.chans[name] = ch
-	return nil
+	return ch, nil
 }
 
 func (b *Bus) Write(name string, value shared.Envelope) error {

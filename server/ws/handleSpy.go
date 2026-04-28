@@ -38,7 +38,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, w http.ResponseWriter,
 			if e != nil {
 				return
 			}
-			ws.ChOut <- env
+			ws.b.Write("bot", env)
 		}
 	}()
 
