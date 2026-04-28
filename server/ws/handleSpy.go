@@ -38,10 +38,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, w http.ResponseWriter,
 			if e != nil {
 				return
 			}
-
-			switch env.Type {
-			case shared.MT_MessageText:
-			}
+			ws.ChOut <- env
 		}
 	}()
 

@@ -22,9 +22,7 @@ type WebSocketServer struct {
 	chIn   <-chan shared.Envelope
 }
 
-var (
-	upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
-)
+var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 
 func NewWebSocketServer(ctx context.Context, cfg types.Config) *WebSocketServer {
 	ws := &WebSocketServer{

@@ -27,6 +27,7 @@ type Bot struct {
 	QWait  *queue.Queue
 	chatID int64
 	ChOut  chan shared.Envelope
+	chIn   <-chan shared.Envelope
 }
 
 func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
@@ -92,6 +93,7 @@ func (b *Bot) SendText(text string) {
 
 func (b *Bot) Run(ctx context.Context, ch <-chan shared.Envelope) {
 	defer close(b.ChOut)
+	b.chIn = ch
 
 out:
 	for {
