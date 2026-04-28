@@ -112,7 +112,7 @@ out:
 					case today.Add(24 * time.Hour * 2):
 						tip = " (послезавтра)"
 					}
-					fmt.Fprintf(&sb, "%s%s: %s\n", v.Date.Format("02.01"), tip, v.Name)
+					fmt.Fprintf(&sb, "%s%s: %s\n", v.Date.Format("02.01"), tip, v.Caption)
 				}
 				b.SendText(sb.String())
 
@@ -125,7 +125,25 @@ out:
 					continue
 				}
 
-				//сообщения от площадок
+				today := ctypes.ClearTime(time.Now())
+				sb := strings.Builder{}
+				sb.WriteString("👷 <b>Изменения дежурств</b>\n\n")
+				signs := []string{"⭐", "🚫", "🔄"}
+				for _, v := range m.Changes {
+					var tip string
+					switch v.Date {
+					case today:
+						tip = " (сегодня)"
+					case today.Add(24 * time.Hour):
+						tip = " (завтра)"
+					case today.Add(24 * time.Hour * 2):
+						tip = " (послезавтра)"
+					}
+					fmt.Fprintf(&sb, "%s %s%s: %s\n", signs[v.ChangeType], v.Date.Format("02.01"), tip, v.Caption)
+				}
+				b.SendText(sb.String())
+
+			//сообщения от площадок
 			case shared.TypeMessageZSRV:
 				log.Println("Bot TypeMessageZSRV")
 

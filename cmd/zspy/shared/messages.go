@@ -72,8 +72,8 @@ type DutyQuery struct {
 }
 
 type Duty struct {
-	Date time.Time `json:"date"`
-	Name string    `json:"name"`
+	Date    time.Time `json:"date"`
+	Caption string    `json:"caption"`
 }
 
 type MessageDuties struct {
