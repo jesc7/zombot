@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	max "github.com/max-messenger/max-bot-api-client-go"
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
@@ -99,9 +100,11 @@ out:
 					break
 				}
 
+				today := time.Now().Truncate(24 * time.Hour)
 				b := strings.Builder{}
 				for _, v := range m.A {
-
+					tip := ""
+					b.WriteString(fmt.Sprintf(""))
 				}
 
 			case shared.TypeMessageZSRV:
