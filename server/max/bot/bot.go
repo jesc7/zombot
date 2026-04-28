@@ -14,6 +14,7 @@ import (
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
 	"golang.org/x/time/rate"
 
+	ctypes "github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
 	"github.com/jesc7/zombot/server/queue"
@@ -98,7 +99,7 @@ out:
 					break
 				}
 
-				today := time.Now().Truncate(24 * time.Hour)
+				today := ctypes.ClearTime(time.Now())
 				sb := strings.Builder{}
 				sb.WriteString("👷 <b>Дежурные</b>\n\n")
 				for _, v := range m.A {

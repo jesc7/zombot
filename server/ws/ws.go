@@ -10,6 +10,8 @@ import (
 
 	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/websocket"
+
+	ctypes "github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
 	"github.com/jesc7/zombot/server/types"
@@ -115,7 +117,7 @@ func jwtGenerate(key []byte, ct clientType) (string, error) {
 		&Claims{
 			Type: ct,
 			RegisteredClaims: jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Truncate(24 * time.Hour).Add(time.Hour * 24 * 365 * 10)), //10 years
+				ExpiresAt: jwt.NewNumericDate(ctypes.ClearTime(time.Now()).Add(time.Hour * 24 * 365 * 10)), //10 years
 			},
 		},
 	).SignedString(key)
