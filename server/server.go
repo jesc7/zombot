@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/jesc7/zombot/server/cmd/zpy/shared/bus"
+	"github.com/jesc7/zombot/cmd/zpy/shared/bus"
 	maxbot "github.com/jesc7/zombot/server/max/bot"
 	"github.com/jesc7/zombot/server/types"
 	"github.com/jesc7/zombot/server/ws"
