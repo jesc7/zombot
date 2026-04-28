@@ -12,16 +12,11 @@ import (
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
 	"golang.org/x/time/rate"
 
-	//"github.com/jesc7/zombot/server/jp/duties"
-
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 	"github.com/jesc7/zombot/server/queue"
 	"github.com/jesc7/zombot/server/types"
 )
 
-type TextMsg struct {
-	Text string
-}
 type Bot struct {
 	bot    *max.Api
 	QWait  *queue.Queue
@@ -61,35 +56,6 @@ func (b *Bot) SendText(text string) {
 	}, queue.PRIORITY_NORMAL)
 }
 
-/*
-	func (b *Bot) SendCall(phone string) {
-		b.QWait.Add(&queue.WaitObj{
-			O: max.NewMessage().
-				SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone)).
-				SetFormat(schemes.HTML),
-		}, queue.PRIORITY_NORMAL)
-	}
-
-	func (b *Bot) SendZSrv(msg types.ZSrvMessage) {
-		if strings.Count(msg.Text, "\n") != 0 {
-			msg.Text = "\n" + msg.Text
-		}
-		switch msg.Status {
-		case types.ZMSG_WARN:
-			msg.Text = fmt.Sprintf("⚠️ <i>zsrv %s беспокоится</i>\n%s", msg.Caption, msg.Text)
-		case types.ZMSG_PANIC:
-			msg.Text = fmt.Sprintf("🆘 <i>zsrv %s паникует</i>\n%s", msg.Caption, msg.Text)
-		default:
-			msg.Text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", msg.Caption, msg.Text)
-		}
-		b.QWait.Add(&queue.WaitObj{
-			O: max.NewMessage().
-				SetText(msg.Text).
-				SetFormat(schemes.HTML),
-		}, queue.PRIORITY_NORMAL)
-	}
-*/
-
 func (b *Bot) Run(ctx context.Context, ch <-chan shared.Envelope) {
 	defer close(b.ChOut)
 
@@ -101,6 +67,28 @@ out:
 
 		case env := <-ch:
 			switch env.Type {
+			case shared.MT_MessageZSRV:
+				m, e := shared.Unpack[shared.MessageZSRV](env)
+				if e != nil {
+					continue
+				}
+				if strings.Count(m.Text, "\n") != 0 {
+					m.Text = "\n" + m.Text
+				}
+				switch m.Status {
+				case shared.ZSRV_WARN:
+					m.Text = fmt.Sprintf("⚠️ <i>zsrv %s беспокоится</i>\n%s", m.Caption, m.Text)
+				case shared.ZSRV_PANIC:
+					m.Text = fmt.Sprintf("🆘 <i>zsrv %s паникует</i>\n%s", m.Caption, m.Text)
+				default:
+					m.Text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", m.Caption, m.Text)
+				}
+				b.QWait.Add(&queue.WaitObj{
+					O: max.NewMessage().
+						SetText(m.Text).
+						SetFormat(schemes.HTML),
+				}, queue.PRIORITY_NORMAL)
+
 			case shared.MT_MessageCall:
 				m, e := shared.Unpack[shared.MessageCall](env)
 				if e != nil {
@@ -111,7 +99,6 @@ out:
 						SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(m.Phone, "8800 "), " на 8800", ""), m.Phone)).
 						SetFormat(schemes.HTML),
 				}, queue.PRIORITY_NORMAL)
-
 			}
 
 		case msg := <-b.QWait.Q: //разгребаем локальную очередь сообщений
@@ -154,15 +141,6 @@ out:
 						},
 					})
 					b.ChOut <- env
-
-					//и только когда придет ответ, шлем его боту
-					/*text := "Тут текст про дежурства"
-					b.QWait.Add(&queue.WaitObj{
-						O: max.NewMessage().
-							SetFormat(schemes.HTML).
-							SetChat(upd.GetChatID()).
-							SetText(text),
-					}, queue.PRIORITY_NORMAL)*/
 
 				case "/absent":
 				case "/birthday":
