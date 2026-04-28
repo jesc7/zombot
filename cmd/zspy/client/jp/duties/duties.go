@@ -32,7 +32,7 @@ func DutiesList(ctx context.Context, db *sql.DB) (*Planner, error) {
 		if e = rows.Scan(&t, &s); e != nil {
 			return nil, e
 		}
-		pl[t.Local().Truncate(24*time.Hour)] = s
+		pl[types.ClearTime(t)] = s //t.Local().Truncate(24*time.Hour)
 	}
 	return &pl, nil
 }
