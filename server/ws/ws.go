@@ -93,13 +93,22 @@ func handle(ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if ws.spy, e = upgrader.Upgrade(w, r, nil); e != nil {
+	conn, e := upgrader.Upgrade(w, r, nil)
+	if e != nil {
 		http.Error(w, "Upgrade: WebSocket", http.StatusUpgradeRequired)
 		return
 	}
+	switch claims.Type {
+	case CT_ZSPY:
+		ws.spy = conn
+	}
+
 	defer func() {
-		ws.spy.Close()
-		ws.spy = nil
+		conn.Close()
+		switch claims.Type {
+		case CT_ZSPY:
+			ws.spy = nil
+		}
 	}()
 	readError := make(chan struct{})
 
@@ -107,50 +116,17 @@ func handle(ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
 		defer close(readError)
 
 		for {
-			env, e := shared.Read(ws.spy)
+			env, e := shared.Read(conn)
 			if e != nil {
 				return
 			}
 
 			switch env.Type {
-			case shared.MT_MessageDuties:
-				dut, e := shared.Unpack[shared.MessageDuties](env)
-				if e != nil {
-					continue
-				}
-				dut.A, e = duties.Duty(ctx, db, dut.Q)
-				if e != nil {
-					continue
-				}
-				env, e = shared.Pack(env.Type, dut)
-				if e != nil {
-					continue
-				}
-				ws.Write(env)
+			case shared.MT_MessageText:
 			}
 		}
 	}()
 
-	go func() {
-		for {
-			messageType, payload, err := conn.ReadMessage()
-			if err != nil {
-				log.Printf("Read error: %v", err)
-				close(readError)
-				return
-			}
-
-			// Обрабатываем только текстовые сообщения
-			if messageType == websocket.TextMessage {
-				log.Printf("Входящее: %s", string(payload))
-
-				// Пример логики: отвечаем клиенту через канал
-				outbound <- fmt.Sprintf("Сервер получил: %s", string(payload))
-			}
-		}
-	}()
-
-	// 2. Основной цикл записи и мониторинга контекста
 	for {
 		select {
 		case msg := <-outbound:
