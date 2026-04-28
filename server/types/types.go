@@ -13,24 +13,4 @@ type Config struct {
 		Port   int    `json:"port"`
 		JwtKey string `json:"jwt_key"`
 	} `json:"ws"`
-	DB struct {
-		Driver  string `json:"driver"`
-		ConnStr string `json:"connstr"`
-	} `json:"db"`
-	CheckDomains []string    `json:"check_domains"`
-	Checks       []string    `json:"checks"`
-	CFChecks     []string    `json:"cf_checks"`
-	ZSrv         []ZSrvWatch `json:"zsrv"`
-	EC           EC          `json:"ec"`
-}
-
-type ZSrvWatch struct {
-	Url     string `json:"url"`
-	Caption string `json:"caption"`
-}
-
-type EC struct {
-	Driver  string `json:"driver"`
-	ConnStr string `json:"connstr"`
-	Pwd     string `json:"pwd"`
 }

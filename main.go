@@ -64,9 +64,9 @@ func main() {
 	//конфиг сервиса
 	p := &program{}
 	s, e := service.New(p, &service.Config{
-		Name:        "zspy",
-		DisplayName: "Zombot spy service",
-		Description: "Zombot spy service",
+		Name:        "zombot",
+		DisplayName: "Zombot service",
+		Description: "Zombot service",
 	})
 	if e != nil {
 		log.Fatal(e)

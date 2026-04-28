@@ -39,19 +39,12 @@ func Start(ctx context.Context, service bool) error {
 
 	wg := &sync.WaitGroup{}
 	wg.Go(func() { //run WebSocket server
-		defer func() {
-			log.Println("WebSocket server has been stopped")
-			cancel()
-		}()
+		defer cancel()
 		srv.Run(ctx)
 	})
 
 	wg.Go(func() { //run Max bot
-		defer func() {
-			log.Println("Max bot has been stopped")
-			bot.Free()
-			cancel()
-		}()
+		defer cancel()
 		bot.Run(ctx)
 	})
 

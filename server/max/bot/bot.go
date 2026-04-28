@@ -2,7 +2,6 @@ package bot
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -10,7 +9,6 @@ import (
 
 	max "github.com/max-messenger/max-bot-api-client-go"
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
-	_ "github.com/nakagami/firebirdsql"
 	"golang.org/x/time/rate"
 
 	//"github.com/jesc7/zombot/server/jp/duties"
@@ -27,7 +25,6 @@ type Bot struct {
 	bot    *max.Api
 	QWait  *queue.Queue
 	chatID int64
-	db     *sql.DB
 	srv    *ws.WebSocketServer
 }
 
@@ -46,25 +43,16 @@ func NewBot(ctx context.Context, cfg types.Config, srv *ws.WebSocketServer) (*Bo
 		}
 	}
 
-	db, e := sql.Open(cfg.DB.Driver, cfg.DB.ConnStr)
-	if e != nil {
-		return nil, e
-	}
-
 	bot, e := max.New(cfg.Max.Token, options...)
 	return &Bot{
 		bot:    bot,
 		QWait:  queue.NewQ(ctx, rate.Limit(5)),
-		db:     db,
 		chatID: cfg.Max.ChatID,
 		srv:    srv,
 	}, e
 }
 
 func (b *Bot) Free() {
-	if b.db != nil {
-		b.db.Close()
-	}
 }
 
 func (b *Bot) SendText(text string) {

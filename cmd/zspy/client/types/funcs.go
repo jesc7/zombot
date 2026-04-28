@@ -18,11 +18,29 @@ import (
 type Config struct {
 	Host  string `json:"host"`
 	Token string `json:"token"`
-	DB    struct {
+	WA    struct {
+		Port int `json:"port"`
+	} `json:"wa"`
+	DB struct {
 		Driver  string `json:"driver"`
 		ConnStr string `json:"connstr"`
 	} `json:"db"`
-	WAPort int `json:"wa_port"`
+	CheckDomains []string    `json:"check_domains"`
+	Checks       []string    `json:"checks"`
+	CFChecks     []string    `json:"cf_checks"`
+	ZSrv         []ZSrvWatch `json:"zsrv"`
+	EC           EC          `json:"ec"`
+}
+
+type ZSrvWatch struct {
+	Url     string `json:"url"`
+	Caption string `json:"caption"`
+}
+
+type EC struct {
+	Driver  string `json:"driver"`
+	ConnStr string `json:"connstr"`
+	Pwd     string `json:"pwd"`
 }
 
 func Rnd(min, max int) int {

@@ -60,7 +60,6 @@ func main() {
 	}
 	defer flog.Close()
 	log.SetOutput(flog)
-	defer log.Println(".")
 
 	//конфиг сервиса
 	p := &program{}

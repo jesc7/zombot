@@ -47,5 +47,6 @@ func Start(ctx context.Context, service bool) error {
 	})
 
 	wg.Wait()
+	log.Println(".")
 	return ctx.Err()
 }

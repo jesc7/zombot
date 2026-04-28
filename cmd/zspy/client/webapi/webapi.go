@@ -45,7 +45,7 @@ func NewWebServer(cfg types.Config, skt *webskt.WebSocketClient) *WebServer {
 	return &WebServer{
 		srv: &http.Server{
 			Handler: mux,
-			Addr:    fmt.Sprintf(":%d", cfg.WAPort), //8089
+			Addr:    fmt.Sprintf(":%d", cfg.WA.Port), //8089
 		},
 	}
 }
