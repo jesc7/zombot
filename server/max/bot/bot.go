@@ -102,37 +102,28 @@ out:
 		case env := <-ch:
 			switch env.Type {
 			case shared.MT_MessageCall:
-				msg, e := shared.Unpack[shared.MessageCall](env)
+				m, e := shared.Unpack[shared.MessageCall](env)
 				if e != nil {
 					continue
 				}
 				b.QWait.Add(&queue.WaitObj{
 					O: max.NewMessage().
-						SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone)).
+						SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(m.Phone, "8800 "), " на 8800", ""), m.Phone)).
 						SetFormat(schemes.HTML),
 				}, queue.PRIORITY_NORMAL)
 
-				/*
-					func (b *Bot) SendCall(phone string) {
-						b.QWait.Add(&queue.WaitObj{
-							O: max.NewMessage().
-								SetText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(phone, "8800 "), " на 8800", ""), phone)).
-								SetFormat(schemes.HTML),
-						}, queue.PRIORITY_NORMAL)
-					}
-				*/
 			}
 
-		case m := <-b.QWait.Q: //разгребаем локальную очередь сообщений
-			wo, ok := m.(*queue.WaitObj)
+		case msg := <-b.QWait.Q: //разгребаем локальную очередь сообщений
+			wo, ok := msg.(*queue.WaitObj)
 			if !ok {
 				break
 			}
-			msg, ok := wo.O.(*max.Message)
+			m, ok := wo.O.(*max.Message)
 			if !ok {
 				break
 			}
-			_ = msg
+			b.bot.Messages.Send(ctx, m)
 			if wo.OnOk != nil {
 				wo.OnOk()
 			}
