@@ -75,6 +75,8 @@ out:
 
 		case env := <-b.chIn: //разгребаем пакеты, пришедшие боту
 			switch env.Type {
+
+			//просто текст
 			case shared.TypeMessageText:
 				m, e := shared.Unpack[shared.MessageText](env)
 				if e != nil {
@@ -86,6 +88,7 @@ out:
 						SetFormat(schemes.HTML),
 				}, queue.PRIORITY_NORMAL)
 
+			//дежурства
 			case shared.TypeMessageDuties:
 				m, e := shared.Unpack[shared.MessageDuties](env)
 				if e != nil {
@@ -101,7 +104,8 @@ out:
 				}
 
 				today := time.Now().Truncate(24 * time.Hour)
-				b := strings.Builder{}
+				sb := strings.Builder{}
+				sb.WriteString("👷 <b>Дежурные</b>\n\n")
 				for _, v := range m.A {
 					var tip string
 					switch v.Date {
@@ -112,9 +116,15 @@ out:
 					case today.Add(24 * time.Hour * 2):
 						tip = " (послезавтра)"
 					}
-					fmt.Fprintf(&b, "%s%s: %s\n", v.Date.Format("02.01"), tip, v.Name)
+					fmt.Fprintf(&sb, "%s%s: %s\n", v.Date.Format("02.01"), tip, v.Name)
 				}
+				b.QWait.Add(&queue.WaitObj{
+					O: max.NewMessage().
+						SetText(sb.String()).
+						SetFormat(schemes.HTML),
+				}, queue.PRIORITY_NORMAL)
 
+			//сообщения от площадок
 			case shared.TypeMessageZSRV:
 				m, e := shared.Unpack[shared.MessageZSRV](env)
 				if e != nil {
@@ -137,6 +147,7 @@ out:
 						SetFormat(schemes.HTML),
 				}, queue.PRIORITY_NORMAL)
 
+			//звонки
 			case shared.TypeMessageCall:
 				m, e := shared.Unpack[shared.MessageCall](env)
 				if e != nil {
