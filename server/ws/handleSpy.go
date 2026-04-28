@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
+	"github.com/jesc7/zombot/server/types"
 )
 
 const ct_ZSPY clientType = "zspy"
@@ -27,7 +28,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 			if e != nil { //ошибка чтения сокета - выходим
 				return
 			}
-			ws.b.Write("bot", env)
+			ws.b.Write(types.BUS_BOT, env)
 		}
 	}()
 

@@ -13,6 +13,7 @@ import (
 	"golang.org/x/time/rate"
 
 	"github.com/jesc7/zombot/cmd/zspy/shared"
+	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
 	"github.com/jesc7/zombot/server/queue"
 	"github.com/jesc7/zombot/server/types"
 )
@@ -21,10 +22,16 @@ type Bot struct {
 	bot    *max.Api
 	QWait  *queue.Queue
 	chatID int64
-	ChOut  chan shared.Envelope
+	b      *bus.Bus
+	chIn   chan shared.Envelope
 }
 
-func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
+func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
+	ch, e := b.Register(types.BUS_BOT)
+	if e != nil {
+		return nil, e
+	}
+
 	var options []max.Option
 	if cfg.Proxy.Addr != "" {
 		proxy, e := url.Parse(fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port))
@@ -44,7 +51,8 @@ func NewBot(ctx context.Context, cfg types.Config) (*Bot, error) {
 		bot:    bot,
 		QWait:  queue.NewQ(ctx, rate.Limit(5)),
 		chatID: cfg.Max.ChatID,
-		ChOut:  make(chan shared.Envelope),
+		b:      b,
+		chIn:   ch,
 	}, e
 }
 
@@ -56,18 +64,27 @@ func (b *Bot) SendText(text string) {
 	}, queue.PRIORITY_NORMAL)
 }
 
-func (b *Bot) Run(ctx context.Context, ch <-chan shared.Envelope) {
-	defer close(b.ChOut)
-
+func (b *Bot) Run(ctx context.Context) {
 out:
 	for {
 		select {
 		case <-ctx.Done():
 			break out
 
-		case env := <-ch: //разгребаем ответы, пришедшие с клиента
+		case env := <-b.chIn: //разгребаем пакеты, пришедшие боту
 			switch env.Type {
-			case shared.MT_MessageZSRV:
+			case shared.TypeMessageText:
+				m, e := shared.Unpack[shared.MessageText](env)
+				if e != nil {
+					continue
+				}
+				b.QWait.Add(&queue.WaitObj{
+					O: max.NewMessage().
+						SetText(m.Text).
+						SetFormat(schemes.HTML),
+				}, queue.PRIORITY_NORMAL)
+
+			case shared.TypeMessageZSRV:
 				m, e := shared.Unpack[shared.MessageZSRV](env)
 				if e != nil {
 					continue
@@ -89,7 +106,7 @@ out:
 						SetFormat(schemes.HTML),
 				}, queue.PRIORITY_NORMAL)
 
-			case shared.MT_MessageCall:
+			case shared.TypeMessageCall:
 				m, e := shared.Unpack[shared.MessageCall](env)
 				if e != nil {
 					continue
@@ -134,7 +151,7 @@ out:
 					if len(params) > 1 {
 						days, _ = strconv.Atoi(params[1])
 					}
-					env, e := shared.Pack(shared.MT_MessageDuties, shared.MessageDuties{
+					env, e := shared.Pack(shared.TypeMessageDuties, shared.MessageDuties{
 						Q: shared.DutyQuery{
 							Name: name,
 							Days: days,
@@ -143,7 +160,7 @@ out:
 					if e != nil {
 						break
 					}
-					b.ChOut <- env
+					b.b.Write(types.BUS_WS, env)
 
 				case "/absent":
 				case "/birthday":

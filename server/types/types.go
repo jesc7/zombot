@@ -14,3 +14,8 @@ type Config struct {
 		JwtKey string `json:"jwt_key"`
 	} `json:"ws"`
 }
+
+const (
+	BUS_BOT = "bot"
+	BUS_WS  = "ws"
+)

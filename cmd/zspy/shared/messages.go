@@ -55,11 +55,11 @@ func Write(conn *websocket.Conn, env Envelope) error {
 }
 
 const (
-	MT_MessageText        = "message_text"
-	MT_MessageDuties      = "message_duties"
-	MT_MessageDutyChanges = "message_duty_changes"
-	MT_MessageZSRV        = "message_zsrv"
-	MT_MessageCall        = "message_call"
+	TypeMessageText        = "message_text"
+	TypeMessageDuties      = "message_duties"
+	TypeMessageDutyChanges = "message_duty_changes"
+	TypeMessageZSRV        = "message_zsrv"
+	TypeMessageCall        = "message_call"
 )
 
 type MessageText struct {

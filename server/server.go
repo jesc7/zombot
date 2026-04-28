@@ -35,7 +35,7 @@ func Start(ctx context.Context, service bool) error {
 	myBus := bus.NewBus()
 	defer myBus.Close()
 
-	srv := ws.NewWebSocketServer(ctx, cfg, myBus)
+	srv, e := ws.NewWebSocketServer(ctx, cfg, myBus)
 	bot, e := maxbot.NewBot(ctx, cfg, myBus)
 	if e != nil {
 		log.Fatalln("Can't create Max bot:", e)
@@ -44,14 +44,14 @@ func Start(ctx context.Context, service bool) error {
 	wg := &sync.WaitGroup{}
 	wg.Go(func() { //run WebSocket server
 		defer cancel()
-		if e = srv.Run(ctx, bot.ChOut); e != nil {
+		if e = srv.Run(ctx); e != nil {
 			log.Println(e)
 		}
 	})
 
 	wg.Go(func() { //run Max bot
 		defer cancel()
-		bot.Run(ctx, srv.ChOut)
+		bot.Run(ctx)
 	})
 
 	wg.Wait()

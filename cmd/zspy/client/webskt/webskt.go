@@ -74,7 +74,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 			}
 
 			switch env.Type {
-			case shared.MT_MessageDuties:
+			case shared.TypeMessageDuties:
 				dut, e := shared.Unpack[shared.MessageDuties](env)
 				if e != nil {
 					continue
