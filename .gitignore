@@ -3,3 +3,4 @@
 cfg.json
 *.log
 /zombot
+/cmd/zspy/cfg.json
