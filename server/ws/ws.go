@@ -18,7 +18,6 @@ type WebSocketServer struct {
 	srv    *http.Server
 	jwtKey []byte
 	spy    *websocket.Conn
-	chIn   <-chan shared.Envelope
 	chOut  chan<- shared.Envelope
 }
 
@@ -26,11 +25,10 @@ var (
 	upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 )
 
-func NewWebSocketServer(ctx context.Context, cfg types.Config, chIn, chOut chan shared.Envelope) *WebSocketServer {
+func NewWebSocketServer(ctx context.Context, cfg types.Config) *WebSocketServer {
 	ws := &WebSocketServer{
 		jwtKey: []byte(cfg.WS.JwtKey),
-		chIn:   chIn,
-		chOut:  chOut,
+		chOut:  make(chan<- shared.Envelope),
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
