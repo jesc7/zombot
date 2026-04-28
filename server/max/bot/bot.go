@@ -103,8 +103,16 @@ out:
 				today := time.Now().Truncate(24 * time.Hour)
 				b := strings.Builder{}
 				for _, v := range m.A {
-					tip := ""
-					b.WriteString(fmt.Sprintf(""))
+					var tip string
+					switch v.Date {
+					case today:
+						tip = " (сегодня)"
+					case today.Add(24 * time.Hour):
+						tip = " (завтра)"
+					case today.Add(24 * time.Hour * 2):
+						tip = " (послезавтра)"
+					}
+					fmt.Fprintf(&b, "%s%s: %s\n", v.Date.Format("02.01"), tip, v.Name)
 				}
 
 			case shared.TypeMessageZSRV:
