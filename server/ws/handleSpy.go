@@ -58,7 +58,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, w http.ResponseWriter,
 		case <-readError: //ошибка чтения сокета - выходим
 			return
 
-		case env := <-ws.ch: //наконец-то делаем что-то полезное
+		case env := <-ws.chIn: //наконец-то делаем что-то полезное
 			if e := shared.Write(ws.spy, env); e != nil {
 				log.Println(e)
 			}
