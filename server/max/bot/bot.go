@@ -67,6 +67,20 @@ func (b *Bot) SendText(text string) {
 }
 
 func (b *Bot) Run(ctx context.Context) {
+
+	_tipDay := func(t time.Time) string {
+		today, tip := ctypes.ClearTime(time.Now()), ""
+		switch t {
+		case today:
+			tip = " (сегодня)"
+		case today.Add(24 * time.Hour):
+			tip = " (завтра)"
+		case today.Add(24 * time.Hour * 2):
+			tip = " (послезавтра)"
+		}
+		return tip
+	}
+
 out:
 	for {
 		select {
@@ -99,20 +113,10 @@ out:
 					break
 				}
 
-				today := ctypes.ClearTime(time.Now())
 				sb := strings.Builder{}
 				sb.WriteString("👷 <b>Дежурные</b>\n\n")
 				for _, v := range m.A {
-					var tip string
-					switch v.Date {
-					case today:
-						tip = " (сегодня)"
-					case today.Add(24 * time.Hour):
-						tip = " (завтра)"
-					case today.Add(24 * time.Hour * 2):
-						tip = " (послезавтра)"
-					}
-					fmt.Fprintf(&sb, "%s%s: %s\n", v.Date.Format("02.01"), tip, v.Caption)
+					fmt.Fprintf(&sb, "%s%s: %s\n", v.Date.Format("02.01"), _tipDay(v.Date), v.Caption)
 				}
 				b.SendText(sb.String())
 
@@ -125,21 +129,11 @@ out:
 					continue
 				}
 
-				today := ctypes.ClearTime(time.Now())
 				sb := strings.Builder{}
 				sb.WriteString("👷 <b>Изменения дежурств</b>\n\n")
 				signs := []string{"⭐", "🚫", "🔄"}
 				for _, v := range m.Changes {
-					var tip string
-					switch v.Date {
-					case today:
-						tip = " (сегодня)"
-					case today.Add(24 * time.Hour):
-						tip = " (завтра)"
-					case today.Add(24 * time.Hour * 2):
-						tip = " (послезавтра)"
-					}
-					fmt.Fprintf(&sb, "%s %s%s: %s\n", signs[v.ChangeType], v.Date.Format("02.01"), tip, v.Caption)
+					fmt.Fprintf(&sb, "%s %s%s: %s\n", signs[v.ChangeType], v.Date.Format("02.01"), _tipDay(v.Date), v.Caption)
 				}
 				b.SendText(sb.String())
 
