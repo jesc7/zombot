@@ -14,10 +14,6 @@ import (
 	"github.com/jesc7/zombot/server/types"
 )
 
-/*type Message struct {
-	Payload []byte
-}*/
-
 type WebSocketServer struct {
 	srv    *http.Server
 	jwtKey []byte
@@ -45,6 +41,9 @@ func NewWebSocketServer(cfg types.Config) *WebSocketServer {
 }
 
 func (ws *WebSocketServer) Run(ctx context.Context) error {
+	ws.ch = make(chan shared.Envelope)
+	defer close(ws.ch)
+
 	go func() {
 		if e := ws.srv.ListenAndServe(); e != nil && e != http.ErrServerClosed {
 			log.Fatalf("WebSocket server error: %v", e)
@@ -102,13 +101,36 @@ func handle(ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
 		ws.spy.Close()
 		ws.spy = nil
 	}()
-
-	// Канал для передачи сообщений от "бизнес-логики" к клиенту
-	outbound := make(chan string)
-	// Канал для отслеживания ошибок чтения
 	readError := make(chan struct{})
 
-	// 1. Горутина для ЧТЕНИЯ (Incoming TextMessages)
+	go func() {
+		defer close(readError)
+
+		for {
+			env, e := shared.Read(ws.spy)
+			if e != nil {
+				return
+			}
+
+			switch env.Type {
+			case shared.MT_MessageDuties:
+				dut, e := shared.Unpack[shared.MessageDuties](env)
+				if e != nil {
+					continue
+				}
+				dut.A, e = duties.Duty(ctx, db, dut.Q)
+				if e != nil {
+					continue
+				}
+				env, e = shared.Pack(env.Type, dut)
+				if e != nil {
+					continue
+				}
+				ws.Write(env)
+			}
+		}
+	}()
+
 	go func() {
 		for {
 			messageType, payload, err := conn.ReadMessage()
