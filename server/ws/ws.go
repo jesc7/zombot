@@ -42,34 +42,27 @@ func NewWebSocketServer(cfg types.Config) *WebSocketServer {
 	return ws
 }
 
-func (ws *WebSocketServer) Read() ([]byte, error) {
-	return nil, nil
-}
+func (ws *WebSocketServer) Run(ctx context.Context) {
+	go func() {
+		if e := ws.srv.ListenAndServe(); e != nil && e != http.ErrServerClosed {
+			log.Fatalf("WebSocket server error: %v", e)
+		}
+	}()
 
-func (ws *WebSocketServer) Write(pay []byte) error {
-	return nil
-}
+	log.Println("WebSocket server started, here the tokens:")
+	for k, v := range map[ClientType]string{CT_ZSPY: "zspy"} {
+		jwt, e := jwtGenerate(ws.jwtKey, k)
+		log.Printf("%s=%s (%v)\n", v, jwt, e)
+	}
 
-type ClientType string
+	<-ctx.Done()
 
-const (
-	CT_ZSPY ClientType = "zspy"
-)
+	ctxClose, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-type Claims struct {
-	Type ClientType `json:"type"`
-	jwt.RegisteredClaims
-}
-
-func jwtGenerate(key []byte, ct ClientType) (string, error) {
-	return jwt.NewWithClaims(jwt.SigningMethodHS256,
-		&Claims{
-			Type: ct,
-			RegisteredClaims: jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Truncate(24 * time.Hour).Add(time.Hour * 24 * 365 * 10)), //10 years
-			},
-		},
-	).SignedString(key)
+	if e := ws.srv.Shutdown(ctxClose); e != nil {
+		log.Fatalf("WebSocket server shutdown error: %v", e)
+	}
 }
 
 func handle(ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
@@ -160,25 +153,24 @@ func handle(ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (ws *WebSocketServer) Run(ctx context.Context) {
-	go func() {
-		if e := ws.srv.ListenAndServe(); e != nil && e != http.ErrServerClosed {
-			log.Fatalf("WebSocket server error: %v", e)
-		}
-	}()
+type ClientType string
 
-	log.Println("WebSocket server started, here the tokens:")
-	for k, v := range map[ClientType]string{CT_ZSPY: "zspy"} {
-		jwt, e := jwtGenerate(ws.jwtKey, k)
-		log.Printf("%s=%s (%v)\n", v, jwt, e)
-	}
+const (
+	CT_ZSPY ClientType = "zspy"
+)
 
-	<-ctx.Done()
+type Claims struct {
+	Type ClientType `json:"type"`
+	jwt.RegisteredClaims
+}
 
-	ctxClose, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if e := ws.srv.Shutdown(ctxClose); e != nil {
-		log.Fatalf("WebSocket server shutdown error: %v", e)
-	}
+func jwtGenerate(key []byte, ct ClientType) (string, error) {
+	return jwt.NewWithClaims(jwt.SigningMethodHS256,
+		&Claims{
+			Type: ct,
+			RegisteredClaims: jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(time.Now().Truncate(24 * time.Hour).Add(time.Hour * 24 * 365 * 10)), //10 years
+			},
+		},
+	).SignedString(key)
 }
