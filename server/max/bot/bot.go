@@ -13,6 +13,7 @@ import (
 
 	//"github.com/jesc7/zombot/server/jp/duties"
 
+	"github.com/jesc7/zombot/cmd/zspy/shared"
 	"github.com/jesc7/zombot/server/queue"
 	"github.com/jesc7/zombot/server/types"
 	"github.com/jesc7/zombot/server/ws"
@@ -127,6 +128,13 @@ out:
 
 				switch upd.GetCommand() {
 				case "/duty": //дежурства
+					env, _ := shared.Pack(shared.MT_MessageDuties, shared.MessageDuties{
+						Q: shared.DutyQuery{
+							Name: "",
+							Days: 1,
+						},
+					})
+					b.srv.Write(env)
 					//шлем запрос zspy
 
 					//и только когда придет ответ, шлем его боту

@@ -67,6 +67,11 @@ func (ws *WebSocketServer) Run(ctx context.Context) error {
 	return ctx.Err()
 }
 
+func (ws *WebSocketServer) Write(env shared.Envelope) {
+	defer recover()
+	ws.ch <- env
+}
+
 func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	auth := r.Header.Get("Authorization")
 	tokenStr := strings.TrimPrefix(auth, "Bearer ")
