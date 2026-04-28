@@ -116,7 +116,16 @@ out:
 				}
 				b.SendText(sb.String())
 
-			//сообщения от площадок
+			//изменения дежурств
+			case shared.TypeMessageDutyChanges:
+				log.Println("Bot TypeMessageDutyChanges")
+
+				m, e := shared.Unpack[shared.MessageDutyChanges](env)
+				if e != nil {
+					continue
+				}
+
+				//сообщения от площадок
 			case shared.TypeMessageZSRV:
 				log.Println("Bot TypeMessageZSRV")
 
