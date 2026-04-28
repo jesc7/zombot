@@ -31,7 +31,7 @@ func NewWebSocketServer(ctx context.Context, cfg types.Config) *WebSocketServer 
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		handle(ctx, ws, w, r)
+		ws.handle(ctx, w, r)
 	})
 	ws.srv = &http.Server{
 		Handler: mux,
@@ -67,7 +67,7 @@ func (ws *WebSocketServer) Run(ctx context.Context) error {
 	return ctx.Err()
 }
 
-func handle(ctx context.Context, ws *WebSocketServer, w http.ResponseWriter, r *http.Request) {
+func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	auth := r.Header.Get("Authorization")
 	tokenStr := strings.TrimPrefix(auth, "Bearer ")
 	if auth == "" || tokenStr == auth {
@@ -84,75 +84,14 @@ func handle(ctx context.Context, ws *WebSocketServer, w http.ResponseWriter, r *
 
 	switch claims.Type {
 	case ct_ZSPY:
-		if ws.spy != nil {
-			http.Error(w, "ZSpy already connected", http.StatusNotAcceptable)
-			return
-		}
+		ws.handleSpy(ctx, w, r)
 
 	default:
 		return
 	}
-
-	conn, e := upgrader.Upgrade(w, r, nil)
-	if e != nil {
-		http.Error(w, "Upgrade: WebSocket", http.StatusUpgradeRequired)
-		return
-	}
-	switch claims.Type {
-	case ct_ZSPY:
-		ws.spy = conn
-	}
-
-	defer func() {
-		conn.Close()
-		switch claims.Type {
-		case ct_ZSPY:
-			ws.spy = nil
-		}
-	}()
-	readError := make(chan struct{})
-
-	go func() {
-		defer close(readError)
-
-		for {
-			env, e := shared.Read(conn)
-			if e != nil {
-				return
-			}
-
-			switch env.Type {
-			case shared.MT_MessageText:
-			}
-		}
-	}()
-
-	for {
-		select {
-		case <-ctx.Done(): //контекст отменен - выходим
-			conn.WriteControl(
-				websocket.CloseMessage,
-				websocket.FormatCloseMessage(websocket.CloseNormalClosure, "Server Shutdown"),
-				time.Now().Add(time.Second),
-			)
-			return
-
-		case <-readError: //ошибка чтения сокета - выходим
-			return
-
-		case env := <-ws.ch: //наконец-то делаем что-то полезное
-			if e := shared.Write(conn, env); e != nil {
-				log.Println(e)
-			}
-		}
-	}
 }
 
 type clientType string
-
-const (
-	ct_ZSPY clientType = "zspy"
-)
 
 type Claims struct {
 	Type clientType `json:"type"`
