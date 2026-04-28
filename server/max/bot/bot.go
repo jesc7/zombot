@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	max "github.com/max-messenger/max-bot-api-client-go"
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
@@ -128,10 +129,15 @@ out:
 
 				switch upd.GetCommand() {
 				case "/duty": //дежурства
+					params := strings.Split(upd.GetParam(), "#")
+					name, days := params[0], 7
+					if len(params) > 1 {
+						days, _ = strconv.Atoi(params[1])
+					}
 					env, _ := shared.Pack(shared.MT_MessageDuties, shared.MessageDuties{
 						Q: shared.DutyQuery{
-							Name: "",
-							Days: 1,
+							Name: name,
+							Days: days,
 						},
 					})
 					b.srv.Write(env)
