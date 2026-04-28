@@ -33,3 +33,5 @@
 2026/04/28 16:24:04 WebSocket server started, here the tokens:
 2026/04/28 16:24:04 zspy=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoienNweSIsImV4cCI6MjA5MjY5NDQwMH0.qK4gTH0_97D4N1Q3xFxVZHZlnoLi--2R5wRvHGAk9LY (<nil>)
 2026/04/28 16:24:14 Connect: 127.0.0.1:1234 / 127.0.0.1:60191
+2026/04/28 16:26:56 Bot <-chIn TypeMessageCall
+2026/04/28 16:27:11 Bot <-chIn TypeMessageCall
