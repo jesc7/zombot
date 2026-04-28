@@ -61,8 +61,7 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 func (b *Bot) SendText(text string) {
 	b.QWait.Add(&queue.WaitObj{
 		O: max.NewMessage().
-			SetText(text).
-			SetFormat(schemes.HTML),
+			SetText(text),
 	}, queue.PRIORITY_NORMAL)
 }
 
@@ -157,7 +156,10 @@ out:
 			if !ok {
 				break
 			}
-			b.bot.Messages.Send(ctx, m.SetChat(b.chatID))
+			b.bot.Messages.Send(ctx, m.
+				SetChat(b.chatID).
+				SetFormat(schemes.HTML),
+			)
 			if wo.OnOk != nil {
 				wo.OnOk()
 			}
