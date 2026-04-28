@@ -2,7 +2,6 @@ package shared
 
 import (
 	"encoding/json"
-	"log"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -40,9 +39,6 @@ func Read(conn *websocket.Conn) (Envelope, error) {
 	case websocket.TextMessage:
 		var env Envelope
 		e = json.Unmarshal(data, &env)
-
-		log.Printf("Read: %#v (%v)", env, e)
-
 		return env, e
 
 	default:
@@ -55,9 +51,6 @@ func Write(conn *websocket.Conn, env Envelope) error {
 	if e != nil {
 		return e
 	}
-
-	log.Printf("Write: %#v (%v)", env, e)
-
 	return conn.WriteMessage(websocket.TextMessage, data)
 }
 
