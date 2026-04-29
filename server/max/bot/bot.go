@@ -308,7 +308,7 @@ out:
 
 				case "/birthday": //дни рождения
 					days, _ := strconv.Atoi(upd.GetParam())
-					if days == 0 {
+					if days <= 0 {
 						days = 31
 					}
 					env, e := shared.Pack(shared.TypeMessageBirthdays, shared.MessageBirthdays{Days: days})

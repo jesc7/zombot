@@ -107,6 +107,11 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 				ws.Write(env)
 
 			case shared.TypeMessageBirthdays:
+				pay, e := shared.Unpack[shared.MessageBirthdays](env)
+				if e != nil {
+					continue
+				}
+
 				pay, e := planner.Birthdays(ctx, db, 30)
 				if e != nil {
 					continue
