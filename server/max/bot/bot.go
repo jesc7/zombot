@@ -219,18 +219,10 @@ out:
 					}
 					b.b.Write(types.BUS_WS, env)
 
-				case "/absent":
-				case "/birthday":
-				case "/ratings":
-				case "/ci":
-
-				case "/chatid":
-					b.QWait.Add(&queue.WaitObj{
-						O: max.NewMessage().
-							SetFormat(schemes.HTML).
-							SetChat(upd.GetChatID()).
-							SetText("ChatID: " + strconv.FormatInt(upd.GetChatID(), 64)),
-					}, queue.PRIORITY_NORMAL)
+				case "/absent": //отсутствующие
+				case "/birthday": //дни рождения
+				case "/ratings": //пятничные рейтинги
+				case "/ci": //инфо о клиентах
 				}
 			}
 		}
