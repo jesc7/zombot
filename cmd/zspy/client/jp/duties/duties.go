@@ -37,7 +37,7 @@ func DutiesList(ctx context.Context, db *sql.DB) (*Planner, error) {
 	return &pl, nil
 }
 
-func Duty(ctx context.Context, db *sql.DB, q shared.DutyQuery) ([]shared.Duty, error) {
+func Duty(ctx context.Context, db *sql.DB, q shared.DutyQuery) ([]shared.Daily, error) {
 	pl, e := DutiesList(ctx, db)
 	if e != nil {
 		return nil, e
@@ -51,11 +51,11 @@ func Duty(ctx context.Context, db *sql.DB, q shared.DutyQuery) ([]shared.Duty, e
 		q.Days = 7
 	}
 
-	var res []shared.Duty
+	var res []shared.Daily
 	for i := start; i <= q.Days; i++ {
 		t := types.ClearTime(time.Now()).Add(24 * time.Hour * time.Duration(i))
 		if d, ok := (*pl)[t]; ok && (q.Name == "" || types.ContainsWord(d, q.Name)) {
-			res = append(res, shared.Duty{
+			res = append(res, shared.Daily{
 				Date:    t,
 				Caption: d,
 			})

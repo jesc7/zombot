@@ -278,6 +278,12 @@ out:
 					b.b.Write(types.BUS_WS, env)
 
 				case "/birthday": //дни рождения
+					env, e := shared.Pack(shared.TypeMessageBirthdays, shared.MessageBirthdays{})
+					if e != nil {
+						break
+					}
+					b.b.Write(types.BUS_WS, env)
+
 				case "/ratings": //пятничные рейтинги
 				case "/ci": //инфо о клиентах
 				}

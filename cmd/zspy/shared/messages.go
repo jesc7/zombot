@@ -61,6 +61,7 @@ const (
 	TypeMessageZSRV        = "message_zsrv"
 	TypeMessageCall        = "message_call"
 	TypeMessageAbsents     = "message_absents"
+	TypeMessageBirthdays   = "message_birthdays"
 )
 
 type MessageText struct {
@@ -72,14 +73,14 @@ type DutyQuery struct {
 	Days int    `json:"days,omitempty"`
 }
 
-type Duty struct {
+type Daily struct {
 	Date    time.Time `json:"date"`
 	Caption string    `json:"caption"`
 }
 
 type MessageDuties struct {
 	Q DutyQuery `json:"q,omitempty"`
-	A []Duty    `json:"a,omitempty"`
+	A []Daily   `json:"a,omitempty"`
 }
 
 type DutyChangeType int
@@ -92,7 +93,7 @@ const (
 
 type MessageDutyChanges struct {
 	Changes []struct {
-		Duty
+		Daily
 		ChangeType DutyChangeType `json:"change_type"`
 	} `json:"changes,omitempty"`
 }
@@ -142,4 +143,8 @@ type Absent struct {
 
 type MessageAbsents struct {
 	Absents []Absent `json:"absents"`
+}
+
+type MessageBirthdays struct {
+	Birthdays []Daily `json:"birthdays"`
 }
