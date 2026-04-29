@@ -161,10 +161,17 @@ out:
 				sb := strings.Builder{}
 				sb.WriteString("👷 <b>Отсутствующие</b>\n\n")
 				for _, v := range m.Absents {
+					var tip string
 					switch v.Type {
 					case shared.AT_DUNNO:
-						fmt.Fprintf(&sb, "%s%s: %s\n", v.Date.Format("02.01"), _tipDay(v.Date), v.Caption)
+						tip = types.Dunno(v.gender)
+					case shared.AT_ILL:
+					case shared.AT_LEAVE:
+					case shared.AT_DINNER:
+					case shared.AT_OFF:
+					case shared.AT_WORK:
 					}
+					fmt.Fprintf(&sb, "%s %s%s\n", tip, v.Name, types.Iif(len(v.Comment) != 0, " - "+v.Comment, ""))
 				}
 				b.SendText(sb.String())
 

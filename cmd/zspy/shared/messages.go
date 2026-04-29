@@ -137,6 +137,7 @@ type MessageAbsents struct {
 	Absents []struct {
 		Sex     EmployeeSex `json:"sex"`
 		Type    AbsentType  `json:"type"`
+		Name    string      `json:"name"`
 		Comment string      `json:"comment,omitempty"`
 	} `json:"absents"`
 }
