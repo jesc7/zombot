@@ -3,7 +3,6 @@ package planner
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"strings"
 	"time"
 
@@ -89,7 +88,7 @@ func Absents(ctx context.Context, db *sql.DB) ([]shared.Absent, error) {
 
 // Birthdays возвращает дни рождения сотрудников
 func Birthdays(ctx context.Context, db *sql.DB, days int) ([]shared.Birthday, error) {
-	rows, e := db.Query(fmt.Sprintf(`
+	rows, e := db.QueryContext(ctx, `
 		select *
 		from (
 			select iif(b.dr < current_date, dateadd(year, 1, b.dr), b.dr) as dr, b.caption, b.g
@@ -104,17 +103,17 @@ func Birthdays(ctx context.Context, db *sql.DB, days int) ([]shared.Birthday, er
 				) a
 			) b
 		) c
-		where %s
+		where c.dr between current_date and dateadd(day, ?, current_date)
 		order by 1,2
-		`, funcs.Iif(mode == 0, "c.dr = current_date", "c.dr between current_date and dateadd(month, 1, current_date)")))
+		`, days)
 	if e != nil {
-		return ""
+		return nil, e
 	}
 	defer rows.Close()
 
-	var listToday, listAfter []string
+	var res []shared.Birthday
 	for rows.Next() {
-		s, d, g := "", time.Time{}, 0
+		d, s, g := time.Time{}, "", 0
 		if e = rows.Scan(&d, &s, &g); e != nil {
 			continue
 		}
