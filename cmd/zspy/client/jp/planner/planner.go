@@ -1,13 +1,16 @@
 package planner
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+
+	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
 
 // Absents выводит список отсутствующих и причину отсутствия
-func Absents(db *sql.DB, forced bool) (res string) {
-	rows, e := db.Query(`
+func Absents(ctx context.Context, db *sql.DB) ([]shared.Absent, error) {
+	rows, e := db.QueryContext(ctx, `
 		select t1, t2, u, lower(trim(iif(t1 = 0, c2, iif((t1 = 6) or (t1 = 7), c1 || iif(char_length(c1) > 0 and char_length(c2) > 0, ' / ', '') || c2, c1)))) as c, g
 		from (
 			select coalesce(t.tabel_type, -1) as t1, coalesce(tc.id, -1) as t2, u.username as u, coalesce(tt.caption, '') as c1, coalesce(tc.caption, '') as c2, coalesce(p.gender, 0) as g
@@ -25,23 +28,33 @@ func Absents(db *sql.DB, forced bool) (res string) {
 		order by u
 	`)
 	if e != nil {
-		return res
+		return nil, e
 	}
 	defer rows.Close()
 
-	type wat struct {
-		type1  int
-		type2  int
-		name   string
-		desc   string
-		gender int
+	type abs struct {
+		type1   int
+		type2   int
+		name    string
+		comment string
+		gender  int
 	}
-	var user wat
+
+	var (
+		res  []shared.Absent
+		user abs
+	)
 	for rows.Next() {
-		if e = rows.Scan(&user.type1, &user.type2, &user.name, &user.desc, &user.gender); e == nil {
+		if e = rows.Scan(&user.type1, &user.type2, &user.name, &user.comment, &user.gender); e == nil {
 			if user.gender < 0 || user.gender > 1 {
 				user.gender = 0
 			}
+			a := shared.Absent{
+				Name:    user.name,
+				Gender:  shared.EmployeeGender(user.gender),
+				Comment: user.comment,
+			}
+
 			pic := ""
 			switch user.type1 {
 			case -1:
@@ -67,11 +80,8 @@ func Absents(db *sql.DB, forced bool) (res string) {
 					pic = funcs.Dunno(user.gender) //неизвестно
 				}
 			}
-			res += fmt.Sprintf("%s %s%s\n", pic, user.name, funcs.Iif(len(user.desc) != 0, " - "+user.desc, ""))
+			res += fmt.Sprintf("%s %s%s\n", pic, user.name, funcs.Iif(len(user.comment) != 0, " - "+user.comment, ""))
 		}
 	}
-	if len(res) != 0 {
-		res = "<b>Отсутствующие</b>\n\n" + res
-	}
-	return res
+	return res, nil
 }
