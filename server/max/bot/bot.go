@@ -23,13 +23,8 @@ import (
 
 const (
 	MSG_HELP = `<b>Что умеет этот бот:</b>
-sdfvsev
-dfv
-sd
-vs
-dv
-sd
-f
+
+дЕЖУр <b>[имя]</b> <b>[дней]</b> - дежурства [имя] (все) на ближайшие [дней] (7)
 `
 )
 
@@ -214,7 +209,7 @@ out:
 
 				switch upd.GetCommand() {
 				case "/help": //помощь
-					b.SendText("")
+					b.SendText(MSG_HELP)
 
 				case "/duty": //дежурства
 					params := strings.Split(upd.GetParam(), "#")
