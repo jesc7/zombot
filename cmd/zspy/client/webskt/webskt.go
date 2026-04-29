@@ -91,6 +91,21 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 					continue
 				}
 				ws.Write(env)
+
+			case shared.TypeMessageAbsents:
+				dut, e := shared.Unpack[shared.MessageAbsents](env)
+				if e != nil {
+					continue
+				}
+				dut.A, e = duties.Duty(ctx, db, dut.Q)
+				if e != nil {
+					continue
+				}
+				env, e = shared.Pack(env.Type, dut)
+				if e != nil {
+					continue
+				}
+				ws.Write(env)
 			}
 		}
 	}()

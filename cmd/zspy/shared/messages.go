@@ -115,11 +115,11 @@ type MessageCall struct {
 	Phone string `json:"phone"`
 }
 
-type EmployeeSex int
+type EmployeeGender int
 
 const (
-	ES_FEMALE EmployeeSex = iota
-	ES_MALE
+	EG_FEMALE EmployeeGender = iota
+	EG_MALE
 )
 
 type AbsentType int
@@ -135,9 +135,9 @@ const (
 
 type MessageAbsents struct {
 	Absents []struct {
-		Sex     EmployeeSex `json:"sex"`
-		Type    AbsentType  `json:"type"`
-		Name    string      `json:"name"`
-		Comment string      `json:"comment,omitempty"`
+		Gender  EmployeeGender `json:"gender"`
+		Type    AbsentType     `json:"type"`
+		Name    string         `json:"name"`
+		Comment string         `json:"comment,omitempty"`
 	} `json:"absents"`
 }
