@@ -194,20 +194,21 @@ out:
 					if v.Date.Equal(today) {
 						bdToday = append(bdToday, fmt.Sprintf("%s %s", gender, v.Caption))
 					} else {
-						bdAfter = append(bdAfter, v)
+						bdAfter = append(bdAfter, fmt.Sprintf("%s %s (%s)", gender, v.Caption, v.Date.Format("02.01")))
 					}
 				}
 				if len(bdToday) != 0 {
 					tip := []string{"🎉", "🎁", "🎂", "✨", "💐"}
-					sb.WriteString("<b>Сегодня день рождения у:</b>\n" + strings.Join(listToday, "\n") + "\n\nПоздравляем, ю-ху!!! " +
-						funcs.RndFrom(tip...) + funcs.RndFrom(tip...) + funcs.RndFrom(tip...))
-					if len(listAfter) != 0 {
-						res += "\n\n<b>А еще скоро день рождения у:</b>\n"
+					sb.WriteString("<b>Сегодня день рождения у:</b>\n" + strings.Join(bdToday, "\n") + "\n\nПоздравляем, ю-ху!!! " +
+						types.RndFrom(tip...) + types.RndFrom(tip...) + types.RndFrom(tip...))
+					if len(bdAfter) != 0 {
+						sb.WriteString("\n\n<b>А еще скоро день рождения у:</b>\n")
 					}
 
 				} else if len(bdAfter) != 0 {
 					sb.WriteString("<b>Скоро день рождения у:</b>\n\n")
 				}
+				sb.WriteString(strings.Join(bdAfter, "\n"))
 				b.SendText(sb.String())
 
 			//сообщения от площадок
