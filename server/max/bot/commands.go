@@ -20,7 +20,7 @@ func findCommand(re *regexp.Regexp, value string) (bool, map[string]string) {
 	}
 
 	groups := make(map[string]string)
-	for i, name := range reDuty.SubexpNames() {
+	for i, name := range re.SubexpNames() {
 		if i < len(res) && i != 0 && name != "" {
 			groups[name] = res[i]
 		}

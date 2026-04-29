@@ -182,7 +182,7 @@ out:
 					continue
 				}
 				if len(m.Birthdays) == 0 {
-					b.SendText("☹ В ближайший месяц нет дней рождения")
+					b.SendText(fmt.Sprintf("☹ В ближайшие %d дней нет ДР", m.Days))
 					break
 				}
 
@@ -191,7 +191,7 @@ out:
 				sb := strings.Builder{}
 				for _, v := range m.Birthdays {
 					gender := types.RndFrom([2][]string{{"👸🏼", "👸", "👸🏻", "💃"}, {"🤵", "🤵🏻", "🤵🏽"}}[v.Gender]...)
-					if v.Date == today {
+					if v.Date.Equal(today) {
 						bdToday = append(bdToday, fmt.Sprintf("%s %s", gender, v.Caption))
 					} else {
 						bdAfter = append(bdAfter, fmt.Sprintf("%s %s (%s)", gender, v.Caption, v.Date.Format("02.01")))
