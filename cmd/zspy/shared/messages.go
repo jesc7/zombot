@@ -133,11 +133,13 @@ const (
 	AT_WORK
 )
 
+type Absent struct {
+	Gender  EmployeeGender `json:"gender"`
+	Type    AbsentType     `json:"type"`
+	Name    string         `json:"name"`
+	Comment string         `json:"comment,omitempty"`
+}
+
 type MessageAbsents struct {
-	Absents []struct {
-		Gender  EmployeeGender `json:"gender"`
-		Type    AbsentType     `json:"type"`
-		Name    string         `json:"name"`
-		Comment string         `json:"comment,omitempty"`
-	} `json:"absents"`
+	Absents []Absent `json:"absents"`
 }
