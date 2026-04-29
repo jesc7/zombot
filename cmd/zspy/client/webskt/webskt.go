@@ -126,6 +126,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 
 	tPing := time.NewTicker(10 * time.Second)
 	defer tPing.Stop()
+	tM30 := time.NewTicker(30 * time.Minute)
+	defer tM30.Stop()
 
 	for {
 		select {
