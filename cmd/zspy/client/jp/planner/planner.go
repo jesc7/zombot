@@ -3,6 +3,7 @@ package planner
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
@@ -126,4 +127,42 @@ func Birthdays(ctx context.Context, db *sql.DB, days int) ([]shared.Birthday, er
 		})
 	}
 	return res, nil
+}
+
+func WatchCriticalTasks(ctx context.Context, db *sql.DB, minutes int) string {
+	rows, e := db.QueryContext(ctx, `
+		select r.id, r.insertdt, r.point_id, p.caption, r.atext, datediff(minute, r.insertdt, current_timestamp), r.clientinfo
+		from srq$requests r
+		join sp$group_detail gd on gd.grouptable_id = r.id
+		join points p on p.id = r.point_id
+		where (r.uchet_id = 0 or r.uchet_id is null)
+			and r.sdeleted is null
+			and gd.grouptable = 'SRQ$REQUESTS' and gd.group_id = 288
+			and datediff(minute, r.insertdt, current_timestamp) > ?
+			and datediff(minute, r.insertdt, current_timestamp) < ?
+			order by r.insertdt desc
+	`, minutes, minutes*2)
+	if e != nil {
+		return ""
+	}
+	defer rows.Close()
+
+	var (
+		id, point_id, dur              int64
+		dt                             time.Time
+		res, caption, text, clientInfo string
+	)
+	for rows.Next() {
+		if e = rows.Scan(&id, &dt, &point_id, &caption, &text, &dur, &clientInfo); e != nil {
+			continue
+		}
+		if len(clientInfo) != 0 {
+			clientInfo = " (" + clientInfo + ")"
+		}
+		res = fmt.Sprintf("%s\n\n#<b>%d</b> (%d мин.) %s%s\n%s", res, id, dur, caption, clientInfo, text)
+	}
+	if len(res) != 0 {
+		res = "⚡ <b>Срочные заявки</b>" + res
+	}
+	return res
 }
