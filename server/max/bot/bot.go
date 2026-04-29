@@ -187,19 +187,26 @@ out:
 				}
 
 				today := ctypes.ClearTime(time.Now())
-				bdToday, bdAfter := []shared.Birthday{}, []shared.Birthday{}
+				bdToday, bdAfter := []string{}, []string{}
 				sb := strings.Builder{}
 				for _, v := range m.Birthdays {
+					gender := types.RndFrom([2][]string{{"👸🏼", "👸", "👸🏻", "💃"}, {"🤵", "🤵🏻", "🤵🏽"}}[v.Gender]...)
 					if v.Date.Equal(today) {
-						bdToday = append(bdToday, v)
+						bdToday = append(bdToday, fmt.Sprintf("%s %s", gender, v.Caption))
 					} else {
 						bdAfter = append(bdAfter, v)
 					}
 				}
 				if len(bdToday) != 0 {
+					tip := []string{"🎉", "🎁", "🎂", "✨", "💐"}
+					sb.WriteString("<b>Сегодня день рождения у:</b>\n" + strings.Join(listToday, "\n") + "\n\nПоздравляем, ю-ху!!! " +
+						funcs.RndFrom(tip...) + funcs.RndFrom(tip...) + funcs.RndFrom(tip...))
+					if len(listAfter) != 0 {
+						res += "\n\n<b>А еще скоро день рождения у:</b>\n"
+					}
 
 				} else if len(bdAfter) != 0 {
-
+					sb.WriteString("<b>Скоро день рождения у:</b>\n\n")
 				}
 				b.SendText(sb.String())
 
