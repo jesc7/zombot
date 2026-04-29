@@ -282,3 +282,13 @@ func ClearTime(t time.Time) time.Time {
 	y, m, d := t.Date()
 	return time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
 }
+
+func NextTime(s string) time.Duration {
+	t, _ := time.Parse("15:04", s)
+	now := time.Now()
+	target := time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), 0, 0, now.Location())
+	if now.After(target) {
+		target = target.Add(24 * time.Hour)
+	}
+	return target.Sub(now)
+}
