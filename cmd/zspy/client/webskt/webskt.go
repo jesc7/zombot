@@ -58,11 +58,11 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) error {
 				continue
 			}
 		}
-		ws.handle(ctx, db)
+		ws.handle(ctx, cfg, db)
 	}
 }
 
-func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
+func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql.DB) {
 
 	log.Printf("Connected: %s / %s", ws.conn.LocalAddr(), ws.conn.RemoteAddr())
 
@@ -149,7 +149,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 		case <-t08_00.C:
 			t08_00.Reset(24 * time.Hour)
 			go func() {
-				if s := checks.CheckEC(ws); s != "" { //critical tasks
+				if s := checks.CheckEC(cfg.EC); s != "" { //checks EC
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
 					}); e == nil {

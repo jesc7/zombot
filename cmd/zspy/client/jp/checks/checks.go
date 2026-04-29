@@ -266,13 +266,7 @@ func CheckWhois(sl []string, days int) string {
 	return ""
 }
 
-type EC struct {
-	Driver  string `json:"driver"`
-	ConnStr string `json:"connstr"`
-	Pwd     string `json:"pwd"`
-}
-
-func CheckEC(ec EC) string {
+func CheckEC(ec types.EC) string {
 	b, _ := base64.StdEncoding.DecodeString(ec.Pwd)
 	db, e := sql.Open(ec.Driver, fmt.Sprintf(ec.ConnStr, string(b)))
 	if e != nil {
