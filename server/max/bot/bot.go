@@ -191,7 +191,7 @@ out:
 				sb := strings.Builder{}
 				for _, v := range m.Birthdays {
 					gender := types.RndFrom([2][]string{{"👸🏼", "👸", "👸🏻", "💃"}, {"🤵", "🤵🏻", "🤵🏽"}}[v.Gender]...)
-					if v.Date.Equal(today) {
+					if v.Date == today {
 						bdToday = append(bdToday, fmt.Sprintf("%s %s", gender, v.Caption))
 					} else {
 						bdAfter = append(bdAfter, fmt.Sprintf("%s %s (%s)", gender, v.Caption, v.Date.Format("02.01")))
@@ -268,7 +268,9 @@ out:
 					break
 				}
 
-				if duty, name, days := isDuty(upd.Message.Body.Text); duty {
+				if isHelp(upd.Message.Body.Text) {
+					upd.Message.Body.Text = "/help"
+				} else if duty, name, days := isDuty(upd.Message.Body.Text); duty {
 					upd.Message.Body.Text = fmt.Sprintf("/duty:%s#%d", name, days)
 				} else if isAbsent(upd.Message.Body.Text) {
 					upd.Message.Body.Text = "/absent"

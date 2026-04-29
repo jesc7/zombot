@@ -3,9 +3,9 @@ package planner
 import (
 	"context"
 	"database/sql"
-	"strings"
 	"time"
 
+	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
 
@@ -117,36 +117,13 @@ func Birthdays(ctx context.Context, db *sql.DB, days int) ([]shared.Birthday, er
 		if e = rows.Scan(&d, &s, &g); e != nil {
 			continue
 		}
-		sign := funcs.RndFrom([2][]string{{"👸🏼", "👸", "👸🏻", "💃"}, {"🤵", "🤵🏻", "🤵🏽"}}[g]...)
-		switch {
-		case s == "Гарри Поттер":
-			sign = "⚡"
-		default:
-		}
-		today := d.Format("20060102") == time.Now().Format("20060102")
-		switch today {
-		case true:
-			listToday = append(listToday, sign+" "+s)
-		default:
-			listAfter = append(listAfter, sign+" "+s+d.Format(" (02.01)"))
-		}
+		res = append(res, shared.Birthday{
+			Daily: shared.Daily{
+				Date:    types.ClearTime(d),
+				Caption: s,
+			},
+			Gender: shared.Gender(g),
+		})
 	}
-	var res string
-	if len(listToday) != 0 { //день рождения сегодня
-		x := []string{"🎉", "🎁", "🎂", "✨", "💐"}
-		res = "<b>Сегодня день рождения у:</b>\n" + strings.Join(listToday, "\n") + "\n\nПоздравляем, ю-ху!!! " +
-			funcs.RndFrom(x...) + funcs.RndFrom(x...) + funcs.RndFrom(x...)
-		if len(listAfter) != 0 {
-			res += "\n\n<b>А еще скоро день рождения у:</b>\n"
-		}
-	} else {
-		if len(listAfter) != 0 { //дни рождения в ближайший месяц
-			res = "<b>Скоро день рождения у:</b>\n"
-		}
-	}
-	res += strings.Join(listAfter, "\n")
-	if mode == 1 && len(res) == 0 {
-		res = "☹ В ближайший месяц нет дней рождения"
-	}
-	return res
+	return res, nil
 }

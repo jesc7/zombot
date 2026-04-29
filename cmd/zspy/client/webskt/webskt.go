@@ -79,27 +79,40 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 
 			switch env.Type {
 			case shared.TypeMessageDuties:
-				dut, e := shared.Unpack[shared.MessageDuties](env)
+				pay, e := shared.Unpack[shared.MessageDuties](env)
 				if e != nil {
 					continue
 				}
-				dut.A, e = duties.Duty(ctx, db, dut.Q)
+				pay.A, e = duties.Duty(ctx, db, pay.Q)
 				if e != nil {
 					continue
 				}
-				env, e = shared.Pack(env.Type, dut)
+				env, e = shared.Pack(env.Type, pay)
 				if e != nil {
 					continue
 				}
 				ws.Write(env)
 
 			case shared.TypeMessageAbsents:
-				abs, e := planner.Absents(ctx, db)
+				pay, e := planner.Absents(ctx, db)
 				if e != nil {
 					continue
 				}
 				env, e = shared.Pack(env.Type, shared.MessageAbsents{
-					Absents: abs,
+					Absents: pay,
+				})
+				if e != nil {
+					continue
+				}
+				ws.Write(env)
+
+			case shared.TypeMessageBirthdays:
+				pay, e := planner.Birthdays(ctx, db, 30)
+				if e != nil {
+					continue
+				}
+				env, e = shared.Pack(env.Type, shared.MessageBirthdays{
+					Birthdays: pay,
 				})
 				if e != nil {
 					continue
