@@ -34,30 +34,23 @@ func Absents(ctx context.Context, db *sql.DB) ([]shared.Absent, error) {
 	}
 	defer rows.Close()
 
-	type abs struct {
-		type1   int
-		type2   int
-		name    string
-		comment string
-		gender  int
-	}
-
 	var (
-		res  []shared.Absent
-		user abs
+		res                  []shared.Absent
+		type1, type2, gender int
+		name, comment        string
 	)
 	for rows.Next() {
-		if e = rows.Scan(&user.type1, &user.type2, &user.name, &user.comment, &user.gender); e == nil {
-			if user.gender < 0 || user.gender > 1 {
-				user.gender = 0
+		if e = rows.Scan(&type1, &type2, &name, &comment, &gender); e == nil {
+			if gender < 0 || gender > 1 {
+				gender = 0
 			}
 			a := shared.Absent{
-				Name:    user.name,
-				Gender:  shared.Gender(user.gender),
-				Comment: user.comment,
+				Name:    name,
+				Gender:  shared.GenderType(gender),
+				Comment: comment,
 			}
 
-			switch user.type1 {
+			switch type1 {
 			case -1:
 				a.Type = shared.AT_DUNNO
 			case 2:
@@ -65,12 +58,12 @@ func Absents(ctx context.Context, db *sql.DB) ([]shared.Absent, error) {
 			case 3:
 				a.Type = shared.AT_LEAVE
 			case 6, 7: //поправил дежурных, проверить
-				if user.type2 == -1 {
-					user.type2 = 5
+				if type2 == -1 {
+					type2 = 5
 				}
 				fallthrough
 			default:
-				switch user.type2 {
+				switch type2 {
 				case 3:
 					a.Type = shared.AT_DINNER
 				case 4:
@@ -123,7 +116,7 @@ func Birthdays(ctx context.Context, db *sql.DB, days int) ([]shared.Birthday, er
 				Date:    types.ClearTime(d),
 				Caption: s,
 			},
-			Gender: shared.Gender(g),
+			Gender: shared.GenderType(g),
 		})
 	}
 	return res, nil
