@@ -111,14 +111,11 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 				if e != nil {
 					continue
 				}
-
-				pay, e := planner.Birthdays(ctx, db, 30)
+				pay.Birthdays, e = planner.Birthdays(ctx, db, pay.Days)
 				if e != nil {
 					continue
 				}
-				env, e = shared.Pack(env.Type, shared.MessageBirthdays{
-					Birthdays: pay,
-				})
+				env, e = shared.Pack(env.Type, pay)
 				if e != nil {
 					continue
 				}

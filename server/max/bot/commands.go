@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"log"
 	"regexp"
 	"strconv"
 )
@@ -52,6 +53,9 @@ func isBirthday(value string) (bool, int) {
 	if !b {
 		return b, 0
 	}
+
+	log.Printf("%#v", m)
+
 	days, _ := strconv.Atoi(m["days"])
 	return b, days
 }

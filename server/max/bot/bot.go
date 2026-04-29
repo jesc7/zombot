@@ -278,6 +278,8 @@ out:
 					upd.Message.Body.Text = fmt.Sprintf("/birthday:%d", days)
 				}
 
+				log.Println(upd.Message.Body.Text)
+
 				switch upd.GetCommand() {
 				case "/help": //помощь
 					b.SendText(MSG_HELP)
