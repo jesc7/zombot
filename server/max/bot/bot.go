@@ -274,8 +274,8 @@ out:
 					upd.Message.Body.Text = fmt.Sprintf("/duty:%s#%d", name, days)
 				} else if isAbsent(upd.Message.Body.Text) {
 					upd.Message.Body.Text = "/absent"
-				} else if isBirthday(upd.Message.Body.Text) {
-					upd.Message.Body.Text = "/birthday"
+				} else if bd, days := isBirthday(upd.Message.Body.Text); bd {
+					upd.Message.Body.Text = fmt.Sprintf("/birthday:%d", days)
 				}
 
 				switch upd.GetCommand() {
@@ -307,7 +307,11 @@ out:
 					b.b.Write(types.BUS_WS, env)
 
 				case "/birthday": //дни рождения
-					env, e := shared.Pack(shared.TypeMessageBirthdays, shared.MessageBirthdays{})
+					days, _ := strconv.Atoi(upd.GetParam())
+					if days == 0 {
+						days = 31
+					}
+					env, e := shared.Pack(shared.TypeMessageBirthdays, shared.MessageBirthdays{Days: days})
 					if e != nil {
 						break
 					}

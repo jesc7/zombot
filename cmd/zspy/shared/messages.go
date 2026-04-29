@@ -151,5 +151,6 @@ type Birthday struct {
 }
 
 type MessageBirthdays struct {
+	Days      int        `json:"days"`
 	Birthdays []Birthday `json:"birthdays"`
 }

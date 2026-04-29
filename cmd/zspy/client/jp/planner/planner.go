@@ -105,7 +105,7 @@ func Birthdays(ctx context.Context, db *sql.DB, days int) ([]shared.Birthday, er
 		) c
 		where c.dr between current_date and dateadd(day, ?, current_date)
 		order by 1,2
-		`, days)
+		`, days-1)
 	if e != nil {
 		return nil, e
 	}
