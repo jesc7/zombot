@@ -24,8 +24,10 @@ import (
 const (
 	MSG_HELP = `<b>Команды бота:</b>
 
+помощь - эта помощь
 дежур[...] [кто] [дней] - дежурства
 отсутств[...] - кто отсутствует
+день|дни рожд[...] [дней] - ДР в ближайшие дни
 `
 )
 
@@ -277,8 +279,6 @@ out:
 				} else if bd, days := isBirthday(upd.Message.Body.Text); bd {
 					upd.Message.Body.Text = fmt.Sprintf("/birthday:%d", days)
 				}
-
-				log.Println(upd.Message.Body.Text)
 
 				switch upd.GetCommand() {
 				case "/help": //помощь
