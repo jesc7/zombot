@@ -113,3 +113,29 @@ type MessageZSRV struct {
 type MessageCall struct {
 	Phone string `json:"phone"`
 }
+
+type EmployeeSex int
+
+const (
+	ES_FEMALE EmployeeSex = iota
+	ES_MALE
+)
+
+type AbsentType int
+
+const (
+	AT_DUNNO AbsentType = iota
+	AT_ILL
+	AT_LEAVE
+	AT_DINNER
+	AT_OFF
+	AT_WORK
+)
+
+type MessageAbsent struct {
+	Absents []struct {
+		Sex  EmployeeSex `json:"sex"`
+		Type AbsentType  `json:"type"`
+		Name string      `json:"name,omitempty"`
+	} `json:"absents"`
+}
