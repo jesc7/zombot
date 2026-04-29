@@ -143,6 +143,17 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 				return
 			}
 
+		case <-tM30.C: //every 30 minutes
+			go func() {
+				if ct := planner.WatchCriticalTasks(ctx, db, 30); ct != "" {
+					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+						Text: ct,
+					}); e == nil {
+						ws.Write(env)
+					}
+				}
+			}()
+
 		case env := <-ws.ch: //наконец-то делаем что-то полезное
 			if e := shared.Write(ws.conn, env); e != nil {
 				log.Println(e)
