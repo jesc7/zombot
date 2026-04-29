@@ -206,6 +206,8 @@ out:
 
 				if duty, name, days := isDuty(upd.Message.Body.Text); duty {
 					upd.Message.Body.Text = fmt.Sprintf("/duty:%s#%d", name, days)
+				} else if isAbsent(upd.Message.Body.Text) {
+					upd.Message.Body.Text = "/absent"
 				}
 
 				switch upd.GetCommand() {
