@@ -110,7 +110,7 @@ func CheckCFResources(sl []string) string {
 // WatchZsrv проверяет, запущены ли zsrv площадок
 // посылает http-запрос на ресурс /ping, ожидает в ответе текст "pong"
 func WatchZsrv(watchers []types.ZSrvWatch) string {
-	b := strings.Builder{}
+	sb := strings.Builder{}
 	wg := &sync.WaitGroup{}
 	for _, v := range watchers {
 		wg.Add(1)
@@ -119,7 +119,7 @@ func WatchZsrv(watchers []types.ZSrvWatch) string {
 			defer func() {
 				if e != nil {
 					log.Printf("%s (%s) error: %v", w.Url, w.Caption, e)
-					b.WriteString(w.Caption + "\n")
+					sb.WriteString(w.Caption + "\n")
 				}
 				wg.Done()
 			}()
@@ -142,10 +142,10 @@ func WatchZsrv(watchers []types.ZSrvWatch) string {
 		}(v)
 	}
 	wg.Wait()
-	if b.String() == "" {
+	if sb.String() == "" {
 		return ""
 	}
-	return "⚠️ <b>Ошибка проверки площадок ОЗ</b>\n\n" + b.String()
+	return "⚠️ <b>Ошибка проверки площадок ОЗ</b>\n\n" + sb.String()
 }
 
 // CheckWhois check WhoIs info by domain names

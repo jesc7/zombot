@@ -161,17 +161,14 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			}()
 
 		case <-tM5.C: //every 5 minutes
-			//zsrv watcher
 			go func() {
-				if s := checks.WatchZsrv(cfg.ZSrv); s != "" { //critical tasks
+				if s := checks.WatchZsrv(cfg.ZSrv); s != "" { //zsrv watcher
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
 					}); e == nil {
 						ws.Write(env)
 					}
 				}
-
-				chMsgOut <- tu.Message(tu.ID(cfg.TG.Room), checks.WatchZsrv(cfg.ZSrv))
 			}()
 
 		case <-tM30.C: //every 30 minutes
