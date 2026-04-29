@@ -149,11 +149,11 @@ func WatchCriticalTasks(ctx context.Context, db *sql.DB, minutes int) string {
 
 	var (
 		id, point_id, dur              int64
-		dt                             time.Time
+		t                              time.Time
 		res, caption, text, clientInfo string
 	)
 	for rows.Next() {
-		if e = rows.Scan(&id, &dt, &point_id, &caption, &text, &dur, &clientInfo); e != nil {
+		if e = rows.Scan(&id, &t, &point_id, &caption, &text, &dur, &clientInfo); e != nil {
 			continue
 		}
 		if len(clientInfo) != 0 {

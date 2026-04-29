@@ -145,7 +145,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 
 		case <-tM30.C: //every 30 minutes
 			go func() {
-				if ct := planner.WatchCriticalTasks(ctx, db, 30); ct != "" {
+				if ct := planner.WatchCriticalTasks(ctx, db, 30); ct != "" { //critical tasks
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: ct,
 					}); e == nil {
