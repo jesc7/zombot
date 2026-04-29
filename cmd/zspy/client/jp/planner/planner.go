@@ -50,7 +50,7 @@ func Absents(ctx context.Context, db *sql.DB) ([]shared.Absent, error) {
 			}
 			a := shared.Absent{
 				Name:    user.name,
-				Gender:  shared.EmployeeGender(user.gender),
+				Gender:  shared.Gender(user.gender),
 				Comment: user.comment,
 			}
 
