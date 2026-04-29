@@ -161,7 +161,10 @@ out:
 				sb := strings.Builder{}
 				sb.WriteString("👷 <b>Отсутствующие</b>\n\n")
 				for _, v := range m.Absents {
-					fmt.Fprintf(&sb, "%s%s: %s\n", v.Date.Format("02.01"), _tipDay(v.Date), v.Caption)
+					switch v.Type {
+					case shared.AT_DUNNO:
+						fmt.Fprintf(&sb, "%s%s: %s\n", v.Date.Format("02.01"), _tipDay(v.Date), v.Caption)
+					}
 				}
 				b.SendText(sb.String())
 
