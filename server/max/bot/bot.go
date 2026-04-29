@@ -159,7 +159,7 @@ out:
 				}
 
 				sb := strings.Builder{}
-				sb.WriteString("👷 <b>Отсутствующие</b>\n\n")
+				sb.WriteString("👤 <b>Отсутствующие</b>\n\n")
 				for _, v := range m.Absents {
 					var tip string
 					switch v.Type {
