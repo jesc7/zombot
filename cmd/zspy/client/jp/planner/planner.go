@@ -3,12 +3,11 @@ package planner
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
 
-// Absents выводит список отсутствующих и причину отсутствия
+// Absents возвращает список отсутствующих и причину отсутствия
 func Absents(ctx context.Context, db *sql.DB) ([]shared.Absent, error) {
 	rows, e := db.QueryContext(ctx, `
 		select t1, t2, u, lower(trim(iif(t1 = 0, c2, iif((t1 = 6) or (t1 = 7), c1 || iif(char_length(c1) > 0 and char_length(c2) > 0, ' / ', '') || c2, c1)))) as c, g
@@ -55,14 +54,13 @@ func Absents(ctx context.Context, db *sql.DB) ([]shared.Absent, error) {
 				Comment: user.comment,
 			}
 
-			pic := ""
 			switch user.type1 {
 			case -1:
-				pic = funcs.Dunno(user.gender) //неизвестно
+				a.Type = shared.AT_DUNNO
 			case 2:
-				pic = funcs.RndFrom("🤕", "😷", "🤧", "🤒") //больничный
+				a.Type = shared.AT_ILL
 			case 3:
-				pic = funcs.RndFrom("🏖", "⛱️", "🏕️", "🏝️", "⛰️", "✈️") //отпуск
+				a.Type = shared.AT_LEAVE
 			case 6, 7: //поправил дежурных, проверить
 				if user.type2 == -1 {
 					user.type2 = 5
@@ -71,16 +69,16 @@ func Absents(ctx context.Context, db *sql.DB) ([]shared.Absent, error) {
 			default:
 				switch user.type2 {
 				case 3:
-					pic = funcs.RndFrom("🍔", "🍳", "🥘", "🥗", "🍱") //обед
+					a.Type = shared.AT_DINNER
 				case 4:
-					pic = funcs.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️"}}[user.gender]...) //ушел
+					a.Type = shared.AT_OFF
 				case 5:
-					pic = funcs.RndFrom([2][]string{{"👷‍♀️", "👩‍🔧"}, {"👷", "👨‍🔧"}}[user.gender]...) //по рабочим делам
+					a.Type = shared.AT_WORK
 				default:
-					pic = funcs.Dunno(user.gender) //неизвестно
+					a.Type = shared.AT_DUNNO
 				}
 			}
-			res += fmt.Sprintf("%s %s%s\n", pic, user.name, funcs.Iif(len(user.comment) != 0, " - "+user.comment, ""))
+			res = append(res, a)
 		}
 	}
 	return res, nil

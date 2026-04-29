@@ -269,7 +269,7 @@ out:
 					b.b.Write(types.BUS_WS, env)
 
 				case "/absent": //отсутствующие
-					env, e := shared.Pack(shared.TypeMessageDuties, shared.MessageAbsents{})
+					env, e := shared.Pack(shared.TypeMessageAbsents, shared.MessageAbsents{})
 					if e != nil {
 						break
 					}

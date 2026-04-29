@@ -12,6 +12,7 @@ import (
 	_ "github.com/nakagami/firebirdsql"
 
 	"github.com/jesc7/zombot/cmd/zspy/client/jp/duties"
+	"github.com/jesc7/zombot/cmd/zspy/client/jp/planner"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
@@ -93,15 +94,13 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 				ws.Write(env)
 
 			case shared.TypeMessageAbsents:
-				abs, e := shared.Unpack[shared.MessageAbsents](env)
+				abs, e := planner.Absents(ctx, db)
 				if e != nil {
 					continue
 				}
-				dut.A, e = duties.Duty(ctx, db, dut.Q)
-				if e != nil {
-					continue
-				}
-				env, e = shared.Pack(env.Type, dut)
+				env, e = shared.Pack(env.Type, shared.MessageAbsents{
+					Absents: abs,
+				})
 				if e != nil {
 					continue
 				}
