@@ -186,8 +186,9 @@ out:
 					break
 				}
 
+				today := ctypes.ClearTime(time.Now())
+				bdToday, bdAfter := []shared.Birthday{}, []shared.Birthday{}
 				sb := strings.Builder{}
-				sb.WriteString("👤 <b>Отсутствующие</b>\n\n")
 				for _, v := range m.Absents {
 					var tip string
 					switch v.Type {
