@@ -145,6 +145,26 @@ out:
 				}
 				b.SendText(sb.String())
 
+			//отсутствующие
+			case shared.TypeMessageAbsents:
+				log.Println("Bot TypeMessageAbsents")
+
+				m, e := shared.Unpack[shared.MessageAbsents](env)
+				if e != nil {
+					continue
+				}
+				if len(m.Absents) == 0 {
+					b.SendText("🙂 Все на месте")
+					break
+				}
+
+				sb := strings.Builder{}
+				sb.WriteString("👷 <b>Отсутствующие</b>\n\n")
+				for _, v := range m.Absents {
+					fmt.Fprintf(&sb, "%s%s: %s\n", v.Date.Format("02.01"), _tipDay(v.Date), v.Caption)
+				}
+				b.SendText(sb.String())
+
 			//сообщения от площадок
 			case shared.TypeMessageZSRV:
 				log.Println("Bot TypeMessageZSRV")
@@ -232,6 +252,12 @@ out:
 					b.b.Write(types.BUS_WS, env)
 
 				case "/absent": //отсутствующие
+					env, e := shared.Pack(shared.TypeMessageDuties, shared.MessageAbsents{})
+					if e != nil {
+						break
+					}
+					b.b.Write(types.BUS_WS, env)
+
 				case "/birthday": //дни рождения
 				case "/ratings": //пятничные рейтинги
 				case "/ci": //инфо о клиентах

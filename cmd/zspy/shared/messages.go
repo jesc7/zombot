@@ -60,6 +60,7 @@ const (
 	TypeMessageDutyChanges = "message_duty_changes"
 	TypeMessageZSRV        = "message_zsrv"
 	TypeMessageCall        = "message_call"
+	TypeMessageAbsents     = "message_absents"
 )
 
 type MessageText struct {
@@ -132,7 +133,7 @@ const (
 	AT_WORK
 )
 
-type MessageAbsent struct {
+type MessageAbsents struct {
 	Absents []struct {
 		Sex  EmployeeSex `json:"sex"`
 		Type AbsentType  `json:"type"`
