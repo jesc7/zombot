@@ -21,11 +21,6 @@ import (
 	_ "github.com/nakagami/firebirdsql"
 )
 
-type ZsrvWatch struct {
-	Url     string `json:"url"`
-	Caption string `json:"caption"`
-}
-
 var client = &http.Client{
 	Transport: &http.Transport{
 		//DisableKeepAlives: true,
@@ -114,12 +109,12 @@ func CheckCFResources(sl []string) string {
 
 // WatchZsrv проверяет, запущены ли zsrv площадок
 // посылает http-запрос на ресурс /ping, ожидает в ответе текст "pong"
-func WatchZsrv(watchers []ZsrvWatch) string {
+func WatchZsrv(watchers []types.ZSrvWatch) string {
 	b := strings.Builder{}
 	wg := &sync.WaitGroup{}
 	for _, v := range watchers {
 		wg.Add(1)
-		go func(w ZsrvWatch) {
+		go func(w types.ZSrvWatch) {
 			var e error
 			defer func() {
 				if e != nil {
@@ -147,13 +142,10 @@ func WatchZsrv(watchers []ZsrvWatch) string {
 		}(v)
 	}
 	wg.Wait()
-	res := b.String()
-	b.Reset()
-	if len(res) != 0 {
-		s := "⚠️ <b>Ошибка проверки площадок ОЗ</b>\n" + types.Iif(strings.Count(res, "\n") > 1, "\n", "") + res
-		return s
+	if b.String() == "" {
+		return ""
 	}
-	return ""
+	return "⚠️ <b>Ошибка проверки площадок ОЗ</b>\n\n" + b.String()
 }
 
 // CheckWhois check WhoIs info by domain names
