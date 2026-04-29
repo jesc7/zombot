@@ -21,6 +21,18 @@ import (
 	"github.com/jesc7/zombot/server/types"
 )
 
+const (
+	MSG_HELP = `<b>Что умеет этот бот:</b>
+sdfvsev
+dfv
+sd
+vs
+dv
+sd
+f
+`
+)
+
 type Bot struct {
 	bot    *max.Api
 	QWait  *queue.Queue
@@ -189,6 +201,8 @@ out:
 		case update := <-b.bot.GetUpdates(ctx): //приехали апдейты с сервера
 			switch upd := update.(type) {
 			case *schemes.MessageCreatedUpdate:
+				log.Println("Message from", upd.GetChatID())
+
 				//только групповой чат из настроек
 				if upd.Message.Recipient.ChatType != schemes.CHAT || upd.GetChatID() != b.chatID {
 					break
@@ -199,15 +213,15 @@ out:
 				}
 
 				switch upd.GetCommand() {
+				case "/help": //помощь
+					b.SendText("")
+
 				case "/duty": //дежурства
 					params := strings.Split(upd.GetParam(), "#")
 					name, days := params[0], 7
 					if len(params) > 1 {
 						days, _ = strconv.Atoi(params[1])
 					}
-
-					log.Printf("Duty query: name=%s, days=%d", name, days)
-
 					env, e := shared.Pack(shared.TypeMessageDuties, shared.MessageDuties{
 						Q: shared.DutyQuery{
 							Name: name,
