@@ -96,12 +96,11 @@ out:
 			break out
 
 		case env := <-b.ch: //разгребаем пакеты, пришедшие боту
-			switch env.Type {
+			log.Println("Bot", env.Type)
 
+			switch env.Type {
 			//просто текст
 			case shared.TypeMessageText:
-				log.Println("Bot TypeMessageText")
-
 				m, e := shared.Unpack[shared.MessageText](env)
 				if e != nil {
 					continue
@@ -110,8 +109,6 @@ out:
 
 			//дежурства
 			case shared.TypeMessageDuties:
-				log.Println("Bot TypeMessageDuties")
-
 				m, e := shared.Unpack[shared.MessageDuties](env)
 				if e != nil {
 					continue
@@ -130,8 +127,6 @@ out:
 
 			//изменения дежурств
 			case shared.TypeMessageDutyChanges:
-				log.Println("Bot TypeMessageDutyChanges")
-
 				m, e := shared.Unpack[shared.MessageDutyChanges](env)
 				if e != nil || len(m.Changes) == 0 {
 					continue
@@ -147,8 +142,6 @@ out:
 
 			//отсутствующие
 			case shared.TypeMessageAbsents:
-				log.Println("Bot TypeMessageAbsents")
-
 				m, e := shared.Unpack[shared.MessageAbsents](env)
 				if e != nil {
 					continue
@@ -182,10 +175,43 @@ out:
 				}
 				b.SendText(sb.String())
 
+			//дни рождения
+			case shared.TypeMessageBirthdays:
+				m, e := shared.Unpack[shared.MessageBirthdays](env)
+				if e != nil {
+					continue
+				}
+				if len(m.Birthdays) == 0 {
+					b.SendText("☹ В ближайший месяц нет дней рождения")
+					break
+				}
+
+				sb := strings.Builder{}
+				sb.WriteString("👤 <b>Отсутствующие</b>\n\n")
+				for _, v := range m.Absents {
+					var tip string
+					switch v.Type {
+					case shared.AT_DUNNO:
+						tip = types.Dunno(int(v.Gender)) //неизвестно
+					case shared.AT_ILL:
+						tip = types.RndFrom("🤕", "😷", "🤧", "🤒") //больничный
+					case shared.AT_LEAVE:
+						tip = types.RndFrom("🏖", "⛱️", "🏕️", "🏝️", "⛰️", "✈️") //отпуск
+					case shared.AT_DINNER:
+						tip = types.RndFrom("🍔", "🍳", "🥘", "🥗", "🍱") //обед
+					case shared.AT_OFF:
+						tip = types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️"}}[v.Gender]...) //ушел
+					case shared.AT_WORK:
+						tip = types.RndFrom([2][]string{{"👷‍♀️", "👩‍🔧"}, {"👷", "👨‍🔧"}}[v.Gender]...) //по рабочим делам
+					default:
+						tip = types.Dunno(int(v.Gender)) //неизвестно
+					}
+					fmt.Fprintf(&sb, "%s %s%s\n", tip, v.Name, types.Iif(len(v.Comment) != 0, " - "+v.Comment, ""))
+				}
+				b.SendText(sb.String())
+
 			//сообщения от площадок
 			case shared.TypeMessageZSRV:
-				log.Println("Bot TypeMessageZSRV")
-
 				m, e := shared.Unpack[shared.MessageZSRV](env)
 				if e != nil {
 					continue
@@ -205,8 +231,6 @@ out:
 
 			//звонки
 			case shared.TypeMessageCall:
-				log.Println("Bot TypeMessageCall")
-
 				m, e := shared.Unpack[shared.MessageCall](env)
 				if e != nil {
 					continue
