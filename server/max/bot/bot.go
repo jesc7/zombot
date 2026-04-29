@@ -319,7 +319,6 @@ out:
 					}
 					b.b.Write(types.BUS_WS, env)
 
-				case "/ratings": //пятничные рейтинги
 				case "/ci": //инфо о клиентах
 				}
 			}
