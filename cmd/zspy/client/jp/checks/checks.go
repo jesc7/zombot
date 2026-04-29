@@ -101,7 +101,7 @@ func CheckCFResources(sl []string) string {
 				return nil
 			}(); e != nil {
 				log.Printf("check URL %s error: %v", url, e)
-				b.WriteString(fmt.Sprintf("\n%s: %v", url, e))
+				fmt.Fprintf(&b, "\n%s: %v", url, e)
 			}
 		}(v)
 	}
@@ -253,8 +253,8 @@ func CheckWhois(sl []string, days int) string {
 
 			switch d := int(time.Until(exp) / Day); {
 			case d >= -3 && d <= days:
-				b.WriteString(fmt.Sprintf("\n%s: %s (%d дн)%s", domain, exp.Format("02.01.2006"), d,
-					types.Iif(len(ans.Registrant.Country) != 0, " "+ans.Registrant.Name, "")))
+				fmt.Fprintf(&b, "\n%s: %s (%d дн)%s", domain, exp.Format("02.01.2006"), d,
+					types.Iif(len(ans.Registrant.Country) != 0, " "+ans.Registrant.Name, ""))
 			default:
 			}
 		}(v)
