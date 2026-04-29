@@ -3,6 +3,9 @@ package planner
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
+	"time"
 
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
@@ -82,4 +85,69 @@ func Absents(ctx context.Context, db *sql.DB) ([]shared.Absent, error) {
 		}
 	}
 	return res, nil
+}
+
+// Birthdays возвращает дни рождения сотрудников
+func Birthdays(ctx context.Context, db *sql.DB, days int) ([]shared.Birthday, error) {
+	rows, e := db.Query(fmt.Sprintf(`
+		select *
+		from (
+			select iif(b.dr < current_date, dateadd(year, 1, b.dr), b.dr) as dr, b.caption, b.g
+			from (
+				select cast(extract(year from current_date)||'-'||extract(month from dr)||'-'||extract(day from dr) as date) as dr, a.caption, a.g
+				from (
+					select dr, caption, coalesce(gender, 0) as g
+					from u$personal
+					where status = 0 and folder_id = 93 and not dr is null
+					union
+					select cast('31.07.1980' as date) as dr, 'Гарри Поттер' as caption, 1 as g from rdb$database
+				) a
+			) b
+		) c
+		where %s
+		order by 1,2
+		`, funcs.Iif(mode == 0, "c.dr = current_date", "c.dr between current_date and dateadd(month, 1, current_date)")))
+	if e != nil {
+		return ""
+	}
+	defer rows.Close()
+
+	var listToday, listAfter []string
+	for rows.Next() {
+		s, d, g := "", time.Time{}, 0
+		if e = rows.Scan(&d, &s, &g); e != nil {
+			continue
+		}
+		sign := funcs.RndFrom([2][]string{{"👸🏼", "👸", "👸🏻", "💃"}, {"🤵", "🤵🏻", "🤵🏽"}}[g]...)
+		switch {
+		case s == "Гарри Поттер":
+			sign = "⚡"
+		default:
+		}
+		today := d.Format("20060102") == time.Now().Format("20060102")
+		switch today {
+		case true:
+			listToday = append(listToday, sign+" "+s)
+		default:
+			listAfter = append(listAfter, sign+" "+s+d.Format(" (02.01)"))
+		}
+	}
+	var res string
+	if len(listToday) != 0 { //день рождения сегодня
+		x := []string{"🎉", "🎁", "🎂", "✨", "💐"}
+		res = "<b>Сегодня день рождения у:</b>\n" + strings.Join(listToday, "\n") + "\n\nПоздравляем, ю-ху!!! " +
+			funcs.RndFrom(x...) + funcs.RndFrom(x...) + funcs.RndFrom(x...)
+		if len(listAfter) != 0 {
+			res += "\n\n<b>А еще скоро день рождения у:</b>\n"
+		}
+	} else {
+		if len(listAfter) != 0 { //дни рождения в ближайший месяц
+			res = "<b>Скоро день рождения у:</b>\n"
+		}
+	}
+	res += strings.Join(listAfter, "\n")
+	if mode == 1 && len(res) == 0 {
+		res = "☹ В ближайший месяц нет дней рождения"
+	}
+	return res
 }
