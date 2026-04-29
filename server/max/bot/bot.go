@@ -189,25 +189,17 @@ out:
 				today := ctypes.ClearTime(time.Now())
 				bdToday, bdAfter := []shared.Birthday{}, []shared.Birthday{}
 				sb := strings.Builder{}
-				for _, v := range m.Absents {
-					var tip string
-					switch v.Type {
-					case shared.AT_DUNNO:
-						tip = types.Dunno(int(v.Gender)) //неизвестно
-					case shared.AT_ILL:
-						tip = types.RndFrom("🤕", "😷", "🤧", "🤒") //больничный
-					case shared.AT_LEAVE:
-						tip = types.RndFrom("🏖", "⛱️", "🏕️", "🏝️", "⛰️", "✈️") //отпуск
-					case shared.AT_DINNER:
-						tip = types.RndFrom("🍔", "🍳", "🥘", "🥗", "🍱") //обед
-					case shared.AT_OFF:
-						tip = types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️"}}[v.Gender]...) //ушел
-					case shared.AT_WORK:
-						tip = types.RndFrom([2][]string{{"👷‍♀️", "👩‍🔧"}, {"👷", "👨‍🔧"}}[v.Gender]...) //по рабочим делам
-					default:
-						tip = types.Dunno(int(v.Gender)) //неизвестно
+				for _, v := range m.Birthdays {
+					if v.Date.Equal(today) {
+						bdToday = append(bdToday, v)
+					} else {
+						bdAfter = append(bdAfter, v)
 					}
-					fmt.Fprintf(&sb, "%s %s%s\n", tip, v.Name, types.Iif(len(v.Comment) != 0, " - "+v.Comment, ""))
+				}
+				if len(bdToday) != 0 {
+
+				} else if len(bdAfter) != 0 {
+
 				}
 				b.SendText(sb.String())
 
