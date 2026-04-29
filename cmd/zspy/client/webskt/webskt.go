@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/websocket"
 	_ "github.com/nakagami/firebirdsql"
 
+	"github.com/jesc7/zombot/cmd/zspy/client/jp/checks"
 	"github.com/jesc7/zombot/cmd/zspy/client/jp/duties"
 	"github.com/jesc7/zombot/cmd/zspy/client/jp/planner"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
@@ -129,6 +130,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 	tM30 := time.NewTicker(30 * time.Minute)
 	defer tM30.Stop()
 
+	t08_00 := time.NewTicker(types.NextTime("08:00"))
+
 	for {
 		select {
 		case <-ctx.Done(): //контекст отменен - выходим
@@ -143,11 +146,23 @@ func (ws *WebSocketClient) handle(ctx context.Context, db *sql.DB) {
 				return
 			}
 
+		case <-t08_00.C:
+			t08_00.Reset(24 * time.Hour)
+			go func() {
+				if s := checks.CheckEC(ws); s != "" { //critical tasks
+					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+						Text: s,
+					}); e == nil {
+						ws.Write(env)
+					}
+				}
+			}()
+
 		case <-tM30.C: //every 30 minutes
 			go func() {
-				if ct := planner.WatchCriticalTasks(ctx, db, 30); ct != "" { //critical tasks
+				if s := planner.WatchCriticalTasks(ctx, db, 30); s != "" { //critical tasks
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
-						Text: ct,
+						Text: s,
 					}); e == nil {
 						ws.Write(env)
 					}
