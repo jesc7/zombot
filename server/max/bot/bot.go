@@ -245,6 +245,8 @@ out:
 					upd.Message.Body.Text = fmt.Sprintf("/duty:%s#%d", name, days)
 				} else if isAbsent(upd.Message.Body.Text) {
 					upd.Message.Body.Text = "/absent"
+				} else if isBirthday(upd.Message.Body.Text) {
+					upd.Message.Body.Text = "/birthday"
 				}
 
 				switch upd.GetCommand() {

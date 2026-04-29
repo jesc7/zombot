@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	reDuty   = regexp.MustCompile(`(?i)^дежур[а-я]*(?:(?:\s+(?P<name>[а-я]+))?(?:\s+(?P<days>\d+))?)?$`)
-	reAbsent = regexp.MustCompile(`(?i)отсутств[а-я]*`)
+	reDuty     = regexp.MustCompile(`(?i)^дежур[а-я]*(?:(?:\s+(?P<name>[а-я]+))?(?:\s+(?P<days>\d+))?)?$`)
+	reAbsent   = regexp.MustCompile(`(?i)отсутств[а-я]*`)
+	reBirthday = regexp.MustCompile(`(?i)(?:день|дни) рожд[а-я]*`)
 )
 
 func findCommand(re *regexp.Regexp, value string) (bool, map[string]string) {
@@ -37,5 +38,10 @@ func isDuty(value string) (bool, string, int) {
 
 func isAbsent(value string) bool {
 	b, _ := findCommand(reAbsent, value)
+	return b
+}
+
+func isBirthday(value string) bool {
+	b, _ := findCommand(reBirthday, value)
 	return b
 }
