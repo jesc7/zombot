@@ -252,6 +252,14 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 		case <-t11_00.C: //everyday 11:00
 			t11_00.Reset(24 * time.Hour)
 
+			if time.Now().Weekday() == time.Friday {
+				//weekly ratings
+
+				if time.Now().Month() != time.Now().AddDate(0, 0, 7).Month() {
+					//monthly ratings
+				}
+			}
+
 		case <-t18_00.C: //everyday 18:00
 			t18_00.Reset(24 * time.Hour)
 

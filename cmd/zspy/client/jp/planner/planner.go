@@ -165,6 +165,44 @@ type notes map[string]int
 
 var lastEOW, lastSOW notes
 
+// SowList (StartOfWork list) сообщает, что дежурный начал работу
+func SowList(ctx context.Context, db *sql.DB) string {
+	dt, e := daytypes.GetDayType("ru", time.Now())
+	if e != nil || dt != daytypes.DtHoliday || !types.TimeBetween("7:30", "9:30") {
+		return ""
+	}
+
+	rows, e := db.Query(`
+		select u.username, h.time_in, coalesce(p.gender, 0) as g
+		from tabel_history h
+		join sp$users u on h.user_id = u.id
+		join u$personal p on u.id = p.user_id
+		where h.comments_id = 1 and h.dt = current_date	and datediff(minute, h.time_in, current_time) < 10
+	`)
+	if e != nil {
+		return ""
+	}
+	defer rows.Close()
+
+	p, user, t, g := notes{}, "", time.Time{}, 0
+	for rows.Next() {
+		if e = rows.Scan(&user, &t, &g); e != nil {
+			return ""
+		}
+		p[fmt.Sprintf("%s (%s)", user, t.Format("15:04"))] = g
+	}
+	for k, v := range p {
+		if _, ok := lastSOW[k]; !ok {
+			delta += funcs.RndFrom([2][]string{{"👩", "👩🏻", "👩🏼", "👩🏽"}, {"🧑", "🧑🏻", "🧑🏼", "🧑🏽"}}[v]...) + " " + k + "\n"
+		}
+	}
+	lastSOW = p
+	if len(delta) != 0 {
+		delta = fmt.Sprintf("<b>Я на месте</b>\n%s", delta)
+	}
+	return
+}
+
 // EowList (EndOfWork list) выводит список сотрудников, окончивших работу ДО окончания рабочего дня согласно рабочего расписания
 func EowList(ctx context.Context, db *sql.DB) string {
 	_getPhrase := func(g int) string {
