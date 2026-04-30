@@ -123,7 +123,7 @@ func Birthdays(ctx context.Context, db *sql.DB, days int) ([]shared.Birthday, er
 	return res, nil
 }
 
-func WatchCriticalTasks(ctx context.Context, db *sql.DB, minutes int) string {
+func CriticalTasks(ctx context.Context, db *sql.DB, minutes int) string {
 	rows, e := db.QueryContext(ctx, `
 		select r.id, r.insertdt, r.point_id, p.caption, r.atext, datediff(minute, r.insertdt, current_timestamp), r.clientinfo
 		from srq$requests r

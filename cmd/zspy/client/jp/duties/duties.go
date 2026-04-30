@@ -173,3 +173,27 @@ func TomorrowDuties(ctx context.Context, db *sql.DB) string {
 	}
 	return res
 }
+
+func HolidaysCount(ctx context.Context, db *sql.DB) int {
+	pl, e := DutiesList(ctx, db)
+	if e != nil {
+		return 0
+	}
+
+	t := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local)
+	if _, ok := (*pl)[t]; ok { //если мы уже внутри выходных, то не реагируем
+		return 0
+	}
+
+	var res int
+	for i := 1; i <= 20; i++ {
+		if _, ok := (*pl)[t.AddDate(0, 0, i)]; !ok {
+			break
+		}
+		res++
+	}
+	if res == 2 && t.AddDate(0, 0, 1).Weekday() == time.Saturday { //если впереди 2 выходных и завтра суббота, то не реагируем
+		res = 0
+	}
+	return res
+}
