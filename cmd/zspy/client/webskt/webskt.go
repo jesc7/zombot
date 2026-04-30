@@ -127,12 +127,13 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 	tPing := time.NewTicker(10 * time.Second)
 	defer tPing.Stop()
-	tM5 := time.NewTicker(time.Minute * 5)
-	defer tM5.Stop()
-	tM30 := time.NewTicker(30 * time.Minute)
-	defer tM30.Stop()
+	t5m := time.NewTicker(time.Minute * 5)
+	defer t5m.Stop()
+	t30m := time.NewTicker(30 * time.Minute)
+	defer t30m.Stop()
 
 	t08_00 := time.NewTicker(types.NextTime("08:00"))
+	defer t08_00.Stop()
 
 	for {
 		select {
@@ -160,7 +161,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				}
 			}()
 
-		case <-tM5.C: //every 5 minutes
+		case <-t5m.C: //every 5 minutes
 			go func() {
 				if s := checks.WatchZsrv(cfg.ZSrv); s != "" { //zsrv watcher
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
@@ -171,7 +172,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				}
 			}()
 
-		case <-tM30.C: //every 30 minutes
+		case <-t30m.C: //every 30 minutes
 			go func() {
 				if s := planner.WatchCriticalTasks(ctx, db, 30); s != "" { //critical tasks
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
