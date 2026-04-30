@@ -143,6 +143,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 	defer t08_10.Stop()
 	t09_00 := time.NewTicker(types.NextTime("09:00"))
 	defer t09_00.Stop()
+	t20_00 := time.NewTicker(types.NextTime("20:00"))
+	defer t20_00.Stop()
 
 	for {
 		select {
@@ -230,6 +232,19 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				}
 				ws.Write(env)
 			}()
+
+			go func() { //missing duties
+				if s := duties.MissDuties(ctx, db, 20); s != "" {
+					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+						Text: s,
+					}); e == nil {
+						ws.Write(env)
+					}
+				}
+			}()
+
+		case <-t20_00.C: //everyday 20:00
+			t20_00.Reset(24 * time.Hour)
 
 		case <-t1m.C: //every 1 minutes
 			go func() { //End-of-work list

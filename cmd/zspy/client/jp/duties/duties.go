@@ -66,17 +66,11 @@ func Duty(ctx context.Context, db *sql.DB, q shared.DutyQuery) ([]shared.Daily, 
 	return res, nil
 }
 
-func MissDuties(ctx context.Context, db *sql.DB, days int) (res string) {
+func MissDuties(ctx context.Context, db *sql.DB, days int) string {
 	pl, e := DutiesList(ctx, db)
 	if e != nil {
 		return ""
 	}
-
-	dr := strings.NewReplacer(
-		"Jan", "января", "Feb", "февраля", "Mar", "марта", "Apr", "апреля", "May", "мая", "Jun", "июня",
-		"Jul", "июля", "Aug", "августа", "Sep", "сентября", "Oct", "октября", "Nov", "ноября", "Dec", "декабря",
-		"Mon", "понедельник", "Tue", "вторник", "Wed", "среда", "Thu", "четверг", "Fri", "пятница", "Sat", "суббота", "Sun", "воскресенье",
-	)
 
 	type needs struct {
 		t time.Time
@@ -110,23 +104,32 @@ func MissDuties(ctx context.Context, db *sql.DB, days int) (res string) {
 			}
 			continue
 		}
-		if dut, ok := pl[t]; ok {
+		if dut, ok := (*pl)[t]; ok {
 			dutCount = strings.Count(dut, ",") + 1
 		}
 		if dutCount < count {
 			switch dutCount {
 			case 0:
-				ds = append(ds, needs{t, funcs.Iif(count == 1, "", " - 2 чел, работают "+strings.Join(countries, ","))})
+				ds = append(ds, needs{t, types.Iif(count == 1, "", " - 2 чел, работают "+strings.Join(countries, ","))})
 			default:
-				ds = append(ds, needs{t, funcs.Iif(count == 1, "", " - доп.дежурный, работают "+strings.Join(countries, ","))})
+				ds = append(ds, needs{t, types.Iif(count == 1, "", " - доп.дежурный, работают "+strings.Join(countries, ","))})
 			}
 		}
 	}
-	if len(ds) != 0 {
-		res = "🤖 <b>Неплохо бы назначить дежурных:</b>"
-		for _, v := range ds {
-			res += dr.Replace(v.t.Format("\n_2 Jan (Mon)")) + v.s
-		}
+
+	if len(ds) == 0 {
+		return ""
 	}
-	return
+
+	repl := strings.NewReplacer(
+		"Jan", "января", "Feb", "февраля", "Mar", "марта", "Apr", "апреля", "May", "мая", "Jun", "июня",
+		"Jul", "июля", "Aug", "августа", "Sep", "сентября", "Oct", "октября", "Nov", "ноября", "Dec", "декабря",
+		"Mon", "понедельник", "Tue", "вторник", "Wed", "среда", "Thu", "четверг", "Fri", "пятница", "Sat", "суббота", "Sun", "воскресенье",
+	)
+	var res string
+	res = "🤖 <b>Неплохо бы назначить дежурных:</b>"
+	for _, v := range ds {
+		res += repl.Replace(v.t.Format("\n_2 Jan (Mon)")) + v.s
+	}
+	return res
 }
