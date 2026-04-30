@@ -16,21 +16,10 @@ import (
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 )
 
-var (
-	client = &http.Client{
-		Transport: &http.Transport{
-			//DisableKeepAlives: true,
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-		Timeout: 240 * time.Second,
-	}
-	pbUpdating bool
-)
+var pbUpdating bool
 
-/*
-phones base update - обновление открытой базы диапазонов номеров операторов
-*/
-func PbUpdate(files []string) (e error) {
+// PbUpdate - обновление открытой базы диапазонов номеров операторов
+func PbUpdate(path string, files []string) (e error) {
 	if pbUpdating {
 		return nil
 	}
@@ -60,6 +49,14 @@ func PbUpdate(files []string) (e error) {
 		}
 	}
 
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+		Timeout: 240 * time.Second,
+	}
 	wg := &sync.WaitGroup{}
 	for _, v := range upd {
 		wg.Add(1)
@@ -82,14 +79,14 @@ func PbUpdate(files []string) (e error) {
 			}
 
 			defer resp.Body.Close()
-			return types.R2file(resp.Body, filepath.Join(filepath.Dir(decl.Arg0), "phones", v[0]), true)
+			return types.R2file(resp.Body, filepath.Join(path, "phones", v[0]), true)
 		}(v)
 	}
 	wg.Wait()
 	return nil
 }
 
-func FindByPhone(phone string) (res string) {
+func FindByPhone(path string, phone string) (res string) {
 	phone = strings.NewReplacer("(", "", ")", "", "-", "", " ", "", "/", "", "\\", "").Replace(phone)
 	if len(phone) < 10 {
 		return
@@ -100,9 +97,9 @@ func FindByPhone(phone string) (res string) {
 		return "Казахстан"
 
 	default:
-		file = filepath.Join(filepath.Dir(decl.Arg0), "phones", first)
+		file = filepath.Join(path, "phones", first)
 		if types.FileSize(file) < 100 {
-			PbUpdate([]string{first})
+			PbUpdate(path, []string{first})
 			if !types.FileExists(file) {
 				return ""
 			}

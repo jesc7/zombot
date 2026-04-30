@@ -14,6 +14,7 @@ import (
 )
 
 type WebServer struct {
+	cwd string
 	srv *http.Server
 	skt *webskt.WebSocketClient
 }
