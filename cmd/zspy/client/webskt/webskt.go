@@ -135,7 +135,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 	t30m := time.NewTicker(30 * time.Minute)
 	defer t30m.Stop()
 
-	t08_00 := time.NewTicker(types.NextTime("08:00"))
+	t08_00 := time.NewTicker(types.NextTime("11:27"))
 	defer t08_00.Stop()
 	t08_10 := time.NewTicker(types.NextTime("08:10"))
 	defer t08_10.Stop()
