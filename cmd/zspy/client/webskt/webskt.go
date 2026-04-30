@@ -154,15 +154,15 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				return
 			}
 
-		case <-t08_00.C:
+		case <-t08_00.C: //everyday 8:00
 			t08_00.Reset(24 * time.Hour)
 
 			go func() { //update phone base
 				phones.PbUpdate(ws.cwd, []string{})
 			}()
 
-			go func() {
-				if s := checks.CheckEC(cfg.EC); s != "" { //checks EC
+			go func() { //checks EC
+				if s := checks.CheckEC(cfg.EC); s != "" {
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
 					}); e == nil {
@@ -171,24 +171,28 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				}
 			}()
 
-		case <-t08_10.C:
+		case <-t08_10.C: //everyday 8:10
 			t08_10.Reset(24 * time.Hour)
 
-			go func() {
-				pay.Birthdays, e := planner.Birthdays(ctx, db, 1)
-				if e != nil {
-					continue
+			go func() { //birthdays today
+				var (
+					pay shared.MessageBirthdays
+					e   error
+				)
+				pay.Birthdays, e = planner.Birthdays(ctx, db, 1)
+				if e != nil || len(pay.Birthdays) == 0 {
+					return
 				}
-				env, e = shared.Pack(env.Type, pay)
+				env, e := shared.Pack(shared.TypeMessageBirthdays, pay)
 				if e != nil {
-					continue
+					return
 				}
 				ws.Write(env)
 			}()
 
 		case <-t5m.C: //every 5 minutes
-			go func() {
-				if s := checks.WatchZsrv(cfg.ZSrv); s != "" { //zsrv watcher
+			go func() { //zsrv watcher
+				if s := checks.WatchZsrv(cfg.ZSrv); s != "" {
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
 					}); e == nil {
@@ -198,8 +202,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			}()
 
 		case <-t30m.C: //every 30 minutes
-			go func() {
-				if s := planner.WatchCriticalTasks(ctx, db, 30); s != "" { //critical tasks
+			go func() { //critical tasks
+				if s := planner.WatchCriticalTasks(ctx, db, 30); s != "" {
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
 					}); e == nil {
@@ -209,7 +213,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			}()
 
 		case env := <-ws.ch: //наконец-то делаем что-то полезное
-			if e := shared.Write(ws.conn, env); e != nil {
+			if e := shared.Write(ws.conn, env); e != nil { //send message to WebSocket server
 				log.Println(e)
 			}
 		}
