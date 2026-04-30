@@ -246,6 +246,16 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 		case <-t20_00.C: //everyday 20:00
 			t20_00.Reset(24 * time.Hour)
 
+			go func() { //tomorrow duties
+				if s := duties.TomorrowDuties(ctx, db); s != "" {
+					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+						Text: s,
+					}); e == nil {
+						ws.Write(env)
+					}
+				}
+			}()
+
 		case <-t1m.C: //every 1 minutes
 			go func() { //End-of-work list
 				if s := planner.EowList(ctx, db); s != "" {

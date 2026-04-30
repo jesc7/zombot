@@ -3,6 +3,7 @@ package duties
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 	"time"
 
@@ -130,6 +131,45 @@ func MissDuties(ctx context.Context, db *sql.DB, days int) string {
 	res = "🤖 <b>Неплохо бы назначить дежурных:</b>"
 	for _, v := range ds {
 		res += repl.Replace(v.t.Format("\n_2 Jan (Mon)")) + v.s
+	}
+	return res
+}
+
+func TomorrowDuties(ctx context.Context, db *sql.DB) string {
+	rows, e := db.QueryContext(ctx, `
+		select t.dt, t.tabel_type, u.username, coalesce(p.gender, 0), coalesce(p.tg_id, 0), coalesce(p.sched_id, 0)
+		from tabel t
+		join sp$users u on t.user_id = u.id
+		join u$personal p on t.user_id = p.user_id
+		where 1 = 1
+			and t.dt = dateadd(day, 1, current_date)
+			and t.tabel_type in (6, 7)
+		order by t.tabel_type
+	`)
+	if e != nil {
+		return ""
+	}
+	defer rows.Close()
+
+	var (
+		res      string
+		dt       time.Time
+		ttype    int
+		name     string
+		gender   int
+		tg_id    int
+		sched_id int
+	)
+	for rows.Next() {
+		if e = rows.Scan(&dt, &ttype, &name, &gender, &tg_id, &sched_id); e == nil {
+			if gender < 0 || gender > 1 {
+				gender = 0
+			}
+			res += fmt.Sprintf("%s - %s\n", types.Iif(ttype == 6, "🌒 Утро", "☀️ День"), strings.Trim(name, " "))
+		}
+	}
+	if len(res) != 0 {
+		res = "<b>👷 Дежурные на завтра</b>\n" + types.Iif(strings.Count(res, "\n") > 1, "\n", "") + res
 	}
 	return res
 }
