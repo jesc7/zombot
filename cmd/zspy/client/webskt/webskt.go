@@ -256,6 +256,23 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				}
 			}()
 
+			go func() { //find duties for next 2 days
+				var (
+					pay shared.MessageDuties
+					e   error
+				)
+				pay.Q.Days = 2
+				pay.A, e = duties.Duty(ctx, db, pay.Q)
+				if e != nil || len(pay.A) == 0 {
+					return
+				}
+				env, e := shared.Pack(shared.TypeMessageDuties, pay)
+				if e != nil {
+					return
+				}
+				ws.Write(env)
+			}()
+
 		case <-t1m.C: //every 1 minutes
 			go func() { //End-of-work list
 				if s := planner.EowList(ctx, db); s != "" {
