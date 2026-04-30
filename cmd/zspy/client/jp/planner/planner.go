@@ -214,15 +214,19 @@ func EowList(ctx context.Context, db *sql.DB) string {
 		}
 	}
 
-	rows, e := db.QueryContext(ctx, `
+	rows, e := db.QueryContext(ctx, fmt.Sprintf(`
 		select u.username, h.time_out, coalesce(p.gender, 0) as g
 		from tabel_history h
 		join tabel t on h.user_id = t.user_id and h.dt = t.dt
 		join sp$users u on h.user_id = u.id
 		join u$personal p on u.id = p.user_id
 		left join pr_getsched_v2(0, u.id, null) a on 1 = 1
-		where h.comments_id = 2 and h.dt = current_date and h.time_out < a.tto and datediff(minute, h.time_out, current_time) < 5
-	`)
+		where 1=1
+		  and h.comments_id = 2 
+		  and h.dt = current_date 
+		  and h.time_out < a.tto 
+		  and datediff(second, h.time_out, time '%s') < 50
+	`, time.Now().Format("15:04")))
 	if e != nil {
 		return ""
 	}
