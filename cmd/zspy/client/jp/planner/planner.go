@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jesc7/zombot/cmd/zspy/client/daytypes"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
@@ -247,7 +248,23 @@ func EowList(ctx context.Context, db *sql.DB) string {
 	}
 	lastEOW = p
 	if len(res) != 0 {
-		res = fmt.Sprintf("<b>%s</b>\n%s", _getPhrase(g), res)
+		res = fmt.Sprintf("<b>%s</b>\n\n%s", _getPhrase(g), res)
 	}
 	return res
+}
+
+// ForeignHoliday проверяет, что клиенты в других странах сегодня отдыхают, в то время как мы работаем :(
+func ForeignHoliday() string {
+	t := time.Now()
+	dt, e := daytypes.GetDayType("ru", t)
+	if e != nil || dt == daytypes.DtHoliday {
+		return ""
+	}
+
+	dt, e = daytypes.GetDayType("kz", t)
+	if e != nil || dt != daytypes.DtHoliday {
+		return ""
+	}
+
+	return "✨ В KZ сегодня " + types.RndFrom("нерабочий день", "отдыхают", "что-то празднуют", "выходной", "праздник какой-то")
 }

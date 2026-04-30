@@ -192,8 +192,18 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				ws.Write(env)
 			}()
 
+			go func() { //another countries holiday
+				if s := planner.ForeignHoliday(); s != "" {
+					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+						Text: s,
+					}); e == nil {
+						ws.Write(env)
+					}
+				}
+			}()
+
 		case <-t1m.C: //every 1 minutes
-			go func() { //zsrv watcher
+			go func() { //End-of-work list
 				if s := planner.EowList(ctx, db); s != "" {
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
