@@ -174,6 +174,18 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 		case <-t08_10.C:
 			t08_10.Reset(24 * time.Hour)
 
+			go func() {
+				pay.Birthdays, e := planner.Birthdays(ctx, db, 1)
+				if e != nil {
+					continue
+				}
+				env, e = shared.Pack(env.Type, pay)
+				if e != nil {
+					continue
+				}
+				ws.Write(env)
+			}()
+
 		case <-t5m.C: //every 5 minutes
 			go func() {
 				if s := checks.WatchZsrv(cfg.ZSrv); s != "" { //zsrv watcher
