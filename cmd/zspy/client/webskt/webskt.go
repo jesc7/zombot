@@ -217,17 +217,19 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 		case <-t09_00.C: //everyday 9:00
 			t09_00.Reset(24 * time.Hour)
 
-			pay, e := planner.Absents(ctx, db)
-			if e != nil || len(pay) == 0 {
-				continue
-			}
-			env, e = shared.Pack(env.Type, shared.MessageAbsents{
-				Absents: pay,
-			})
-			if e != nil {
-				continue
-			}
-			ws.Write(env)
+			go func() { //who's absent today
+				pay, e := planner.Absents(ctx, db)
+				if e != nil || len(pay) == 0 {
+					return
+				}
+				env, e := shared.Pack(shared.TypeMessageAbsents, shared.MessageAbsents{
+					Absents: pay,
+				})
+				if e != nil {
+					return
+				}
+				ws.Write(env)
+			}()
 
 		case <-t1m.C: //every 1 minutes
 			go func() { //End-of-work list

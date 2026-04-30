@@ -3,8 +3,10 @@ package duties
 import (
 	"context"
 	"database/sql"
+	"strings"
 	"time"
 
+	"github.com/jesc7/zombot/cmd/zspy/client/daytypes"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
@@ -62,4 +64,69 @@ func Duty(ctx context.Context, db *sql.DB, q shared.DutyQuery) ([]shared.Daily, 
 		}
 	}
 	return res, nil
+}
+
+func MissDuties(ctx context.Context, db *sql.DB, days int) (res string) {
+	pl, e := DutiesList(ctx, db)
+	if e != nil {
+		return ""
+	}
+
+	dr := strings.NewReplacer(
+		"Jan", "января", "Feb", "февраля", "Mar", "марта", "Apr", "апреля", "May", "мая", "Jun", "июня",
+		"Jul", "июля", "Aug", "августа", "Sep", "сентября", "Oct", "октября", "Nov", "ноября", "Dec", "декабря",
+		"Mon", "понедельник", "Tue", "вторник", "Wed", "среда", "Thu", "четверг", "Fri", "пятница", "Sat", "суббота", "Sun", "воскресенье",
+	)
+
+	type needs struct {
+		t time.Time
+		s string
+	}
+
+	now, ds := time.Now(), []needs{}
+	for i := 1; ; i++ {
+		t := time.Date(now.Year(), now.Month(), now.Day()+i, 0, 0, 0, 0, time.Local)
+		count, dutCount, countries := 0, 0, []string{}
+
+	out:
+		for i, v := range []string{"ru", "kz"} { //by, ua, uz
+			dt, _ := daytypes.GetDayType(v, t)
+			switch i == 0 {
+			case true:
+				if dt != daytypes.DtHoliday {
+					break out
+				}
+				count++
+			default:
+				if dt != daytypes.DtHoliday {
+					count++
+					countries = append(countries, strings.ToUpper(v))
+				}
+			}
+		}
+		if count == 0 {
+			if i > days {
+				break
+			}
+			continue
+		}
+		if dut, ok := pl[t]; ok {
+			dutCount = strings.Count(dut, ",") + 1
+		}
+		if dutCount < count {
+			switch dutCount {
+			case 0:
+				ds = append(ds, needs{t, funcs.Iif(count == 1, "", " - 2 чел, работают "+strings.Join(countries, ","))})
+			default:
+				ds = append(ds, needs{t, funcs.Iif(count == 1, "", " - доп.дежурный, работают "+strings.Join(countries, ","))})
+			}
+		}
+	}
+	if len(ds) != 0 {
+		res = "🤖 <b>Неплохо бы назначить дежурных:</b>"
+		for _, v := range ds {
+			res += dr.Replace(v.t.Format("\n_2 Jan (Mon)")) + v.s
+		}
+	}
+	return
 }
