@@ -135,6 +135,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 	defer t1m.Stop()
 	t5m := time.NewTicker(5 * time.Minute)
 	defer t5m.Stop()
+	t9m := time.NewTicker(9 * time.Minute)
+	defer t9m.Stop()
 	t30m := time.NewTicker(30 * time.Minute)
 	defer t30m.Stop()
 
@@ -327,6 +329,17 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 			go func() { //zsrv watcher
 				if s := checks.WatchZsrv(cfg.ZSrv); s != "" {
+					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+						Text: s,
+					}); e == nil {
+						ws.Write(env)
+					}
+				}
+			}()
+
+		case <-t9m.C: //every 9 minutes
+			go func() { //cf tasks
+				if s := checks.CheckCFResources(cfg.CFChecks); s != "" {
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
 					}); e == nil {

@@ -121,7 +121,7 @@ func WatchZsrv(watchers []types.ZSrvWatch) string {
 			defer func() {
 				if e != nil {
 					log.Printf("%s (%s) error: %v", w.Url, w.Caption, e)
-					sb.WriteString(w.Caption + "\n")
+					sb.WriteString("\n" + w.Caption)
 				}
 				wg.Done()
 			}()
@@ -148,7 +148,7 @@ func WatchZsrv(watchers []types.ZSrvWatch) string {
 	if sb.Len() == 0 {
 		return ""
 	}
-	return "⚠️ <b>Ошибка проверки площадок ОЗ</b>\n\n" + sb.String()
+	return "⚠️ <b>Ошибка проверки площадок ОЗ</b>" + sb.String()
 }
 
 // CheckWhois check WhoIs info by domain names
@@ -255,6 +255,7 @@ func CheckWhois(sl []string, days int) string {
 		}(v)
 	}
 	wg.Wait()
+
 	if sb.Len() == 0 {
 		return ""
 	}
