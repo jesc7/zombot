@@ -346,6 +346,16 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				}
 			}()
 
+			go func() { //check resources
+				if s := checks.CheckResources(cfg.Checks); s != "" {
+					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+						Text: s,
+					}); e == nil {
+						ws.Write(env)
+					}
+				}
+			}()
+
 		case env := <-ws.ch: //наконец-то делаем что-то полезное
 			if e := shared.Write(ws.conn, env); e != nil { //send message to WebSocket server
 				log.Println(e)

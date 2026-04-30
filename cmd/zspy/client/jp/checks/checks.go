@@ -31,7 +31,7 @@ var client = &http.Client{
 
 // checkResources check urls pool (GET requests only)
 func CheckResources(sl []string) string {
-	b := strings.Builder{}
+	sb := strings.Builder{}
 	wg := &sync.WaitGroup{}
 	for _, v := range sl {
 		wg.Add(1)
@@ -50,15 +50,16 @@ func CheckResources(sl []string) string {
 				time.Sleep(5 * time.Second)
 			}
 			if e != nil {
-				b.WriteString("\n" + url)
+				sb.WriteString("\n" + url)
 			}
 		}(v)
 	}
 	wg.Wait()
-	if b.Len() != 0 {
-		return "⚠️ <b>Ошибка проверки URL</b>" + b.String()
+
+	if sb.Len() == 0 {
+		return ""
 	}
-	return ""
+	return "⚠️ <b>Ошибка проверки URL</b>" + sb.String()
 }
 
 // checkCFResources check cf resources
@@ -70,7 +71,7 @@ func CheckCFResources(sl []string) string {
 		Timeout: 20 * time.Second,
 	}
 
-	b := strings.Builder{}
+	sb := strings.Builder{}
 	wg := &sync.WaitGroup{}
 	for _, v := range sl {
 		wg.Add(1)
@@ -96,15 +97,16 @@ func CheckCFResources(sl []string) string {
 				return nil
 			}(); e != nil {
 				log.Printf("check URL %s error: %v", url, e)
-				fmt.Fprintf(&b, "\n%s: %v", url, e)
+				fmt.Fprintf(&sb, "\n%s: %v", url, e)
 			}
 		}(v)
 	}
 	wg.Wait()
-	if b.Len() != 0 {
-		return "⚠️ <b>Ошибка проверки URL</b>" + b.String()
+
+	if sb.Len() == 0 {
+		return ""
 	}
-	return ""
+	return "⚠️ <b>Ошибка проверки URL</b>" + sb.String()
 }
 
 // WatchZsrv проверяет, запущены ли zsrv площадок
@@ -142,7 +144,8 @@ func WatchZsrv(watchers []types.ZSrvWatch) string {
 		}(v)
 	}
 	wg.Wait()
-	if sb.String() == "" {
+
+	if sb.Len() == 0 {
 		return ""
 	}
 	return "⚠️ <b>Ошибка проверки площадок ОЗ</b>\n\n" + sb.String()
@@ -196,7 +199,7 @@ func CheckWhois(sl []string, days int) string {
 		return
 	}
 
-	b := strings.Builder{}
+	sb := strings.Builder{}
 	wg := &sync.WaitGroup{}
 	for _, v := range sl {
 		wg.Add(1)
@@ -245,17 +248,17 @@ func CheckWhois(sl []string, days int) string {
 
 			switch d := int(time.Until(exp) / Day); {
 			case d >= -3 && d <= days:
-				fmt.Fprintf(&b, "\n%s: %s (%d дн)%s", domain, exp.Format("02.01.2006"), d,
+				fmt.Fprintf(&sb, "\n%s: %s (%d дн)%s", domain, exp.Format("02.01.2006"), d,
 					types.Iif(len(ans.Registrant.Country) != 0, " "+ans.Registrant.Name, ""))
 			default:
 			}
 		}(v)
 	}
 	wg.Wait()
-	if s := b.String(); len(s) != 0 {
-		return "⚠️ <b>Срок регистрации домена заканчивается</b>" + types.Iif(strings.Count(s, "\n") > 1, "\n", "") + s
+	if sb.Len() == 0 {
+		return ""
 	}
-	return ""
+	return "⚠️ <b>Срок регистрации домена заканчивается</b>\n" + sb.String()
 }
 
 func CheckEC(ec types.EC) string {
