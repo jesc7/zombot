@@ -137,10 +137,12 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 	t30m := time.NewTicker(30 * time.Minute)
 	defer t30m.Stop()
 
-	t08_00 := time.NewTicker(types.NextTime("11:27"))
+	t08_00 := time.NewTicker(types.NextTime("08:00"))
 	defer t08_00.Stop()
 	t08_10 := time.NewTicker(types.NextTime("08:10"))
 	defer t08_10.Stop()
+	t09_00 := time.NewTicker(types.NextTime("09:00"))
+	defer t09_00.Stop()
 
 	for {
 		select {
@@ -201,6 +203,31 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					}
 				}
 			}()
+
+			go func() { //check domains registration
+				if s := checks.CheckWhois(cfg.CheckDomains, 10); s != "" {
+					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+						Text: s,
+					}); e == nil {
+						ws.Write(env)
+					}
+				}
+			}()
+
+		case <-t09_00.C: //everyday 9:00
+			t09_00.Reset(24 * time.Hour)
+
+			pay, e := planner.Absents(ctx, db)
+			if e != nil || len(pay) == 0 {
+				continue
+			}
+			env, e = shared.Pack(env.Type, shared.MessageAbsents{
+				Absents: pay,
+			})
+			if e != nil {
+				continue
+			}
+			ws.Write(env)
 
 		case <-t1m.C: //every 1 minutes
 			go func() { //End-of-work list
