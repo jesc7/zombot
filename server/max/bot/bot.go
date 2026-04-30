@@ -241,6 +241,9 @@ out:
 					continue
 				}
 				text := fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(m.Phone, "8800 "), " на 8800", ""), m.Phone)
+				if m.Region != "" {
+					text += "\n" + m.Region
+				}
 				b.SendText(text)
 			}
 
