@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/jesc7/zombot/cmd/zspy/client/phones"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/client/webskt"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
@@ -18,7 +19,7 @@ type WebServer struct {
 	skt *webskt.WebSocketClient
 }
 
-func NewWebServer(cfg types.Config, skt *webskt.WebSocketClient) *WebServer {
+func NewWebServer(cfg types.Config, cwd string, skt *webskt.WebSocketClient) *WebServer {
 	mux := http.NewServeMux()
 	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
 	mux.HandleFunc("/call", func(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +27,11 @@ func NewWebServer(cfg types.Config, skt *webskt.WebSocketClient) *WebServer {
 		if !ok {
 			return
 		}
-		env, _ := shared.Pack(shared.TypeMessageCall, shared.MessageCall{Phone: v[0]})
+		region := phones.FindByPhone(cwd, v[0])
+		env, _ := shared.Pack(shared.TypeMessageCall, shared.MessageCall{
+			Phone:  v[0],
+			Region: region,
+		})
 		skt.Write(env)
 	})
 

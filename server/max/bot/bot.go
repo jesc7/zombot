@@ -240,7 +240,8 @@ out:
 				if e != nil {
 					continue
 				}
-				b.SendText(fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(m.Phone, "8800 "), " на 8800", ""), m.Phone))
+				text := fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(strings.HasPrefix(m.Phone, "8800 "), " на 8800", ""), m.Phone)
+				b.SendText(text)
 			}
 
 		case msg := <-b.QWait.Q: //разгребаем локальную очередь сообщений

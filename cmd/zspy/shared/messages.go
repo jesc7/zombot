@@ -113,8 +113,8 @@ type MessageZSRV struct {
 }
 
 type MessageCall struct {
-	Phone string `json:"phone"`
-	Desc  string `json:"desc"`
+	Phone  string `json:"phone"`
+	Region string `json:"region"`
 }
 
 type GenderType int

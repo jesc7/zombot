@@ -18,8 +18,9 @@ func Start(ctx context.Context, service bool) error {
 	if e != nil {
 		return e
 	}
+	cwd := filepath.Dir(bin)
 
-	f, e := os.ReadFile(filepath.Join(filepath.Dir(bin), "cfg.json"))
+	f, e := os.ReadFile(filepath.Join(cwd, "cfg.json"))
 	if e != nil {
 		return e
 	}
@@ -32,7 +33,7 @@ func Start(ctx context.Context, service bool) error {
 	defer cancel()
 
 	wg := &sync.WaitGroup{}
-	skt := webskt.NewWebSocketClient(cfg, filepath.Dir(bin))
+	skt := webskt.NewWebSocketClient(cfg, cwd)
 	wg.Go(func() { //run WebSocket client
 		defer cancel()
 		if e = skt.Run(ctx, cfg); e != nil {
@@ -40,7 +41,7 @@ func Start(ctx context.Context, service bool) error {
 		}
 	})
 
-	wa := webapi.NewWebServer(cfg, skt)
+	wa := webapi.NewWebServer(cfg, cwd, skt)
 	wg.Go(func() { //run WebAPI server
 		defer cancel()
 		wa.Run(ctx)
