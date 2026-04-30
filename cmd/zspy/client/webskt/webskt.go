@@ -3,6 +3,7 @@ package webskt
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -143,6 +144,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 	defer t08_10.Stop()
 	t09_00 := time.NewTicker(types.NextTime("09:00"))
 	defer t09_00.Stop()
+	t11_00 := time.NewTicker(types.NextTime("11:00"))
+	defer t11_00.Stop()
+
 	t18_00 := time.NewTicker(types.NextTime("18:00"))
 	defer t18_00.Stop()
 	t20_00 := time.NewTicker(types.NextTime("20:00"))
@@ -245,13 +249,16 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				}
 			}()
 
+		case <-t11_00.C: //everyday 11:00
+			t11_00.Reset(24 * time.Hour)
+
 		case <-t18_00.C: //everyday 18:00
 			t18_00.Reset(24 * time.Hour)
 
-			go func() { //tomorrow duties
-				if s := duties.TomorrowDuties(ctx, db); s != "" {
+			go func() { //holidays detector
+				if i := duties.HolidaysCount(ctx, db); i > 0 {
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
-						Text: s,
+						Text: fmt.Sprintf("🤖 Уважаемые гуманоиды!\nВпереди %d выходных, желаю всем хорошо отдохнуть!", i),
 					}); e == nil {
 						ws.Write(env)
 					}
