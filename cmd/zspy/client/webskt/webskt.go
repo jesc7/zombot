@@ -130,7 +130,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 	tPing := time.NewTicker(10 * time.Second)
 	defer tPing.Stop()
-	t5m := time.NewTicker(time.Minute * 5)
+	t1m := time.NewTicker(1 * time.Minute)
+	defer t1m.Stop()
+	t5m := time.NewTicker(5 * time.Minute)
 	defer t5m.Stop()
 	t30m := time.NewTicker(30 * time.Minute)
 	defer t30m.Stop()
@@ -188,6 +190,17 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					return
 				}
 				ws.Write(env)
+			}()
+
+		case <-t1m.C: //every 1 minutes
+			go func() { //zsrv watcher
+				if s := planner.EowList(ctx, db); s != "" {
+					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+						Text: s,
+					}); e == nil {
+						ws.Write(env)
+					}
+				}
 			}()
 
 		case <-t5m.C: //every 5 minutes
