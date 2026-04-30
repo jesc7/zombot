@@ -171,6 +171,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				}
 			}()
 
+		case <-t08_10.C:
+			t08_10.Reset(24 * time.Hour)
+
 		case <-t5m.C: //every 5 minutes
 			go func() {
 				if s := checks.WatchZsrv(cfg.ZSrv); s != "" { //zsrv watcher
