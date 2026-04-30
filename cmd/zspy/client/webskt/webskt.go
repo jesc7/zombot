@@ -315,6 +315,16 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			}()
 
 		case <-t5m.C: //every 5 minutes
+			go func() { //start-of-work for duties
+				if s := planner.SowList(ctx, db); s != "" {
+					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+						Text: s,
+					}); e == nil {
+						ws.Write(env)
+					}
+				}
+			}()
+
 			go func() { //zsrv watcher
 				if s := checks.WatchZsrv(cfg.ZSrv); s != "" {
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{

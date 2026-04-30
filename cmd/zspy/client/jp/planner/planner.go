@@ -191,16 +191,19 @@ func SowList(ctx context.Context, db *sql.DB) string {
 		}
 		p[fmt.Sprintf("%s (%s)", user, t.Format("15:04"))] = g
 	}
+
+	var res string
 	for k, v := range p {
 		if _, ok := lastSOW[k]; !ok {
-			delta += funcs.RndFrom([2][]string{{"👩", "👩🏻", "👩🏼", "👩🏽"}, {"🧑", "🧑🏻", "🧑🏼", "🧑🏽"}}[v]...) + " " + k + "\n"
+			res += types.RndFrom([2][]string{{"👩", "👩🏻", "👩🏼", "👩🏽"}, {"🧑", "🧑🏻", "🧑🏼", "🧑🏽"}}[v]...) + " " + k + "\n"
 		}
 	}
 	lastSOW = p
-	if len(delta) != 0 {
-		delta = fmt.Sprintf("<b>Я на месте</b>\n%s", delta)
+
+	if res == "" {
+		return ""
 	}
-	return
+	return fmt.Sprintf("<b>Я на месте</b>\n%s", res)
 }
 
 // EowList (EndOfWork list) выводит список сотрудников, окончивших работу ДО окончания рабочего дня согласно рабочего расписания
