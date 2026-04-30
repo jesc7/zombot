@@ -14,6 +14,7 @@ import (
 	"github.com/jesc7/zombot/cmd/zspy/client/jp/checks"
 	"github.com/jesc7/zombot/cmd/zspy/client/jp/duties"
 	"github.com/jesc7/zombot/cmd/zspy/client/jp/planner"
+	"github.com/jesc7/zombot/cmd/zspy/client/phones"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
@@ -23,12 +24,14 @@ type WebSocketClient struct {
 	header http.Header
 	ch     chan shared.Envelope
 	conn   *websocket.Conn
+	cwd    string
 }
 
-func NewWebSocketClient(cfg types.Config) *WebSocketClient {
+func NewWebSocketClient(cfg types.Config, cwd string) *WebSocketClient {
 	return &WebSocketClient{
 		host:   url.URL{Scheme: "ws", Host: cfg.Host, Path: "/ws"},
 		header: http.Header{"Authorization": []string{"Bearer " + cfg.Token}},
+		cwd:    cwd,
 	}
 }
 
@@ -134,6 +137,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 	t08_00 := time.NewTicker(types.NextTime("08:00"))
 	defer t08_00.Stop()
+	t08_10 := time.NewTicker(types.NextTime("08:10"))
+	defer t08_10.Stop()
 
 	for {
 		select {
@@ -151,6 +156,11 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 		case <-t08_00.C:
 			t08_00.Reset(24 * time.Hour)
+
+			go func() { //update phone base
+				phones.PbUpdate(ws.cwd, []string{})
+			}()
+
 			go func() {
 				if s := checks.CheckEC(cfg.EC); s != "" { //checks EC
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
