@@ -159,3 +159,91 @@ func WatchCriticalTasks(ctx context.Context, db *sql.DB, minutes int) string {
 	}
 	return res
 }
+
+type notes map[string]int
+
+var lastEOW, lastSOW notes
+
+// EowList (EndOfWork list) выводит список сотрудников, окончивших работу ДО окончания рабочего дня согласно рабочего расписания
+func EowList(ctx context.Context, db *sql.DB) string {
+	_getPhrase := func(g int) string {
+		phrases := []string{
+			"Алоха",
+			"Адиос мучачос",
+			"Аста ла виста",
+			"Арривидерчи",
+			"Саёнара",
+			"Сау болындар",
+			"Всем пока",
+			"Бай бай",
+			"Чао рагацци",
+			"Баюшки",
+			"До завтра",
+			"Гудбайте",
+			"Покедова",
+		}
+		phrasesMale := []string{
+			"Всё, я ушел",
+			"Ушёл, всем пока",
+			"Пора валить",
+			"Досвидос",
+			"Я устал, я ухожу",
+			"Давай до свидания",
+		}
+		phrasesFemale := []string{
+			"Ой, всё",
+			"Пошла я",
+			"Я ушла",
+			"Оревуар",
+			"Покасики",
+			"Досвидули",
+			"Я побежала",
+		}
+		switch g {
+		case 0:
+			phrases = append(phrasesFemale, phrases...)
+		default:
+			phrases = append(phrasesMale, phrases...)
+		}
+
+		switch types.Rnd(0, 100) < 50 {
+		case true:
+			return phrases[0]
+		default:
+			return types.RndFrom(phrases[1:]...)
+		}
+	}
+
+	rows, e := db.QueryContext(ctx, `
+		select u.username, h.time_out, coalesce(p.gender, 0) as g
+		from tabel_history h
+		join tabel t on h.user_id = t.user_id and h.dt = t.dt
+		join sp$users u on h.user_id = u.id
+		join u$personal p on u.id = p.user_id
+		left join pr_getsched_v2(0, u.id, null) a on 1 = 1
+		where h.comments_id = 2 and h.dt = current_date and h.time_out < a.tto and datediff(minute, h.time_out, current_time) < 5
+	`)
+	if e != nil {
+		return ""
+	}
+	defer rows.Close()
+
+	p, user, t, g := notes{}, "", time.Time{}, 0
+	for rows.Next() {
+		if e = rows.Scan(&user, &t, &g); e != nil {
+			return ""
+		}
+		p[fmt.Sprintf("%s (%s)", user, t.Format("15:04"))] = g
+	}
+	res := ""
+	for k, v := range p {
+		if _, ok := lastEOW[k]; !ok {
+			res += types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[v]...) + " " + k + "\n"
+		}
+	}
+	lastEOW = p
+	if len(res) != 0 {
+		res = fmt.Sprintf("<b>%s</b>\n%s", _getPhrase(g), res)
+	}
+	return res
+}
