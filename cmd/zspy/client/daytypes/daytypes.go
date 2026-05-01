@@ -32,7 +32,7 @@ type jobCal struct {
 
 var cal = make(map[string]jobCal)
 
-func GetDayType(country string, t time.Time) (dt DayType, e error) {
+func GetDayType(cwd, country string, t time.Time) (dt DayType, e error) {
 	if cal[country].Year != t.Year() {
 		cal[country] = jobCal{}
 	}
@@ -40,7 +40,7 @@ func GetDayType(country string, t time.Time) (dt DayType, e error) {
 		buf := new(bytes.Buffer)
 		var (
 			resp  *http.Response
-			fname = path.Join(path.Dir(os.Args[0]), "daytypes", fmt.Sprintf("%s_%d.json", country, t.Year()))
+			fname = path.Join(cwd, "daytypes", fmt.Sprintf("%s_%d.json", country, t.Year()))
 		)
 
 		fromFile := false

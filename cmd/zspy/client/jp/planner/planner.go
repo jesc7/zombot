@@ -166,8 +166,8 @@ type notes map[string]int
 var lastEOW, lastSOW notes
 
 // SowList (StartOfWork list) сообщает, что дежурный начал работу
-func SowList(ctx context.Context, db *sql.DB) string {
-	dt, e := daytypes.GetDayType("ru", time.Now())
+func SowList(ctx context.Context, db *sql.DB, cwd string) string {
+	dt, e := daytypes.GetDayType(cwd, "ru", time.Now())
 	if e != nil || dt != daytypes.DtHoliday || !types.NowBetween("7:30", "9:30") {
 		return ""
 	}
