@@ -152,6 +152,12 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 	t20_00 := time.NewTicker(types.NextTime("20:00"))
 	defer t20_00.Stop()
 
+	var (
+		pay shared.MessageDuties
+	)
+	pay.Q.Days = 2
+	pay.A, _ = duties.Duty(ctx, db, pay.Q)
+
 	for {
 		select {
 		case <-ctx.Done(): //контекст отменен - выходим

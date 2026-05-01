@@ -56,7 +56,8 @@ func Duty(ctx context.Context, db *sql.DB, q shared.DutyQuery) ([]shared.Daily, 
 
 	var res []shared.Daily
 	for i := start; i <= q.Days; i++ {
-		t := types.ClearTime(time.Now()).Add(24 * time.Hour * time.Duration(i))
+		//t := types.ClearTime(time.Now()).Add(24 * time.Hour * time.Duration(i))
+		t := types.ClearTime(time.Now()).AddDate(0, 0, i)
 		if d, ok := (*pl)[t]; ok && (q.Name == "" || types.ContainsWord(d, q.Name)) {
 			res = append(res, shared.Daily{
 				Date:    t,
@@ -180,7 +181,7 @@ func HolidaysCount(ctx context.Context, db *sql.DB) int {
 		return 0
 	}
 
-	t := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local)
+	t := types.ClearTime(time.Now())
 	if _, ok := (*pl)[t]; ok { //если мы уже внутри выходных, то не реагируем
 		return 0
 	}
