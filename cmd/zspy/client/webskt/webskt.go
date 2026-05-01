@@ -181,7 +181,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 						ws.Write(env)
 					}
 				} else {
-					log.Println("08:00 - CheckEC: nothing to say")
+					log.Println("CheckEC: nothing to say")
 				}
 			}()
 
@@ -195,7 +195,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				)
 				pay.Birthdays, e = planner.Birthdays(ctx, db, 1)
 				if e != nil || len(pay.Birthdays) == 0 {
-					log.Println("08:10 - Birthdays: nothing to say")
+					log.Println("Birthdays: nothing to say")
 					return
 				}
 				env, e := shared.Pack(shared.TypeMessageBirthdays, pay)
@@ -213,7 +213,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 						ws.Write(env)
 					}
 				} else {
-					log.Println("08:10 - ForeignHoliday: nothing to say")
+					log.Println("ForeignHoliday: nothing to say")
 				}
 			}()
 
@@ -224,6 +224,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					}); e == nil {
 						ws.Write(env)
 					}
+				} else {
+					log.Println("CheckWhois: nothing to say")
 				}
 			}()
 
@@ -233,6 +235,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			go func() { //who's absent today
 				pay, e := planner.Absents(ctx, db)
 				if e != nil || len(pay) == 0 {
+					log.Println("Absents: nothing to say")
 					return
 				}
 				env, e := shared.Pack(shared.TypeMessageAbsents, shared.MessageAbsents{
@@ -251,6 +254,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					}); e == nil {
 						ws.Write(env)
 					}
+				} else {
+					log.Println("MissDuties: nothing to say")
 				}
 			}()
 
@@ -275,6 +280,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					}); e == nil {
 						ws.Write(env)
 					}
+				} else {
+					log.Println("HolidaysCount: nothing to say")
 				}
 			}()
 
@@ -288,6 +295,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					}); e == nil {
 						ws.Write(env)
 					}
+				} else {
+					log.Println("TomorrowDuties: nothing to say")
 				}
 			}()
 
@@ -299,6 +308,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				pay.Q.Days = 2
 				pay.A, e = duties.Duty(ctx, db, pay.Q)
 				if e != nil || len(pay.A) == 0 {
+					log.Println("Duty for 2 next days: nothing to say")
 					return
 				}
 				env, e := shared.Pack(shared.TypeMessageDuties, pay)
