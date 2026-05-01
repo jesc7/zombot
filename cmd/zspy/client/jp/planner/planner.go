@@ -180,9 +180,9 @@ func SowList(ctx context.Context, db *sql.DB, cwd string) string {
 		where 1=1
 			and h.comments_id = 1 
 			and h.dt = current_date	
-			and datediff(minute, h.time_in, time '%s') < 10
+			and datediff(minute, h.time_in, time '%s') < 5
 	`, time.Now().Format("15:04")))
-	if e != nil { //and datediff(second, h.time_out, time '%s') < 50
+	if e != nil {
 		return ""
 	}
 	defer rows.Close()
