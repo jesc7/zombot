@@ -168,11 +168,11 @@ var lastEOW, lastSOW notes
 // SowList (StartOfWork list) сообщает, что дежурный начал работу
 func SowList(ctx context.Context, db *sql.DB) string {
 	dt, e := daytypes.GetDayType("ru", time.Now())
-	if e != nil || dt != daytypes.DtHoliday || !types.TimeBetween("7:30", "9:30") {
+	if e != nil || dt != daytypes.DtHoliday || !types.NowBetween("7:30", "9:30") {
 		return ""
 	}
 
-	rows, e := db.Query(`
+	rows, e := db.QueryContext(ctx, `
 		select u.username, h.time_in, coalesce(p.gender, 0) as g
 		from tabel_history h
 		join sp$users u on h.user_id = u.id

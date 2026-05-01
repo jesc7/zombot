@@ -6,6 +6,7 @@ import (
 	"math/rand/v2"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -103,7 +104,7 @@ func Left(src string, length int) string {
 	return string(r[:length])
 }
 
-func TimeBetween(s1, s2 string) bool {
+func TimeBetween_obsolete(s1, s2 string) bool {
 	_check := func(s string) (int, error) {
 		sl := strings.SplitN(s, ":", 3)
 		if len(sl) == 1 {
@@ -182,15 +183,6 @@ func R2file(r io.Reader, name string, by3rd bool) (e error) {
 	return
 }
 
-func Join(elem ...string) (s string) {
-	defer func() {
-		if len(s) > 1 && s[0] == '/' && s[1] != '/' {
-			s = "/" + s
-		}
-	}()
-	return path.Join(elem...)
-}
-
 func CopyFile(src, dst string) error {
 	in, e := os.Open(src)
 	if e != nil {
@@ -226,14 +218,6 @@ func UUID() (string, error) {
 	return uid.String(), nil
 }
 
-func MultiReplace(src, find, replace string) string {
-	repl := make([]string, 0, 2*len([]rune(find)))
-	for _, r := range find {
-		repl = append(repl, string(r), replace)
-	}
-	return strings.NewReplacer(repl...).Replace(src)
-}
-
 func DeleteOldFiles(dir, mask string, days uint) error {
 	if mask == "" {
 		mask = ".*"
@@ -253,7 +237,7 @@ func DeleteOldFiles(dir, mask string, days uint) error {
 	for _, ent := range de {
 		if !ent.IsDir() && re.MatchString(ent.Name()) {
 			if info, e := ent.Info(); e == nil && time.Since(info.ModTime()).Hours() >= float64(time.Hour*24*time.Duration(days)) {
-				os.Remove(Join(dir, ent.Name()))
+				os.Remove(filepath.Join(dir, ent.Name()))
 			}
 		}
 	}
@@ -291,4 +275,11 @@ func NextTime(s string) time.Duration {
 		target = target.Add(24 * time.Hour)
 	}
 	return target.Sub(now)
+}
+
+func NowBetween(time1, time2 string) bool {
+	t1, e1 := time.Parse("15:04", time1)
+	t2, e2 := time.Parse("15:04", time2)
+	tNow := time.Date(0, 1, 1, time.Now().Hour(), time.Now().Minute(), time.Now().Second(), 0, time.Now().Location())
+	return errors.Join(e1, e2) == nil && tNow.After(t1) && tNow.Before(t2)
 }
