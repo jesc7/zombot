@@ -53,7 +53,6 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) error {
 
 	for {
 		if ws.conn, _, e = websocket.DefaultDialer.DialContext(ctx, ws.host.String(), ws.header); e != nil {
-			log.Println(e)
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
@@ -67,8 +66,8 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) error {
 }
 
 func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql.DB) {
-
-	log.Printf("Connected to %s", ws.conn.RemoteAddr())
+	log.Printf("Connect %s", ws.conn.RemoteAddr())
+	defer log.Printf("Disconnect %s", ws.conn.RemoteAddr())
 
 	defer ws.conn.Close()
 	readError := make(chan struct{})
@@ -148,7 +147,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 	defer t09_00.Stop()
 	t11_00 := time.NewTicker(types.NextTime("11:00"))
 	defer t11_00.Stop()
-
 	t18_00 := time.NewTicker(types.NextTime("18:00"))
 	defer t18_00.Stop()
 	t20_00 := time.NewTicker(types.NextTime("20:00"))
