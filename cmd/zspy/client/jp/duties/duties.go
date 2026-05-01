@@ -67,7 +67,7 @@ func Duty(ctx context.Context, db *sql.DB, q shared.DutyQuery) ([]shared.Daily, 
 	return res, nil
 }
 
-func MissDuties(ctx context.Context, db *sql.DB, days int) string {
+func MissDuties(ctx context.Context, db *sql.DB, cwd string, days int) string {
 	pl, e := DutiesList(ctx, db)
 	if e != nil {
 		return ""
@@ -85,7 +85,7 @@ func MissDuties(ctx context.Context, db *sql.DB, days int) string {
 
 	out:
 		for i, v := range []string{"ru", "kz"} { //by, ua, uz
-			dt, _ := daytypes.GetDayType(v, t)
+			dt, _ := daytypes.GetDayType(cwd, v, t)
 			switch i == 0 {
 			case true:
 				if dt != daytypes.DtHoliday {

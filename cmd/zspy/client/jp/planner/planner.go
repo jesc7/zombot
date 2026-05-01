@@ -295,14 +295,14 @@ func EowList(ctx context.Context, db *sql.DB) string {
 }
 
 // ForeignHoliday проверяет, что клиенты в других странах сегодня отдыхают, в то время как мы работаем :(
-func ForeignHoliday() string {
+func ForeignHoliday(cwd string) string {
 	t := time.Now()
-	dt, e := daytypes.GetDayType("ru", t)
+	dt, e := daytypes.GetDayType(cwd, "ru", t)
 	if e != nil || dt == daytypes.DtHoliday {
 		return ""
 	}
 
-	dt, e = daytypes.GetDayType("kz", t)
+	dt, e = daytypes.GetDayType(cwd, "kz", t)
 	if e != nil || dt != daytypes.DtHoliday {
 		return ""
 	}

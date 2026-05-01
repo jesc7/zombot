@@ -205,7 +205,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			}()
 
 			go func() { //another countries holiday
-				if s := planner.ForeignHoliday(); s != "" {
+				if s := planner.ForeignHoliday(ws.cwd); s != "" {
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
 					}); e == nil {
@@ -242,7 +242,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			}()
 
 			go func() { //missing duties
-				if s := duties.MissDuties(ctx, db, 20); s != "" {
+				if s := duties.MissDuties(ctx, db, ws.cwd, 20); s != "" {
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
 					}); e == nil {
@@ -318,7 +318,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 		case <-t5m.C: //every 5 minutes
 			go func() { //start-of-work for duties
-				if s := planner.SowList(ctx, db); s != "" {
+				if s := planner.SowList(ctx, db, ws.cwd); s != "" {
 					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
 					}); e == nil {
