@@ -8,8 +8,9 @@ import (
 )
 
 type Bus struct {
-	mu    sync.Mutex
-	chans map[string]chan shared.Envelope
+	mu     sync.Mutex
+	chans  map[string]chan shared.Envelope
+	closed bool
 }
 
 func NewBus() *Bus {
@@ -19,6 +20,7 @@ func NewBus() *Bus {
 }
 
 func (b *Bus) Close() {
+	b.closed = true
 	for _, v := range b.chans {
 		func() {
 			defer recover()
