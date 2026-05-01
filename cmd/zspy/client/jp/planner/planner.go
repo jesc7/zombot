@@ -172,14 +172,17 @@ func SowList(ctx context.Context, db *sql.DB, cwd string) string {
 		return ""
 	}
 
-	rows, e := db.QueryContext(ctx, `
+	rows, e := db.QueryContext(ctx, fmt.Sprintf(`
 		select u.username, h.time_in, coalesce(p.gender, 0) as g
 		from tabel_history h
 		join sp$users u on h.user_id = u.id
 		join u$personal p on u.id = p.user_id
-		where h.comments_id = 1 and h.dt = current_date	and datediff(minute, h.time_in, current_time) < 10
-	`)
-	if e != nil {
+		where 1=1
+			and h.comments_id = 1 
+			and h.dt = current_date	
+			and datediff(minute, h.time_in, time '%s') < 10
+	`, time.Now().Format("15:04")))
+	if e != nil { //and datediff(second, h.time_out, time '%s') < 50
 		return ""
 	}
 	defer rows.Close()
