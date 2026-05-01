@@ -92,6 +92,9 @@ func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r 
 		return
 	}
 
+	log.Printf("Connect %s", conn.RemoteAddr())
+	defer log.Printf("Disconnect %s", conn.RemoteAddr())
+
 	switch claims.Type {
 	case ct_ZSPY:
 		if ws.zspy != nil {

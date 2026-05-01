@@ -42,6 +42,9 @@ func (b *Bus) Register(name string) (chan shared.Envelope, error) {
 }
 
 func (b *Bus) Write(name string, value shared.Envelope) error {
+	if b.closed {
+		return nil
+	}
 	b.mu.Lock()
 	defer b.mu.Unlock()
 

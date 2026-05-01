@@ -13,9 +13,6 @@ import (
 const ct_ZSPY clientType = "zspy"
 
 func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, ch chan shared.Envelope) {
-
-	log.Printf("Connect: %s / %s", conn.LocalAddr(), conn.RemoteAddr())
-
 	ws.zspy = conn
 	defer func() {
 		ws.zspy.Close()
