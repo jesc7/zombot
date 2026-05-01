@@ -75,9 +75,10 @@ func GetDayType(cwd, country string, t time.Time) (dt DayType, e error) {
 			}
 		}
 
-		dec := json.NewDecoder(buf)
+		//dec := json.NewDecoder(buf)
 		c := jobCal{}
-		if e = dec.Decode(&c); e != nil {
+		if e = json.Unmarshal(buf.Bytes(), &c); e != nil {
+			//if e = dec.Decode(&c); e != nil {
 			return
 		}
 		cal[country] = c
