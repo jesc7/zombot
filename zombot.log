@@ -131,3 +131,12 @@
 2026/05/01 20:43:36 Connect 127.0.0.1:36616
 2026/05/01 20:43:47 Message from -74063217832624
 2026/05/01 20:43:48 Bot message_duties
+2026/05/01 20:47:23 context canceled
+2026/05/01 20:47:23 .
+2026/05/01 20:47:23 Disconnect 127.0.0.1:36616
+2026/05/01 20:47:23 failed to get updates: context canceled
+2026/05/01 20:47:52 WebSocket server started, here the tokens:
+2026/05/01 20:47:52 zspy=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoienNweSIsImV4cCI6MjA5Mjk1MzYwMH0.7DO6c2qfAESVkVtju22TVUL07x1LTuAgk5TX8_AaAnY (<nil>)
+2026/05/01 20:47:53 Connect 127.0.0.1:51790
+2026/05/01 20:48:04 Disconnect 127.0.0.1:51790
+2026/05/01 20:48:25 Message from -74063217832624
