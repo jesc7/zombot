@@ -40,7 +40,7 @@ func GetDayType(country string, t time.Time) (dt DayType, e error) {
 		buf := new(bytes.Buffer)
 		var (
 			resp  *http.Response
-			fname = types.Join(path.Dir(os.Args[0]), "daytypes", fmt.Sprintf("%s_%d.json", country, t.Year()))
+			fname = path.Join(path.Dir(os.Args[0]), "daytypes", fmt.Sprintf("%s_%d.json", country, t.Year()))
 		)
 
 		fromFile := false
