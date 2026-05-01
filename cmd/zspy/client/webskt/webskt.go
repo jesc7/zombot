@@ -152,12 +152,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 	t20_00 := time.NewTicker(types.NextTime("20:00"))
 	defer t20_00.Stop()
 
-	var (
-		pay shared.MessageDuties
-	)
-	pay.Q.Days = 2
-	pay.A, _ = duties.Duty(ctx, db, pay.Q)
-
 	for {
 		select {
 		case <-ctx.Done(): //контекст отменен - выходим
@@ -186,6 +180,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					}); e == nil {
 						ws.Write(env)
 					}
+				} else {
+					log.Println("08:00 - CheckEC: nothing to say")
 				}
 			}()
 
@@ -199,6 +195,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				)
 				pay.Birthdays, e = planner.Birthdays(ctx, db, 1)
 				if e != nil || len(pay.Birthdays) == 0 {
+					log.Println("08:10 - Birthdays: nothing to say")
 					return
 				}
 				env, e := shared.Pack(shared.TypeMessageBirthdays, pay)
@@ -215,6 +212,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					}); e == nil {
 						ws.Write(env)
 					}
+				} else {
+					log.Println("08:10 - ForeignHoliday: nothing to say")
 				}
 			}()
 
