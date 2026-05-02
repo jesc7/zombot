@@ -5,6 +5,10 @@ type Config struct {
 		Token  string `json:"token"`
 		ChatID int64  `json:"chat_id"`
 	} `json:"max"`
+	TG struct {
+		Token  string `json:"token"`
+		ChatID int64  `json:"chat_id"`
+	} `json:"tg"`
 	Proxy struct {
 		Addr string `json:"addr"`
 		Port int    `json:"port"`
