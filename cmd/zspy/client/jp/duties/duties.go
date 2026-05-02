@@ -80,7 +80,7 @@ func MissDuties(ctx context.Context, db *sql.DB, cwd string, days int) string {
 
 	var ds []needs
 	for i := 1; ; i++ {
-		t := types.ClearTime(time.Now()) //time.Date(now.Year(), now.Month(), now.Day()+i, 0, 0, 0, 0, time.Local)
+		t := types.ClearTime(time.Now().AddDate(0, 0, i)) //time.Date(now.Year(), now.Month(), now.Day()+i, 0, 0, 0, 0, time.Local)
 		count, dutCount, countries := 0, 0, []string{}
 
 	out:
@@ -193,7 +193,7 @@ func HolidaysCount(ctx context.Context, db *sql.DB) int {
 		res++
 	}
 	if res == 2 && t.AddDate(0, 0, 1).Weekday() == time.Saturday { //если впереди 2 выходных и завтра суббота, то не реагируем
-		res = 0
+		return 0
 	}
 	return res
 }
