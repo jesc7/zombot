@@ -134,5 +134,5 @@ func (b *Bot) Run(ctx context.Context) error {
 	defer bh.Stop()
 	//do work
 
-	return ctx.Err()
+	return bh.Start()
 }
