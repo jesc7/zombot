@@ -16,6 +16,7 @@ type Config struct {
 }
 
 const (
-	BUS_BOT = "bot"
-	BUS_WS  = "ws"
+	BUS_BOTMAX = "bot_max"
+	BUS_BOTTG  = "bot_tg"
+	BUS_WS     = "ws"
 )

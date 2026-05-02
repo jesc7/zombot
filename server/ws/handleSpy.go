@@ -28,7 +28,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 			if e != nil { //ошибка чтения сокета - выходим
 				return
 			}
-			ws.b.Write(types.BUS_BOT, env)
+			ws.b.Write(types.BUS_BOTMAX, env)
 		}
 	}()
 

@@ -40,7 +40,7 @@ type Bot struct {
 }
 
 func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
-	ch, e := b.Register(types.BUS_BOT)
+	ch, e := b.Register(types.BUS_BOTMAX)
 	if e != nil {
 		return nil, e
 	}
