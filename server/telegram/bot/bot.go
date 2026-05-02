@@ -9,9 +9,8 @@ import (
 
 	tg "github.com/mymmrac/telego"
 	th "github.com/mymmrac/telego/telegohandler"
+	tu "github.com/mymmrac/telego/telegoutil"
 	"golang.org/x/time/rate"
-
-	//tu "github.com/mymmrac/telego/telegoutil"
 
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
@@ -64,6 +63,12 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 		b:      b,
 		ch:     ch,
 	}, nil
+}
+
+func (b *Bot) SendText(text string) {
+	b.QWait.Add(&queue.WaitObj{
+		O: tu.Message(tu.ID(b.chatID), text),
+	}, queue.PRIORITY_NORMAL)
 }
 
 func (b *Bot) Run(ctx context.Context) error {
