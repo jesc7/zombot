@@ -75,7 +75,7 @@ func (b *Bot) Run(ctx context.Context) {
 		}
 	}()
 
-	updates, e := bot.UpdatesViaLongPolling(ctx, &tg.GetUpdatesParams{
+	updates, e := b.bot.UpdatesViaLongPolling(ctx, &tg.GetUpdatesParams{
 		Offset:  -1,
 		Limit:   0,
 		Timeout: 10,
@@ -87,8 +87,8 @@ func (b *Bot) Run(ctx context.Context) {
 		},
 	})
 	if e != nil {
-		return e
+		return
 	}
-	defer bot.StopPoll(ctx, nil)
+	defer b.bot.StopPoll(ctx, nil)
 
 }
