@@ -113,7 +113,6 @@ func (b *Bot) Run(ctx context.Context) error {
 				if !ok {
 					break
 				}
-
 				switch mt := wo.O.(type) {
 				case *tg.SendMessageParams:
 					b.bot.SendMessage(ctx, mt.
