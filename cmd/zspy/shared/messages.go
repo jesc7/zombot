@@ -155,3 +155,13 @@ type MessageBirthdays struct {
 	Days      int        `json:"days"`
 	Birthdays []Birthday `json:"birthdays"`
 }
+
+type MessageCrossPosting struct {
+	Source      string `json:"source"`
+	ChatID      int64  `json:"chat_id"`
+	ChatCaption int64  `json:"chat_caption"`
+	UserUID     string `json:"user_uid"`
+	UserName    string `json:"user_name"`
+	MessageUID  string `json:"message_id"`
+	Text        string `json:"text"`
+}
