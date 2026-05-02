@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/max-messenger/max-bot-api-client-go/schemes"
 	tg "github.com/mymmrac/telego"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/time/rate"
@@ -91,4 +92,43 @@ func (b *Bot) Run(ctx context.Context) {
 	}
 	defer b.bot.StopPoll(ctx, nil)
 
+	go func() {
+	out:
+		for {
+			select {
+			case <-ctx.Done():
+				break out
+
+			case env := <-b.ch: //разгребаем пакеты, пришедшие боту
+				log.Println("Bot", env.Type)
+
+				switch env.Type {
+				//просто текст
+				case shared.TypeMessageText:
+					m, e := shared.Unpack[shared.MessageText](env)
+					if e != nil {
+						continue
+					}
+					b.SendText(m.Text)
+				}
+
+			case msg := <-b.QWait.Q: //разгребаем локальную очередь сообщений
+				wo, ok := msg.(*queue.WaitObj)
+				if !ok {
+					break
+				}
+				m, ok := wo.O.(*max.Message)
+				if !ok {
+					break
+				}
+				b.bot.Messages.Send(ctx, m.
+					SetChat(b.chatID).
+					SetFormat(schemes.HTML),
+				)
+				if wo.OnOk != nil {
+					wo.OnOk()
+				}
+			}
+		}
+	}()
 }
