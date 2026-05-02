@@ -105,8 +105,7 @@ func (b *Bot) Run(ctx context.Context) error {
 					if e != nil {
 						continue
 					}
-					_ = m
-					//b.SendText(m.Text)
+					b.SendText(m.Text)
 				}
 
 			case msg := <-b.QWait.Q: //разгребаем локальную очередь сообщений
@@ -114,18 +113,16 @@ func (b *Bot) Run(ctx context.Context) error {
 				if !ok {
 					break
 				}
-				_ = wo
-				/*m, ok := wo.O.(*max.Message)
-				if !ok {
-					break
+
+				switch mt := wo.O.(type) {
+				case *tg.SendMessageParams:
+					b.bot.SendMessage(ctx, mt.
+						WithParseMode(tg.ModeHTML),
+					)
 				}
-				b.bot.Messages.Send(ctx, m.
-					SetChat(b.chatID).
-					SetFormat(schemes.HTML),
-				)
 				if wo.OnOk != nil {
 					wo.OnOk()
-				}*/
+				}
 			}
 		}
 	}()
