@@ -78,15 +78,15 @@ func MissDuties(ctx context.Context, db *sql.DB, cwd string, days int) string {
 		s string
 	}
 
-	now, ds := time.Now(), []needs{}
+	var ds []needs
 	for i := 1; ; i++ {
-		t := time.Date(now.Year(), now.Month(), now.Day()+i, 0, 0, 0, 0, time.Local)
+		t := types.ClearTime(time.Now()) //time.Date(now.Year(), now.Month(), now.Day()+i, 0, 0, 0, 0, time.Local)
 		count, dutCount, countries := 0, 0, []string{}
 
 	out:
-		for i, v := range []string{"ru", "kz"} { //by, ua, uz
+		for idx, v := range []string{"ru", "kz"} { //by, ua, uz
 			dt, _ := daytypes.GetDayType(cwd, v, t)
-			switch i == 0 {
+			switch idx == 0 {
 			case true:
 				if dt != daytypes.DtHoliday {
 					break out
