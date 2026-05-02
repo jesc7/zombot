@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
-	maxbot "github.com/jesc7/zombot/server/max/bot"
+	max_bot "github.com/jesc7/zombot/server/max/bot"
 	"github.com/jesc7/zombot/server/types"
 	"github.com/jesc7/zombot/server/ws"
 )
@@ -36,7 +36,7 @@ func Start(ctx context.Context, service bool) error {
 	defer myBus.Close()
 
 	srv, e := ws.NewWebSocketServer(ctx, cfg, myBus)
-	bot, e := maxbot.NewBot(ctx, cfg, myBus)
+	botMax, e := max_bot.NewBot(ctx, cfg, myBus)
 	if e != nil {
 		log.Fatalln("Can't create Max bot:", e)
 	}
@@ -51,7 +51,7 @@ func Start(ctx context.Context, service bool) error {
 
 	wg.Go(func() { //run Max bot
 		defer cancel()
-		bot.Run(ctx)
+		botMax.Run(ctx)
 	})
 
 	wg.Wait()
