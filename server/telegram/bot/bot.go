@@ -7,12 +7,10 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/max-messenger/max-bot-api-client-go/schemes"
 	tg "github.com/mymmrac/telego"
-	"github.com/rs/zerolog/log"
+	th "github.com/mymmrac/telego/telegohandler"
 	"golang.org/x/time/rate"
 
-	//th "github.com/mymmrac/telego/telegohandler"
 	//tu "github.com/mymmrac/telego/telegoutil"
 
 	"github.com/jesc7/zombot/cmd/zspy/shared"
@@ -109,7 +107,8 @@ func (b *Bot) Run(ctx context.Context) {
 					if e != nil {
 						continue
 					}
-					b.SendText(m.Text)
+					_ = m
+					//b.SendText(m.Text)
 				}
 
 			case msg := <-b.QWait.Q: //разгребаем локальную очередь сообщений
@@ -117,7 +116,8 @@ func (b *Bot) Run(ctx context.Context) {
 				if !ok {
 					break
 				}
-				m, ok := wo.O.(*max.Message)
+				_ = wo
+				/*m, ok := wo.O.(*max.Message)
 				if !ok {
 					break
 				}
@@ -127,8 +127,14 @@ func (b *Bot) Run(ctx context.Context) {
 				)
 				if wo.OnOk != nil {
 					wo.OnOk()
-				}
+				}*/
 			}
 		}
 	}()
+
+	bh, e := th.NewBotHandler(b.bot, updates)
+	if e != nil {
+		return
+	}
+	defer bh.Stop()
 }
