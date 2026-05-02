@@ -7,12 +7,21 @@ import (
 	"time"
 
 	"github.com/jesc7/zombot/cmd/zspy/client/daytypes"
+	"github.com/jesc7/zombot/cmd/zspy/client/jp/duties"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
 
 // Absents возвращает список отсутствующих и причину отсутствия
 func Absents(ctx context.Context, db *sql.DB) ([]shared.Absent, error) {
+	pl, e := duties.DutiesList(ctx, db)
+	if e != nil {
+		return nil, e
+	}
+	if _, ok := (*pl)[types.ClearTime(time.Now())]; ok { //если сегодня есть дежурные, значит нерабочий день, не проверяем отсутствующих
+		return []shared.Absent{}, nil
+	}
+
 	rows, e := db.QueryContext(ctx, `
 		select t1, t2, u, lower(trim(iif(t1 = 0, c2, iif((t1 = 6) or (t1 = 7), c1 || iif(char_length(c1) > 0 and char_length(c2) > 0, ' / ', '') || c2, c1)))) as c, g
 		from (
