@@ -274,6 +274,12 @@ out:
 					break
 				}
 
+				//дублируем в Telegram
+				env, _ := shared.Pack(shared.TypeMessageText, shared.MessageText{
+					Text: upd.Message.Sender.Username + " в MAX пишет:\n" + upd.Message.Body.Text,
+				})
+				b.b.Write(types.BUS_BOTTG, env)
+
 				if isHelp(upd.Message.Body.Text) {
 					upd.Message.Body.Text = "/help"
 				} else if duty, name, days := isDuty(upd.Message.Body.Text); duty {
