@@ -66,14 +66,7 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 	}, nil
 }
 
-func (b *Bot) Run(ctx context.Context) {
-	var e error
-	defer func() {
-		if e != nil {
-			log.Println(e)
-		}
-	}()
-
+func (b *Bot) Run(ctx context.Context) error {
 	updates, e := b.bot.UpdatesViaLongPolling(ctx, &tg.GetUpdatesParams{
 		Offset:  -1,
 		Limit:   0,
@@ -86,7 +79,7 @@ func (b *Bot) Run(ctx context.Context) {
 		},
 	})
 	if e != nil {
-		return
+		return e
 	}
 	defer b.bot.StopPoll(ctx, nil)
 
@@ -134,7 +127,10 @@ func (b *Bot) Run(ctx context.Context) {
 
 	bh, e := th.NewBotHandler(b.bot, updates)
 	if e != nil {
-		return
+		return e
 	}
 	defer bh.Stop()
+	//do work
+
+	return ctx.Err()
 }

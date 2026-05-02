@@ -10,6 +10,7 @@ import (
 
 	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
 	max_bot "github.com/jesc7/zombot/server/max/bot"
+	tg_bot "github.com/jesc7/zombot/server/telegram/bot"
 	"github.com/jesc7/zombot/server/types"
 	"github.com/jesc7/zombot/server/ws"
 )
@@ -41,6 +42,11 @@ func Start(ctx context.Context, service bool) error {
 		log.Fatalln("Can't create Max bot:", e)
 	}
 
+	botTG, e := tg_bot.NewBot(ctx, cfg, myBus)
+	if e != nil {
+		log.Fatalln("Can't create Telegram bot:", e)
+	}
+
 	wg := &sync.WaitGroup{}
 	wg.Go(func() { //run WebSocket server
 		defer cancel()
@@ -52,6 +58,13 @@ func Start(ctx context.Context, service bool) error {
 	wg.Go(func() { //run Max bot
 		defer cancel()
 		botMax.Run(ctx)
+	})
+
+	wg.Go(func() { //run Telegram bot
+		defer cancel()
+		if e = botTG.Run(ctx); e != nil {
+			log.Println(e)
+		}
 	})
 
 	wg.Wait()
