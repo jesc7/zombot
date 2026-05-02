@@ -3,10 +3,12 @@ package bot
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 
 	tg "github.com/mymmrac/telego"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/time/rate"
 
 	//th "github.com/mymmrac/telego/telegohandler"
@@ -20,6 +22,7 @@ import (
 
 type Bot struct {
 	bot    *tg.Bot
+	me     *tg.User
 	QWait  *queue.Queue
 	chatID int64
 	b      *bus.Bus
@@ -47,11 +50,45 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 	}
 
 	bot, e := tg.NewBot(cfg.TG.Token, options...)
+	if e != nil {
+		return nil, e
+	}
+	me, e := bot.GetMe(ctx)
+	if e != nil {
+		return nil, e
+	}
 	return &Bot{
 		bot:    bot,
+		me:     me,
 		QWait:  queue.NewQ(ctx, rate.Limit(5)),
 		chatID: cfg.TG.ChatID,
 		b:      b,
 		ch:     ch,
-	}, e
+	}, nil
+}
+
+func (b *Bot) Run(ctx context.Context) {
+	var e error
+	defer func() {
+		if e != nil {
+			log.Println(e)
+		}
+	}()
+
+	updates, e := bot.UpdatesViaLongPolling(ctx, &tg.GetUpdatesParams{
+		Offset:  -1,
+		Limit:   0,
+		Timeout: 10,
+		AllowedUpdates: []string{
+			tg.MessageUpdates,
+			tg.EditedMessageUpdates,
+			tg.CallbackQueryUpdates,
+			tg.MessageReactionUpdates,
+		},
+	})
+	if e != nil {
+		return e
+	}
+	defer bot.StopPoll(ctx, nil)
+
 }
