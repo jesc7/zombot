@@ -156,12 +156,16 @@ type MessageBirthdays struct {
 	Birthdays []Birthday `json:"birthdays"`
 }
 
+type CPCore struct {
+	Source     string `json:"source"`
+	MessageUID string `json:"message_uid"`
+}
+
 type MessageCrossPosting struct {
-	Source      string `json:"source"`
+	CPCore
 	ChatID      int64  `json:"chat_id"`
 	ChatCaption int64  `json:"chat_caption"`
 	UserUID     string `json:"user_uid"`
 	UserName    string `json:"user_name"`
-	MessageUID  string `json:"message_id"`
 	Text        string `json:"text"`
 }
