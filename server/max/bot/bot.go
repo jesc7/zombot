@@ -276,7 +276,7 @@ out:
 
 				//дублируем в Telegram
 				env, _ := shared.Pack(shared.TypeMessageText, shared.MessageText{
-					Text: upd.Message.Sender.Username + " в MAX пишет:\n" + upd.Message.Body.Text,
+					Text: upd.Message.Sender.Name + " в MAX пишет:\n" + upd.Message.Body.Text,
 				})
 				b.b.Write(types.BUS_BOTTG, env)
 
