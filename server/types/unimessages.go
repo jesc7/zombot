@@ -5,25 +5,25 @@ package types
 	way to send a messages in any supported messengers
 */
 
-type IntUniMessage interface {
+type UniMessage interface {
 	UniID() string
 }
 
-type UniMessage struct {
+type UniMessageCore struct {
 	ID string
 }
 
-func (m *UniMessage) UniID() string {
+func (m *UniMessageCore) UniID() string {
 	return m.ID
 }
 
 type UniMessageText struct {
-	UniMessage
+	UniMessageCore
 	Text string
 }
 
 type UniMessageFile struct {
-	UniMessage
+	UniMessageCore
 	Name    string
 	Caption string
 	File    []byte
@@ -57,23 +57,23 @@ type Contact struct {
 }
 
 type UniMessageContact struct {
-	UniMessage
+	UniMessageCore
 	Contact
 }
 
 type UniMessageContacts struct {
-	UniMessage
+	UniMessageCore
 	Contacts []Contact
 }
 
 type UniMessageQuoted struct {
-	UniMessage
-	Quoted IntUniMessage
+	UniMessageCore
+	Quoted UniMessage
 	Text   string
 }
 
 type UniMessageReaction struct {
-	UniMessage
-	Reacted  IntUniMessage
+	UniMessageCore
+	Reacted  UniMessage
 	Reaction string
 }
