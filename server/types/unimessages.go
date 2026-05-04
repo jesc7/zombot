@@ -68,12 +68,12 @@ type UniMessageContacts struct {
 
 type UniMessageQuoted struct {
 	UniMessageCore
-	Quoted UniMessage
+	Quoted *UniMessage
 	Text   string
 }
 
 type UniMessageReaction struct {
 	UniMessageCore
-	Reacted  UniMessage
+	Reacted  *UniMessage
 	Reaction string
 }
