@@ -36,15 +36,10 @@ type Bot struct {
 	QWait  *queue.Queue
 	chatID int64
 	b      *bus.Bus
-	ch     chan any /*shared.Envelope*/
+	ch     chan any
 }
 
 func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
-	ch, e := b.Register(types.BUS_BOTMAX)
-	if e != nil {
-		return nil, e
-	}
-
 	var options []max.Option
 	if cfg.Proxy.Addr != "" {
 		proxy, e := url.Parse(fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port))
@@ -65,7 +60,7 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 		QWait:  queue.NewQ(ctx, rate.Limit(5)),
 		chatID: cfg.Max.ChatID,
 		b:      b,
-		ch:     ch,
+		ch:     b.Register(types.BUS_BOTMAX),
 	}, e
 }
 

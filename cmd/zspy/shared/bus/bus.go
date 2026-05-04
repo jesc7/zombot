@@ -27,19 +27,19 @@ func (b *Bus) Close() {
 	}
 }
 
-func (b *Bus) Register(name string) (chan any /*shared.Envelope*/, error) {
+func (b *Bus) Register(name string) chan any {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	if _, ok := b.chans[name]; ok {
-		return nil, errors.New("name already exist")
+	if ch, ok := b.chans[name]; ok {
+		return ch
 	}
-	ch := make(chan any /*shared.Envelope*/)
+	ch := make(chan any)
 	b.chans[name] = ch
-	return ch, nil
+	return ch
 }
 
-func (b *Bus) Write(name string, value any /*shared.Envelope*/) error {
+func (b *Bus) Write(name string, value any) error {
 	if b.closed {
 		return nil
 	}

@@ -28,15 +28,10 @@ type Bot struct {
 }
 
 func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
-	ch, e := b.Register(types.BUS_BOTTG)
-	if e != nil {
-		return nil, e
-	}
-
 	options := append([]tg.BotOption{}, tg.WithDefaultLogger(false, true))
 	if cfg.Proxy.Addr != "" {
-		var proxy *url.URL
-		if proxy, e = url.Parse(fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port)); e == nil {
+		proxy, e := url.Parse(fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port))
+		if e == nil {
 			options = append(options, tg.WithHTTPClient(
 				&http.Client{
 					Transport: &http.Transport{
@@ -61,7 +56,7 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 		QWait:  queue.NewQ(ctx, rate.Limit(5)),
 		chatID: cfg.TG.ChatID,
 		b:      b,
-		ch:     ch,
+		ch:     b.Register(types.BUS_BOTTG),
 	}, nil
 }
 

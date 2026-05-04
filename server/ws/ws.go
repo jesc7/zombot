@@ -26,18 +26,13 @@ type WebSocketServer struct {
 var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 
 func NewWebSocketServer(ctx context.Context, cfg types.Config, b *bus.Bus) (*WebSocketServer, error) {
-	ch, e := b.Register(types.BUS_WS)
-	if e != nil {
-		return nil, e
-	}
-
 	ws := &WebSocketServer{
 		b:      b,
 		jwtKey: []byte(cfg.WS.JwtKey),
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		ws.handle(ctx, w, r, ch)
+		ws.handle(ctx, w, r, b.Register(types.BUS_WS))
 	})
 	ws.srv = &http.Server{
 		Handler: mux,
