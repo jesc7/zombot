@@ -33,24 +33,19 @@ func Start(ctx context.Context, service bool) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	myBus := bus.NewBus()
+	myBus := bus.NewBus() //data bus
 	defer myBus.Close()
-
-	botTelegram, e := tg_bot.NewBot(ctx, cfg, myBus)
-	if e != nil {
-		log.Fatalln("Can't create Telegram bot:", e)
-	}
 
 	wg := &sync.WaitGroup{}
 
 	//WebSocket server
-	srv, e := ws.NewWebSocketServer(ctx, cfg, myBus)
+	wsServer, e := ws.NewWebSocketServer(ctx, cfg, myBus)
 	if e != nil {
 		log.Fatalln("Can't create WebSocket server:", e)
 	}
 	wg.Go(func() { //run server
 		defer cancel()
-		if e = srv.Run(ctx); e != nil {
+		if e = wsServer.Run(ctx); e != nil {
 			log.Println(e)
 		}
 	})
@@ -66,12 +61,18 @@ func Start(ctx context.Context, service bool) error {
 		})
 	}
 
-	wg.Go(func() { //run Telegram bot
-		defer cancel()
-		if e = botTelegram.Run(ctx); e != nil {
-			log.Println(e)
-		}
-	})
+	//Telegram bot
+	botTelegram, e := tg_bot.NewBot(ctx, cfg, myBus)
+	if e != nil {
+		log.Println("Can't create Telegram bot:", e)
+	} else {
+		wg.Go(func() { //run bot
+			defer cancel()
+			if e = botTelegram.Run(ctx); e != nil {
+				log.Println(e)
+			}
+		})
+	}
 
 	wg.Wait()
 	return ctx.Err()
