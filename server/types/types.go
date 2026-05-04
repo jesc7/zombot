@@ -28,9 +28,8 @@ const (
 type UniMessageText struct {
 	Text string
 }
-type UniMessageCaption struct {
-	Caption string
-}
+
 type UniMessageFile struct {
+	Name string
 	File []byte
 }
