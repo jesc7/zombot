@@ -278,10 +278,10 @@ out:
 				}
 
 				//дублируем в Telegram
-				env, _ := shared.Pack(shared.TypeMessageText, shared.MessageText{
+				/*env, _ := shared.Pack(shared.TypeMessageText, shared.MessageText{
 					Text: upd.Message.Sender.Name + " в MAX пишет:\n" + upd.Message.Body.Text,
 				})
-				b.b.Write(types.BUS_BOTTG, env)
+				b.b.Write(types.BUS_BOTTG, env)*/
 
 				if isHelp(upd.Message.Body.Text) {
 					upd.Message.Body.Text = "/help"
