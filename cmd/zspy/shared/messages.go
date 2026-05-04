@@ -113,6 +113,7 @@ type MessageZSRV struct {
 }
 
 type MessageCall struct {
+	Prefix string `json:"prefix"`
 	Phone  string `json:"phone"`
 	Region string `json:"region"`
 }
