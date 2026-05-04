@@ -172,16 +172,21 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			t08_00.Reset(24 * time.Hour)
 
 			go func() { //update phone base
+				log.Println("PbUpdate")
 				phones.PbUpdate(ws.cwd, []string{})
 			}()
 
 			go func() { //checks EC
 				if s := checks.CheckEC(cfg.EC); s != "" {
-					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
-					}); e == nil {
-						ws.Write(env)
+					})
+					if e != nil {
+						log.Println("CheckEC error:", e)
+						return
 					}
+					log.Println("CheckEC Write:", s)
+					ws.Write(env)
 				} else {
 					log.Println("CheckEC: nothing to say")
 				}
