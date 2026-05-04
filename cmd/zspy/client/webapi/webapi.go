@@ -33,15 +33,15 @@ func NewWebServer(cfg types.Config, cwd string, skt *webskt.WebSocketClient) *We
 		if !ok {
 			return
 		}
-		phone := reCall.FindAllString(v[0], -1)
+		phone := reCall.FindString(v[0])
 		if len(phone) == 0 {
 			return
 		}
 
 		env, _ := shared.Pack(shared.TypeMessageCall, shared.MessageCall{
-			Prefix: types.Iif(strings.HasPrefix(phone[0], "8800 "), "8800", ""),
-			Phone:  phone[0],
-			Region: phones.FindByPhone(cwd, phone[0]),
+			Prefix: types.Iif(strings.HasPrefix(v[0], "8800 "), "8800", ""),
+			Phone:  phone,
+			Region: phones.FindByPhone(cwd, phone),
 		})
 		skt.Write(env)
 	})
@@ -61,7 +61,7 @@ func NewWebServer(cfg types.Config, cwd string, skt *webskt.WebSocketClient) *We
 	return &WebServer{
 		srv: &http.Server{
 			Handler: mux,
-			Addr:    fmt.Sprintf(":%d", cfg.WA.Port), //8089
+			Addr:    fmt.Sprintf(":%d", cfg.WebAPI.Port),
 		},
 	}
 }

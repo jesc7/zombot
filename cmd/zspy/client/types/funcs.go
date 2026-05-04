@@ -17,11 +17,11 @@ import (
 )
 
 type Config struct {
-	Host  string `json:"host"`
-	Token string `json:"token"`
-	WA    struct {
+	Host   string `json:"host"`
+	Token  string `json:"token"`
+	WebAPI struct {
 		Port int `json:"port"`
-	} `json:"wa"`
+	} `json:"webapi"`
 	DB struct {
 		Driver  string `json:"driver"`
 		ConnStr string `json:"connstr"`
