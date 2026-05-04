@@ -24,3 +24,10 @@ const (
 	BUS_BOTTG  = "bot_tg"
 	BUS_WS     = "ws"
 )
+
+type UniMessageText struct {
+	Text string
+}
+type UniMessageCaption struct {
+	Caption string
+}
