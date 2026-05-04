@@ -96,16 +96,19 @@ func (b *Bot) Run(ctx context.Context) error {
 				break out
 
 			case msg := <-b.ch: //разгребаем пакеты, пришедшие боту
-				log.Println("Bot", msg.Type)
+				switch mt := msg.(type) {
+				case shared.Envelope:
+					log.Println("Bot", mt.Type)
 
-				switch msg.Type {
-				//просто текст
-				case shared.TypeMessageText:
-					m, e := shared.Unpack[shared.MessageText](msg)
-					if e != nil {
-						continue
+					switch mt.Type {
+					//просто текст
+					case shared.TypeMessageText:
+						m, e := shared.Unpack[shared.MessageText](mt)
+						if e != nil {
+							continue
+						}
+						b.SendText(m.Text)
 					}
-					b.SendText(m.Text)
 				}
 
 			case msg := <-b.QWait.Q: //разгребаем локальную очередь сообщений
