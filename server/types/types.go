@@ -25,11 +25,22 @@ const (
 	BUS_WS     = "ws"
 )
 
+/*
+	UNIVERSAL MESSAGES
+	way to send a messages in any supported messengers
+*/
+
+type UniMessage struct {
+	ID string
+}
+
 type UniMessageText struct {
+	UniMessage
 	Text string
 }
 
 type UniMessageFile struct {
+	UniMessage
 	Name    string
 	Caption string
 	File    []byte
@@ -59,15 +70,27 @@ type UniMessageDocument struct {
 	UniMessageFile
 }
 
+type Contact struct {
+}
+
 type UniMessageContact struct {
+	UniMessage
+	Contact
 }
 
 type UniMessageContacts struct {
-	Contacts []UniMessageContact
+	UniMessage
+	Contacts []Contact
 }
 
 type UniMessageQuoted struct {
+	UniMessage
+	Quoted UniMessage
+	Text   string
 }
 
 type UniMessageReaction struct {
+	UniMessage
+	Reacted  UniMessage
+	Reaction string
 }
