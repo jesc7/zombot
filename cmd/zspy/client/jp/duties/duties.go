@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jesc7/zombot/cmd/zspy/client/daytypes"
@@ -14,7 +15,14 @@ import (
 
 type Planner map[time.Time]string
 
+var (
+	muDL sync.Mutex
+)
+
 func DutiesList(ctx context.Context, db *sql.DB) (*Planner, error) {
+	muDL.Lock()
+	defer muDL.Unlock()
+
 	pl := make(Planner)
 	rows, e := db.QueryContext(ctx, `
 		select t.dt, list(u.username, ', ')
