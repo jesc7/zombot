@@ -30,6 +30,31 @@ type UniMessageText struct {
 }
 
 type UniMessageFile struct {
-	Name string
-	File []byte
+	Name    string
+	Caption string
+	File    []byte
+}
+
+type UniMessageImage struct {
+	UniMessageFile
+}
+
+type UniMessageVoice struct {
+	UniMessageFile
+}
+
+type UniMessageAudio struct {
+	UniMessageFile
+}
+
+type UniMessageVideo struct {
+	UniMessageFile
+}
+
+type UniMessageVideoNote struct {
+	UniMessageFile
+}
+
+type UniMessageDocument struct {
+	UniMessageFile
 }
