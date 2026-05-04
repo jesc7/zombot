@@ -12,7 +12,6 @@ import (
 	"github.com/gorilla/websocket"
 
 	ctypes "github.com/jesc7/zombot/cmd/zspy/client/types"
-	"github.com/jesc7/zombot/cmd/zspy/shared"
 	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
 	"github.com/jesc7/zombot/server/types"
 )
@@ -71,7 +70,7 @@ func (ws *WebSocketServer) Run(ctx context.Context) error {
 	return ctx.Err()
 }
 
-func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request, ch chan shared.Envelope) {
+func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request, ch chan any /*shared.Envelope*/) {
 	auth := r.Header.Get("Authorization")
 	tokenStr := strings.TrimPrefix(auth, "Bearer ")
 	if auth == "" || tokenStr == auth {
