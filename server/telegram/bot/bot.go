@@ -24,7 +24,7 @@ type Bot struct {
 	QWait  *queue.Queue
 	chatID int64
 	b      *bus.Bus
-	ch     chan any /*shared.Envelope*/
+	ch     chan any
 }
 
 func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
@@ -92,7 +92,7 @@ func (b *Bot) Run(ctx context.Context) error {
 
 			case msg := <-b.ch: //разгребаем пакеты, пришедшие боту
 				switch mt := msg.(type) {
-				case shared.Envelope:
+				case shared.Envelope: //пакеты zspy
 					log.Println("Bot", mt.Type)
 
 					switch mt.Type {

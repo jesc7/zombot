@@ -94,7 +94,7 @@ out:
 
 		case msg := <-b.ch: //разгребаем пакеты, пришедшие боту
 			switch mt := msg.(type) {
-			case shared.Envelope: //пакеты с клиента
+			case shared.Envelope: //пакеты zspy
 				log.Println("Bot", mt.Type)
 
 				switch mt.Type {

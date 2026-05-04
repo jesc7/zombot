@@ -7,22 +7,23 @@ import (
 
 type Bus struct {
 	mu     sync.Mutex
-	chans  map[string]chan any // shared.Envelope
+	chans  map[string]chan any
 	closed bool
 }
 
 func NewBus() *Bus {
 	return &Bus{
-		chans: make(map[string]chan any /*shared.Envelope*/),
+		chans: make(map[string]chan any),
 	}
 }
 
 func (b *Bus) Close() {
 	b.closed = true
-	for _, v := range b.chans {
+	for k, v := range b.chans {
 		func() {
 			defer recover()
 			close(v)
+			delete(b.chans, k)
 		}()
 	}
 }
