@@ -42,7 +42,7 @@ func Start(ctx context.Context, service bool) error {
 		log.Fatalln("Can't create Max bot:", e)
 	}
 
-	botTG, e := tg_bot.NewBot(ctx, cfg, myBus)
+	botTelegram, e := tg_bot.NewBot(ctx, cfg, myBus)
 	if e != nil {
 		log.Fatalln("Can't create Telegram bot:", e)
 	}
@@ -62,7 +62,7 @@ func Start(ctx context.Context, service bool) error {
 
 	wg.Go(func() { //run Telegram bot
 		defer cancel()
-		if e = botTG.Run(ctx); e != nil {
+		if e = botTelegram.Run(ctx); e != nil {
 			log.Println(e)
 		}
 	})
