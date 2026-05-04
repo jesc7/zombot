@@ -39,6 +39,16 @@ func (b *Bus) Register(name string) chan any {
 	return ch
 }
 
+func (b *Bus) Unregister(name string) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	if ch, ok := b.chans[name]; ok {
+		close(ch)
+		delete(b.chans, name)
+	}
+}
+
 func (b *Bus) Write(name string, value any) error {
 	if b.closed {
 		return nil
@@ -48,7 +58,7 @@ func (b *Bus) Write(name string, value any) error {
 
 	ch, ok := b.chans[name]
 	if !ok {
-		return errors.New("name not found")
+		return errors.New("named chan not found")
 	}
 	go func() { ch <- value }()
 	return nil
