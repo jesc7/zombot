@@ -266,11 +266,15 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 			go func() { //missing duties
 				if s := duties.MissDuties(ctx, db, ws.cwd, 20); s != "" {
-					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
-					}); e == nil {
-						ws.Write(env)
+					})
+					if e != nil {
+						log.Println("MissDuties error:", e)
+						return
 					}
+					log.Println("MissDuties Write:", s)
+					ws.Write(env)
 				} else {
 					log.Println("MissDuties: nothing to say")
 				}
@@ -292,11 +296,15 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 			go func() { //holidays detector
 				if i := duties.HolidaysCount(ctx, db); i > 0 {
-					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: fmt.Sprintf("🤖 Уважаемые гуманоиды!\nВпереди %d выходных, желаю всем хорошо отдохнуть!", i),
-					}); e == nil {
-						ws.Write(env)
+					})
+					if e != nil {
+						log.Println("HolidaysCount error:", e)
+						return
 					}
+					log.Println("HolidaysCount Write:", i)
+					ws.Write(env)
 				} else {
 					log.Println("HolidaysCount: nothing to say")
 				}
@@ -307,11 +315,15 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 			go func() { //tomorrow duties
 				if s := duties.TomorrowDuties(ctx, db); s != "" {
-					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
-					}); e == nil {
-						ws.Write(env)
+					})
+					if e != nil {
+						log.Println("TomorrowDuties error:", e)
+						return
 					}
+					log.Println("TomorrowDuties Write:", s)
+					ws.Write(env)
 				} else {
 					log.Println("TomorrowDuties: nothing to say")
 				}
@@ -330,8 +342,10 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				}
 				env, e := shared.Pack(shared.TypeMessageDuties, pay)
 				if e != nil {
+					log.Println("Duty error:", e)
 					return
 				}
+				log.Println("Duty Write:", len(pay.A))
 				ws.Write(env)
 			}()
 
