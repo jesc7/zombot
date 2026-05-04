@@ -7,8 +7,10 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 
+	"github.com/jesc7/zombot/cmd/zspy/client/phones"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/client/webskt"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
@@ -31,15 +33,15 @@ func NewWebServer(cfg types.Config, cwd string, skt *webskt.WebSocketClient) *We
 		if !ok {
 			return
 		}
-		phones := reCall.FindAllString(v[0], -1)
-		if len(phones) == 0 {
+		phone := reCall.FindAllString(v[0], -1)
+		if len(phone) == 0 {
 			return
 		}
 
-		region := phones.FindByPhone(cwd, v[0])
 		env, _ := shared.Pack(shared.TypeMessageCall, shared.MessageCall{
-			Phone:  v[0],
-			Region: region,
+			Prefix: types.Iif(strings.HasPrefix(phone[0], "8800 "), "8800", ""),
+			Phone:  phone[0],
+			Region: phones.FindByPhone(cwd, phone[0]),
 		})
 		skt.Write(env)
 	})
