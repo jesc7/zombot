@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"time"
 
-	"github.com/jesc7/zombot/cmd/zspy/client/phones"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/client/webskt"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
@@ -19,6 +19,10 @@ type WebServer struct {
 	skt *webskt.WebSocketClient
 }
 
+var (
+	reCall = regexp.MustCompile(`(?:\+?\d[\-\s]?\(?\s?\d{3,5}\s?\)?[\-\s]?)?(?:\d[\-\s]?){4,6}\d`)
+)
+
 func NewWebServer(cfg types.Config, cwd string, skt *webskt.WebSocketClient) *WebServer {
 	mux := http.NewServeMux()
 	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
@@ -27,6 +31,11 @@ func NewWebServer(cfg types.Config, cwd string, skt *webskt.WebSocketClient) *We
 		if !ok {
 			return
 		}
+		phones := reCall.FindAllString(v[0], -1)
+		if len(phones) == 0 {
+			return
+		}
+
 		region := phones.FindByPhone(cwd, v[0])
 		env, _ := shared.Pack(shared.TypeMessageCall, shared.MessageCall{
 			Phone:  v[0],
