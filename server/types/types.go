@@ -58,3 +58,16 @@ type UniMessageVideoNote struct {
 type UniMessageDocument struct {
 	UniMessageFile
 }
+
+type UniMessageContact struct {
+}
+
+type UniMessageContacts struct {
+	Contacts []UniMessageContact
+}
+
+type UniMessageQuoted struct {
+}
+
+type UniMessageReaction struct {
+}
