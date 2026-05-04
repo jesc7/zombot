@@ -31,3 +31,6 @@ type UniMessageText struct {
 type UniMessageCaption struct {
 	Caption string
 }
+type UniMessageFile struct {
+	File []byte
+}
