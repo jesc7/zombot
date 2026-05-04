@@ -209,16 +209,21 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				if e != nil {
 					return
 				}
+				log.Println("Birthdays:", len(pay.Birthdays))
 				ws.Write(env)
 			}()
 
 			go func() { //another countries holiday
 				if s := planner.ForeignHoliday(ws.cwd); s != "" {
-					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
-					}); e == nil {
-						ws.Write(env)
+					})
+					if e != nil {
+						log.Println("ForeignHoliday error:", e)
+						return
 					}
+					log.Println("ForeignHoliday Write:", s)
+					ws.Write(env)
 				} else {
 					log.Println("ForeignHoliday: nothing to say")
 				}
@@ -226,11 +231,15 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 			go func() { //check domains registration
 				if s := checks.CheckWhois(cfg.CheckDomains, 10); s != "" {
-					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
-					}); e == nil {
-						ws.Write(env)
+					})
+					if e != nil {
+						log.Println("CheckWhois error:", e)
+						return
 					}
+					log.Println("CheckWhois Write:", s)
+					ws.Write(env)
 				} else {
 					log.Println("CheckWhois: nothing to say")
 				}
@@ -251,6 +260,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				if e != nil {
 					return
 				}
+				log.Println("Absents Write:", len(pay))
 				ws.Write(env)
 			}()
 
