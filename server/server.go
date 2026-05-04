@@ -36,29 +36,35 @@ func Start(ctx context.Context, service bool) error {
 	myBus := bus.NewBus()
 	defer myBus.Close()
 
-	srv, e := ws.NewWebSocketServer(ctx, cfg, myBus)
-	botMax, e := max_bot.NewBot(ctx, cfg, myBus)
-	if e != nil {
-		log.Fatalln("Can't create Max bot:", e)
-	}
-
 	botTelegram, e := tg_bot.NewBot(ctx, cfg, myBus)
 	if e != nil {
 		log.Fatalln("Can't create Telegram bot:", e)
 	}
 
 	wg := &sync.WaitGroup{}
-	wg.Go(func() { //run WebSocket server
+
+	//WebSocket server
+	srv, e := ws.NewWebSocketServer(ctx, cfg, myBus)
+	if e != nil {
+		log.Fatalln("Can't create WebSocket server:", e)
+	}
+	wg.Go(func() { //run server
 		defer cancel()
 		if e = srv.Run(ctx); e != nil {
 			log.Println(e)
 		}
 	})
 
-	wg.Go(func() { //run Max bot
-		defer cancel()
-		botMax.Run(ctx)
-	})
+	//Max bot
+	botMax, e := max_bot.NewBot(ctx, cfg, myBus)
+	if e != nil {
+		log.Println("Can't create Max bot:", e)
+	} else {
+		wg.Go(func() { //run bot
+			defer cancel()
+			botMax.Run(ctx)
+		})
+	}
 
 	wg.Go(func() { //run Telegram bot
 		defer cancel()
