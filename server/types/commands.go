@@ -62,14 +62,23 @@ func isBirthday(value string) (bool, int) {
 }
 
 func IsCommand(text string) bool {
-	_command := func() (string, bool) {
+	_command := func(text string) (string, bool) {
 		if strings.Index(text, "/") == 0 {
-			if strings.Contains(b.Message.Body.Text, ":") {
-				return strings.Split(b.Message.Body.Text, ":")[0]
+			if strings.Contains(text, ":") {
+				return strings.Split(text, ":")[0], true
 			}
-			return b.Message.Body.Text
+			return text, true
 		}
 		return "", false
+	}
+	_params := func(text string) string {
+		if strings.Index(text, "/") == 0 {
+			if strings.Contains(text, ":") {
+				return strings.Split(text, ":")[1]
+			}
+			return ""
+		}
+		return ""
 	}
 
 	if isHelp(text) {
@@ -82,7 +91,12 @@ func IsCommand(text string) bool {
 		text = fmt.Sprintf("/birthday:%d", days)
 	}
 
-	switch upd.GetCommand() {
+	cmd, ok := _command(text)
+	if !ok {
+		return false
+	}
+
+	switch cmd {
 	case "/help": //помощь
 		b.SendText(MSG_HELP)
 
