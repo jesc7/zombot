@@ -224,10 +224,9 @@ type eow struct {
 	gender int
 }
 
-var eowList []eow
-
-func EowClear() {
-	eowList = []eow{}
+var eowList struct {
+	t    time.Time
+	list []eow
 }
 
 // EowList (EndOfWork list) выводит список сотрудников, окончивших работу ДО окончания рабочего дня согласно рабочего расписания
@@ -274,6 +273,11 @@ func EowList(ctx context.Context, db *sql.DB) string {
 		}
 	}
 
+	if t := types.ClearTime(time.Now()); t != eowList.t {
+		eowList.t = t
+		eowList.list = []eow{}
+	}
+
 	rows, e := db.QueryContext(ctx, fmt.Sprintf(`
 		select
 		u.username, h.time_out, coalesce(p.gender, 0) as g
@@ -294,15 +298,13 @@ func EowList(ctx context.Context, db *sql.DB) string {
 	}
 	defer rows.Close()
 
-	p, user, t, g := notes{}, "", time.Time{}, 0
-	_ = p
+	n, t, g := "", time.Time{}, 0
 	var curr []eow
 	for rows.Next() {
-		if e = rows.Scan(&user, &t, &g); e != nil {
+		if e = rows.Scan(&n, &t, &g); e != nil {
 			return ""
 		}
-		//p[fmt.Sprintf("%s (%s)", user, t.Format("15:04"))] = g
-		curr = append(curr, eow{t, user, g})
+		curr = append(curr, eow{t, n, g})
 	}
 	res := ""
 	if len(curr) > len(eowList) {

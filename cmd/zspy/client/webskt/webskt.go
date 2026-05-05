@@ -329,7 +329,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 			go func() { //End-of-work list
 				if t := time.Now().Hour(); t < 14 || t > 18 {
-					planner.EowClear()
 					return
 				}
 				if s := planner.EowList(ctx, db); s != "" {
