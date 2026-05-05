@@ -27,6 +27,8 @@ const (
 `
 )
 
+var otherMessengers = []string{types.BUS_BOTTG}
+
 type Bot struct {
 	bot    *max.Api
 	QWait  *queue.Queue
@@ -131,6 +133,12 @@ out:
 					}
 
 					//сообщения-не-команды
+					for _, v := range otherMessengers {
+						env, _ := shared.Pack(shared.TypeMessageText, shared.MessageText{
+							Text: "<b>(Max) " + upd.Message.Sender.Name + "</b>\n" + upd.Message.Body.Text,
+						})
+						b.b.Write(v, env)
+					}
 				}()
 			}
 		}

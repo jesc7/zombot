@@ -96,12 +96,6 @@ func IsCommand(b *bus.Bus, text string) bool {
 		return false
 	}
 
-	//дублируем в Telegram
-	/*env, _ := shared.Pack(shared.TypeMessageText, shared.MessageText{
-		Text: upd.Message.Sender.Name + " в MAX пишет:\n" + upd.Message.Body.Text,
-	})
-	b.b.Write(types.BUS_BOTTG, env)*/
-
 	switch cmd {
 	case "/duty": //дежурства
 		params := strings.Split(_params(text), "#")
