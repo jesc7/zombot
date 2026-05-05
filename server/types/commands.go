@@ -62,14 +62,24 @@ func isBirthday(value string) (bool, int) {
 }
 
 func IsCommand(text string) bool {
-	if types.IsHelp(upd.Message.Body.Text) {
-		upd.Message.Body.Text = "/help"
-	} else if duty, name, days := types.IsDuty(upd.Message.Body.Text); duty {
-		upd.Message.Body.Text = fmt.Sprintf("/duty:%s#%d", name, days)
-	} else if types.IsAbsent(upd.Message.Body.Text) {
-		upd.Message.Body.Text = "/absent"
-	} else if bd, days := types.IsBirthday(upd.Message.Body.Text); bd {
-		upd.Message.Body.Text = fmt.Sprintf("/birthday:%d", days)
+	_command := func() (string, bool) {
+		if strings.Index(text, "/") == 0 {
+			if strings.Contains(b.Message.Body.Text, ":") {
+				return strings.Split(b.Message.Body.Text, ":")[0]
+			}
+			return b.Message.Body.Text
+		}
+		return "", false
+	}
+
+	if isHelp(text) {
+		text = "/help"
+	} else if duty, name, days := isDuty(text); duty {
+		text = fmt.Sprintf("/duty:%s#%d", name, days)
+	} else if isAbsent(text) {
+		text = "/absent"
+	} else if bd, days := isBirthday(text); bd {
+		text = fmt.Sprintf("/birthday:%d", days)
 	}
 
 	switch upd.GetCommand() {
