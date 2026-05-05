@@ -196,17 +196,18 @@ func SowList(ctx context.Context, db *sql.DB, cwd string) string {
 	if t := types.ClearTime(time.Now()); t != types.ClearTime(sowTime) {
 		sowTime = t
 	}
-	res, g := "", 0
+	res, currTime, g := "", sowTime, 0
 	for rows.Next() {
 		n, t := "", time.Time{}
 		if e = rows.Scan(&n, &t, &g); e != nil {
 			return ""
 		}
 		if t = time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), t.Hour(), t.Minute(), t.Second(), 0, t.Location()); t.After(sowTime) {
-			sowTime = t
+			currTime = t
 			res += fmt.Sprintf("%s %s\n", types.RndFrom([2][]string{{"👩", "👩🏻", "👩🏼", "👩🏽"}, {"🧑", "🧑🏻", "🧑🏼", "🧑🏽"}}[g]...), n)
 		}
 	}
+	sowTime = currTime
 	if res == "" {
 		return ""
 	}
@@ -280,17 +281,18 @@ func EowList(ctx context.Context, db *sql.DB) string {
 	if t := types.ClearTime(time.Now()); t != types.ClearTime(eowTime) {
 		eowTime = t
 	}
-	res, g := "", 0
+	res, currTime, g := "", eowTime, 0
 	for rows.Next() {
 		n, t := "", time.Time{}
 		if e = rows.Scan(&n, &t, &g); e != nil {
 			return ""
 		}
 		if t = time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), t.Hour(), t.Minute(), t.Second(), 0, t.Location()); t.After(eowTime) {
-			eowTime = t
+			currTime = t
 			res += fmt.Sprintf("%s %s (%s)\n", types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[g]...), n, t.Format("15:04"))
 		}
 	}
+	eowTime = currTime
 	if res == "" {
 		return ""
 	}
