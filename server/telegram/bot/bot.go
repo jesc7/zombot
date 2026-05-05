@@ -71,9 +71,9 @@ func (b *Bot) Run(ctx context.Context) error {
 		Timeout: 10,
 		AllowedUpdates: []string{
 			tg.MessageUpdates,
-			tg.EditedMessageUpdates,
-			tg.CallbackQueryUpdates,
-			tg.MessageReactionUpdates,
+			//tg.EditedMessageUpdates,
+			//tg.CallbackQueryUpdates,
+			//tg.MessageReactionUpdates,
 		},
 	})
 	if e != nil {
@@ -81,49 +81,49 @@ func (b *Bot) Run(ctx context.Context) error {
 	}
 	defer b.bot.StopPoll(ctx, nil)
 
-	go func() {
-	out:
-		for {
-			select {
-			case <-ctx.Done():
-				break out
+	//go func() {
+out:
+	for {
+		select {
+		case <-ctx.Done():
+			break out
 
-			case msg := <-b.ch: //разгребаем пакеты, пришедшие боту
-				switch mt := msg.(type) {
-				case shared.Envelope: //пакеты zspy
+		case msg := <-b.ch: //разгребаем пакеты, пришедшие боту
+			switch mt := msg.(type) {
+			case shared.Envelope: //пакеты zspy
 
-					switch mt.Type {
-					//просто текст
-					case shared.TypeMessageText:
-						m, e := shared.Unpack[shared.MessageText](mt)
-						if e != nil {
-							continue
-						}
-						b.SendText(m.Text)
+				switch mt.Type {
+				//просто текст
+				case shared.TypeMessageText:
+					m, e := shared.Unpack[shared.MessageText](mt)
+					if e != nil {
+						continue
 					}
+					b.SendText(m.Text)
 				}
-
-			case msg := <-b.QWait.Q: //разгребаем локальную очередь сообщений
-				wo, ok := msg.(*queue.WaitObj)
-				if !ok {
-					break
-				}
-				switch mt := wo.O.(type) {
-				case *tg.SendMessageParams:
-					b.bot.SendMessage(ctx, mt.
-						WithParseMode(tg.ModeHTML),
-					)
-				}
-				if wo.OnOk != nil {
-					wo.OnOk()
-				}
-
-			case update := <-updates:
-				_ = update
-
 			}
+
+		case msg := <-b.QWait.Q: //разгребаем локальную очередь сообщений
+			wo, ok := msg.(*queue.WaitObj)
+			if !ok {
+				break
+			}
+			switch mt := wo.O.(type) {
+			case *tg.SendMessageParams:
+				b.bot.SendMessage(ctx, mt.
+					WithParseMode(tg.ModeHTML),
+				)
+			}
+			if wo.OnOk != nil {
+				wo.OnOk()
+			}
+
+		case update := <-updates:
+			fmt.Println(update)
+
 		}
-	}()
+	}
+	//}()
 
 	/*bh, e := th.NewBotHandler(b.bot, updates)
 	if e != nil {
