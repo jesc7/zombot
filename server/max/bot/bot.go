@@ -270,14 +270,8 @@ out:
 				if upd.Message.Recipient.ChatType != schemes.CHAT || upd.GetChatID() != b.chatID {
 					break
 				}
-
-				//дублируем в Telegram
-				/*env, _ := shared.Pack(shared.TypeMessageText, shared.MessageText{
-					Text: upd.Message.Sender.Name + " в MAX пишет:\n" + upd.Message.Body.Text,
-				})
-				b.b.Write(types.BUS_BOTTG, env)*/
-
-				if types.IsCommand(upd.Message.Body.Text) {
+				//отсеиваем команды
+				if types.IsCommand(b.b, upd.Message.Body.Text) {
 					break
 				}
 

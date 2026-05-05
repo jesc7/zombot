@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/jesc7/zombot/cmd/zspy/shared"
-	"github.com/jesc7/zombot/server/types"
+	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
 )
 
 var (
@@ -61,7 +61,7 @@ func isBirthday(value string) (bool, int) {
 	return b, days
 }
 
-func IsCommand(text string) bool {
+func IsCommand(b *bus.Bus, text string) bool {
 	_command := func(text string) (string, bool) {
 		if strings.Index(text, "/") == 0 {
 			if strings.Contains(text, ":") {
@@ -88,7 +88,6 @@ func IsCommand(text string) bool {
 	} else if bd, days := isBirthday(text); bd {
 		text = fmt.Sprintf("/birthday:%d", days)
 	}
-
 	cmd, ok := _command(text)
 	if !ok {
 		return false
@@ -110,14 +109,14 @@ func IsCommand(text string) bool {
 		if e != nil {
 			break
 		}
-		b.b.Write(types.BUS_WS, env)
+		b.Write(BUS_WS, env)
 
 	case "/absent": //отсутствующие
 		env, e := shared.Pack(shared.TypeMessageAbsents, shared.MessageAbsents{})
 		if e != nil {
 			break
 		}
-		b.b.Write(types.BUS_WS, env)
+		b.Write(BUS_WS, env)
 
 	case "/birthday": //дни рождения
 		days, _ := strconv.Atoi(_params(text))
@@ -128,9 +127,13 @@ func IsCommand(text string) bool {
 		if e != nil {
 			break
 		}
-		b.b.Write(types.BUS_WS, env)
+		b.Write(BUS_WS, env)
 
 	case "/ci": //инфо о клиентах
+
+	default:
+		return false
 	}
 
+	return true
 }
