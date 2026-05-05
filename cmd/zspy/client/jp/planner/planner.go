@@ -170,10 +170,6 @@ func CriticalTasks(ctx context.Context, db *sql.DB, minutes int) string {
 	return res
 }
 
-//type notes map[string]int
-
-//var lastEOW, lastSOW notes
-
 var sowTime time.Time
 
 // SowList (StartOfWork list) сообщает, что дежурный начал работу
@@ -183,7 +179,7 @@ func SowList(ctx context.Context, db *sql.DB, cwd string) string {
 		return ""
 	}
 
-	rows, e := db.QueryContext(ctx, fmt.Sprintf(`
+	rows, e := db.QueryContext(ctx, `
 		select u.username, h.time_in, coalesce(p.gender, 0) as g
 		from tabel_history h
 		join sp$users u on h.user_id = u.id
@@ -191,8 +187,7 @@ func SowList(ctx context.Context, db *sql.DB, cwd string) string {
 		where 1=1
 			and h.comments_id = 1 
 			and h.dt = current_date	
-			--and datediff(minute, h.time_in, time '%s') < 5
-	`, time.Now().Format("15:04")))
+	`)
 	if e != nil {
 		return ""
 	}
@@ -201,22 +196,17 @@ func SowList(ctx context.Context, db *sql.DB, cwd string) string {
 	if t := types.ClearTime(time.Now()); t != types.ClearTime(sowTime) {
 		sowTime = t
 	}
-	p, user, t, g := notes{}, "", time.Time{}, 0
+	res, g := "", 0
 	for rows.Next() {
-		if e = rows.Scan(&user, &t, &g); e != nil {
+		n, t := "", time.Time{}
+		if e = rows.Scan(&n, &t, &g); e != nil {
 			return ""
 		}
-		p[fmt.Sprintf("%s (%s)", user, t.Format("15:04"))] = g
-	}
-
-	var res string
-	for k, v := range p {
-		if _, ok := lastSOW[k]; !ok {
-			res += types.RndFrom([2][]string{{"👩", "👩🏻", "👩🏼", "👩🏽"}, {"🧑", "🧑🏻", "🧑🏼", "🧑🏽"}}[v]...) + " " + k + "\n"
+		if t = time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), t.Hour(), t.Minute(), t.Second(), 0, t.Location()); t.After(sowTime) {
+			sowTime = t
+			res += fmt.Sprintf("%s %s\n", types.RndFrom([2][]string{{"👩", "👩🏻", "👩🏼", "👩🏽"}, {"🧑", "🧑🏻", "🧑🏼", "🧑🏽"}}[g]...), n)
 		}
 	}
-	lastSOW = p
-
 	if res == "" {
 		return ""
 	}
