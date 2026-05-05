@@ -297,9 +297,9 @@ func EowList(ctx context.Context, db *sql.DB) string {
 		eowTime = t
 	}
 
-	var res string
+	res, g := "", 0
 	for rows.Next() {
-		n, t, g := "", time.Time{}, 0
+		n, t := "", time.Time{}
 		if e = rows.Scan(&n, &t, &g); e != nil {
 			return ""
 		}
@@ -308,10 +308,10 @@ func EowList(ctx context.Context, db *sql.DB) string {
 			res += fmt.Sprintf("%s %s (%s)\n", types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[g]...), n, t.Format("15:04"))
 		}
 	}
-	if res != "" {
-		res = fmt.Sprintf("<b>%s</b>\n\n%s", _getPhrase(g), res)
+	if res == "" {
+		return ""
 	}
-	return res
+	return fmt.Sprintf("<b>%s</b>\n\n%s", _getPhrase(g), res)
 }
 
 // ForeignHoliday проверяет, что клиенты в других странах сегодня отдыхают, в то время как мы работаем :(
