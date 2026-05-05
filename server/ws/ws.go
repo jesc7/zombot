@@ -32,7 +32,7 @@ func NewWebSocketServer(ctx context.Context, cfg types.Config, b *bus.Bus) (*Web
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		ws.handle(ctx, w, r, b.Register(types.BUS_WS))
+		ws.handle(ctx, w, r)
 	})
 	ws.srv = &http.Server{
 		Handler: mux,
@@ -65,7 +65,7 @@ func (ws *WebSocketServer) Run(ctx context.Context) error {
 	return ctx.Err()
 }
 
-func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request, ch chan any) {
+func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request /*, ch chan any*/) {
 	auth := r.Header.Get("Authorization")
 	tokenStr := strings.TrimPrefix(auth, "Bearer ")
 	if auth == "" || tokenStr == auth {
@@ -88,6 +88,8 @@ func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r 
 
 	log.Printf("Connect %s", conn.RemoteAddr())
 	defer log.Printf("Disconnect %s", conn.RemoteAddr())
+
+	ws.b.Register(fmt.Sprintf("%s_%s", types.BUS_WS, claims.Type))
 
 	switch claims.Type {
 	case ct_ZSPY:
