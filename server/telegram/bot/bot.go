@@ -3,12 +3,10 @@ package bot
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 
 	tg "github.com/mymmrac/telego"
-	th "github.com/mymmrac/telego/telegohandler"
 	tu "github.com/mymmrac/telego/telegoutil"
 	"golang.org/x/time/rate"
 
@@ -93,7 +91,6 @@ func (b *Bot) Run(ctx context.Context) error {
 			case msg := <-b.ch: //разгребаем пакеты, пришедшие боту
 				switch mt := msg.(type) {
 				case shared.Envelope: //пакеты zspy
-					log.Println("Bot", mt.Type)
 
 					switch mt.Type {
 					//просто текст
@@ -120,16 +117,21 @@ func (b *Bot) Run(ctx context.Context) error {
 				if wo.OnOk != nil {
 					wo.OnOk()
 				}
+
+			case update := <-updates:
+				_ = update
+
 			}
 		}
 	}()
 
-	bh, e := th.NewBotHandler(b.bot, updates)
+	/*bh, e := th.NewBotHandler(b.bot, updates)
 	if e != nil {
 		return e
 	}
 	defer bh.Stop()
 	//do work
 
-	return bh.Start()
+	return bh.Start()*/
+	return nil
 }

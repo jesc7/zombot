@@ -96,14 +96,13 @@ out:
 			if !ok {
 				break
 			}
-			m, ok := wo.O.(*max.Message)
-			if !ok {
-				break
+			switch mt := wo.O.(type) {
+			case *max.Message:
+				b.bot.Messages.Send(ctx, mt.
+					SetChat(b.chatID).
+					SetFormat(schemes.HTML),
+				)
 			}
-			b.bot.Messages.Send(ctx, m.
-				SetChat(b.chatID).
-				SetFormat(schemes.HTML),
-			)
 			if wo.OnOk != nil {
 				wo.OnOk()
 			}
