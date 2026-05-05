@@ -351,7 +351,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 		case <-t1m.C: //every 1 minutes
 
 			go func() { //End-of-work list
-				if t := time.Now().Hour(); t < 15 || t > 18 {
+				if t := time.Now().Hour(); t < 14 || t > 18 {
+					planner.EowClear()
 					return
 				}
 				if s := planner.EowList(ctx, db, 10); s != "" {

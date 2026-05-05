@@ -330,10 +330,12 @@ func EowList(ctx context.Context, db *sql.DB, first int) string {
 		eowCurr = append(eowCurr, eow{t, user, g})
 	}
 	res := ""
-	for _, v := range eowCurr[len(eowList):] {
-		res += fmt.Sprintf("%s %s (%s)\n", types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[v.gender]...), v.name, v.eot.Format("15:04"))
+	if len(eowCurr) > len(eowList) {
+		for _, v := range eowCurr[len(eowList):] {
+			res += fmt.Sprintf("%s %s (%s)\n", types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[v.gender]...), v.name, v.eot.Format("15:04"))
+		}
+		eowList = eowCurr
 	}
-	eowList = eowCurr
 
 	/*res := ""
 	for k, v := range p {
