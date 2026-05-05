@@ -135,37 +135,43 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				if e != nil {
 					continue
 				}
-				if len(m.Birthdays) == 0 {
-					b.SendText(fmt.Sprintf("☹ В ближайшие %d дней нет ДР", m.Days))
-					break
-				}
 
-				today := ctypes.ClearTime(time.Now())
-				bdToday, bdAfter := []string{}, []string{}
 				sb := strings.Builder{}
-				for _, v := range m.Birthdays {
-					gender := types.RndFrom([2][]string{{"👸🏼", "👸", "👸🏻", "💃"}, {"🤵", "🤵🏻", "🤵🏽"}}[v.Gender]...)
-					if v.Date.Equal(today) {
-						bdToday = append(bdToday, fmt.Sprintf("%s %s", gender, v.Caption))
-					} else {
-						bdAfter = append(bdAfter, fmt.Sprintf("%s %s (%s)", gender, v.Caption, v.Date.Format("02.01")))
+				if len(m.Birthdays) == 0 {
+					sb.WriteString(fmt.Sprintf("☹ В ближайшие %d дней нет ДР", m.Days))
+				} else {
+
+					today := ctypes.ClearTime(time.Now())
+					bdToday, bdAfter := []string{}, []string{}
+					for _, v := range m.Birthdays {
+						gender := types.RndFrom([2][]string{{"👸🏼", "👸", "👸🏻", "💃"}, {"🤵", "🤵🏻", "🤵🏽"}}[v.Gender]...)
+						if v.Date.Equal(today) {
+							bdToday = append(bdToday, fmt.Sprintf("%s %s", gender, v.Caption))
+						} else {
+							bdAfter = append(bdAfter, fmt.Sprintf("%s %s (%s)", gender, v.Caption, v.Date.Format("02.01")))
+						}
 					}
-				}
-				if len(bdToday) != 0 {
-					tip := []string{"🎉", "🎁", "🎂", "✨", "💐"}
-					fmt.Fprintf(&sb, "<b>Сегодня день рождения у:</b>\n%s\n\nПоздравляем, ю-ху!!! %s%s%s",
-						strings.Join(bdToday, "\n"),
-						types.RndFrom(tip...),
-						types.RndFrom(tip...),
-						types.RndFrom(tip...))
-					if len(bdAfter) != 0 {
-						sb.WriteString("\n\n<b>А еще скоро день рождения у:</b>\n")
+					if len(bdToday) != 0 {
+						tip := []string{"🎉", "🎁", "🎂", "✨", "💐"}
+						fmt.Fprintf(&sb, "<b>Сегодня день рождения у:</b>\n%s\n\nПоздравляем, ю-ху!!! %s%s%s",
+							strings.Join(bdToday, "\n"),
+							types.RndFrom(tip...),
+							types.RndFrom(tip...),
+							types.RndFrom(tip...))
+						if len(bdAfter) != 0 {
+							sb.WriteString("\n\n<b>А еще скоро день рождения у:</b>\n")
+						}
+					} else if len(bdAfter) != 0 {
+						sb.WriteString("<b>Скоро день рождения у:</b>\n\n")
 					}
-				} else if len(bdAfter) != 0 {
-					sb.WriteString("<b>Скоро день рождения у:</b>\n\n")
+					sb.WriteString(strings.Join(bdAfter, "\n"))
 				}
-				sb.WriteString(strings.Join(bdAfter, "\n"))
-				b.SendText(sb.String())
+				env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{
+					Text: sb.String(),
+				})
+				if e != nil {
+					return
+				}
 
 			//сообщения от площадок
 			case shared.TypeMessageZSRV:
@@ -173,6 +179,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				if e != nil {
 					continue
 				}
+
 				if strings.Count(m.Text, "\n") != 0 {
 					m.Text = "\n" + m.Text
 				}
@@ -184,7 +191,12 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				default:
 					m.Text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", m.Caption, m.Text)
 				}
-				b.SendText(m.Text)
+				env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{
+					Text: m.Text,
+				})
+				if e != nil {
+					return
+				}
 
 			//звонки
 			case shared.TypeMessageCall:
@@ -192,11 +204,17 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				if e != nil {
 					continue
 				}
+
 				text := fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(m.Prefix != "", " на "+m.Prefix, ""), m.Phone)
 				if m.Region != "" {
 					text += "\n" + m.Region
 				}
-				b.SendText(text)
+				env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{
+					Text: text,
+				})
+				if e != nil {
+					return
+				}
 			}
 
 			for _, v := range BUS_NAMES {
