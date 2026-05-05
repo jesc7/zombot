@@ -193,3 +193,5 @@
 2026/05/05 23:52:14 WebSocket server started, here the tokens:
 2026/05/05 23:52:14 zspy=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoienNweSIsImV4cCI6MjA5MzU1ODQwMH0.Bubs0imleevkaxhSaok_QXaZVX_mn8jzHoKnr8I7-pE (<nil>)
 2026/05/05 23:52:20 Message from -74063217832624
+2026/05/05 23:57:28 context canceled
+2026/05/05 23:57:28 failed to get updates: context canceled
