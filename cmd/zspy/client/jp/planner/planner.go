@@ -273,12 +273,12 @@ func EowList(ctx context.Context, db *sql.DB) string {
 		}
 	}
 
-	if t := types.ClearTime(time.Now()); t != eowList.t {
+	if t := types.ClearTime(time.Now()); t != types.ClearTime(eowList.t) {
 		eowList.t = t
 		eowList.list = []eow{}
 	}
 
-	rows, e := db.QueryContext(ctx, fmt.Sprintf(`
+	rows, e := db.QueryContext(ctx, `
 		select
 		u.username, h.time_out, coalesce(p.gender, 0) as g
 		from tabel_history h
@@ -290,16 +290,14 @@ func EowList(ctx context.Context, db *sql.DB) string {
 		  and h.comments_id = 2 
 		  and h.dt = current_date 
 		  and h.time_out < a.tto 
-		  --and datediff(second, h.time_out, time '%s') < 50
 		order by 2, 1
-	`, time.Now().Format("15:04")))
+	`)
 	if e != nil {
 		return ""
 	}
 	defer rows.Close()
 
-	n, t, g := "", time.Time{}, 0
-	var curr []eow
+	curr, n, t, g := []eow{}, "", time.Time{}, 0
 	for rows.Next() {
 		if e = rows.Scan(&n, &t, &g); e != nil {
 			return ""
@@ -307,11 +305,11 @@ func EowList(ctx context.Context, db *sql.DB) string {
 		curr = append(curr, eow{t, n, g})
 	}
 	res := ""
-	if len(curr) > len(eowList) {
-		for _, v := range curr[len(eowList):] {
+	if len(curr) > len(eowList.list) {
+		for _, v := range curr[len(eowList.list):] {
 			res += fmt.Sprintf("%s %s (%s)\n", types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[v.gender]...), v.name, v.eot.Format("15:04"))
 		}
-		eowList = curr
+		eowList.list = curr
 		res = fmt.Sprintf("<b>%s</b>\n\n%s", _getPhrase(g), res)
 	}
 
