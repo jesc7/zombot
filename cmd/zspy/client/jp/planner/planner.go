@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/jesc7/zombot/cmd/zspy/client/daytypes"
@@ -317,12 +318,15 @@ func EowList(ctx context.Context, db *sql.DB) string {
 	defer rows.Close()
 
 	p, user, t, g := notes{}, "", time.Time{}, 0
+	var eowCurr []eow
 	for rows.Next() {
 		if e = rows.Scan(&user, &t, &g); e != nil {
 			return ""
 		}
 		p[fmt.Sprintf("%s (%s)", user, t.Format("15:04"))] = g
+		eowCurr = append(eowCurr, eow{t, user, g})
 	}
+	slices.Reverse()
 	res := ""
 	for k, v := range p {
 		if _, ok := lastEOW[k]; !ok {
