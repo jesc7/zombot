@@ -52,21 +52,27 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				if e != nil {
 					continue
 				}
+				sb := strings.Builder{}
 				if len(m.A) == 0 {
-					b.SendText("😟 Дежурства не найдены")
-					break
+					sb.WriteString("😟 Дежурства не найдены")
+				} else {
+
+					sb.WriteString("👷 <b>Дежурные</b>\n\n")
+					for _, v := range m.A {
+						fmt.Fprintf(&sb, "%s%s: %s\n", v.Date.Format("02.01"), _tipDay(v.Date), v.Caption)
+					}
 				}
 
-				sb := strings.Builder{}
-				sb.WriteString("👷 <b>Дежурные</b>\n\n")
-				for _, v := range m.A {
-					fmt.Fprintf(&sb, "%s%s: %s\n", v.Date.Format("02.01"), _tipDay(v.Date), v.Caption)
+				env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{
+					Text: sb.String(),
+				})
+				if e != nil {
+					return
 				}
-				b.SendText(sb.String())
 
 			//изменения дежурств
 			case shared.TypeMessageDutyChanges:
-				m, e := shared.Unpack[shared.MessageDutyChanges](mt)
+				m, e := shared.Unpack[shared.MessageDutyChanges](env)
 				if e != nil || len(m.Changes) == 0 {
 					continue
 				}
@@ -81,7 +87,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 
 			//отсутствующие
 			case shared.TypeMessageAbsents:
-				m, e := shared.Unpack[shared.MessageAbsents](mt)
+				m, e := shared.Unpack[shared.MessageAbsents](env)
 				if e != nil {
 					continue
 				}
@@ -116,7 +122,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 
 			//дни рождения
 			case shared.TypeMessageBirthdays:
-				m, e := shared.Unpack[shared.MessageBirthdays](mt)
+				m, e := shared.Unpack[shared.MessageBirthdays](env)
 				if e != nil {
 					continue
 				}
@@ -154,7 +160,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 
 			//сообщения от площадок
 			case shared.TypeMessageZSRV:
-				m, e := shared.Unpack[shared.MessageZSRV](mt)
+				m, e := shared.Unpack[shared.MessageZSRV](env)
 				if e != nil {
 					continue
 				}
@@ -173,7 +179,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 
 			//звонки
 			case shared.TypeMessageCall:
-				m, e := shared.Unpack[shared.MessageCall](mt)
+				m, e := shared.Unpack[shared.MessageCall](env)
 				if e != nil {
 					continue
 				}
