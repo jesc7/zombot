@@ -49,7 +49,7 @@ func (ws *WebSocketServer) Run(ctx context.Context) error {
 	}()
 
 	log.Println("WebSocket server started, here the tokens:")
-	for k, v := range map[clientType]string{ct_ZSPY: "zspy"} {
+	for k, v := range map[ClientType]string{CT_ZSPY: "zspy"} {
 		jwt, e := jwtGenerate(ws.jwtKey, k)
 		log.Printf("%s=%s (%v)\n", v, jwt, e)
 	}
@@ -64,6 +64,8 @@ func (ws *WebSocketServer) Run(ctx context.Context) error {
 	}
 	return ctx.Err()
 }
+
+func WsChan(t)
 
 func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	auth := r.Header.Get("Authorization")
@@ -91,7 +93,7 @@ func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r 
 
 	ch := ws.b.Register(fmt.Sprintf("%s_%s", types.BUS_WS, claims.Type))
 	switch claims.Type {
-	case ct_ZSPY:
+	case CT_ZSPY:
 		if ws.zspy != nil {
 			http.Error(w, "ZSpy already connected", http.StatusNotAcceptable)
 			return
@@ -103,14 +105,14 @@ func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r 
 	}
 }
 
-type clientType string
+type ClientType string
 
 type Claims struct {
-	Type clientType `json:"type"`
+	Type ClientType `json:"type"`
 	jwt.RegisteredClaims
 }
 
-func jwtGenerate(key []byte, ct clientType) (string, error) {
+func jwtGenerate(key []byte, ct ClientType) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256,
 		&Claims{
 			Type: ct,

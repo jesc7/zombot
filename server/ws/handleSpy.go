@@ -10,7 +10,7 @@ import (
 	"github.com/jesc7/zombot/server/types"
 )
 
-const ct_ZSPY clientType = "zspy"
+const CT_ZSPY ClientType = "zspy"
 
 var BUS_NAMES = []string{types.BUS_BOTMAX, types.BUS_BOTTG}
 
