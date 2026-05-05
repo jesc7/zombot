@@ -280,6 +280,6 @@ func NextTime(s string) time.Duration {
 func NowBetween(time1, time2 string) bool {
 	t1, e1 := time.Parse("15:04", time1)
 	t2, e2 := time.Parse("15:04", time2)
-	tNow := time.Date(0, 1, 1, time.Now().Hour(), time.Now().Minute(), time.Now().Second(), 0, time.Now().Location())
+	tNow := time.Date(0, 1, 1, time.Now().Hour(), time.Now().Minute(), time.Now().Second(), 0, time.UTC)
 	return errors.Join(e1, e2) == nil && tNow.After(t1) && tNow.Before(t2)
 }

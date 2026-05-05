@@ -136,24 +136,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 		}
 	}()
 
-	/*if t := time.Now().Hour(); t < 14 || t > 22 {
-		return
-	}
-	if s := planner.EowList(ctx, db); s != "" {
-		env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
-			Text: s,
-		})
-		if e != nil {
-			return
-		}
-		ws.Write(env)
-	}
-	time.Sleep(5 * time.Second)
-	return*/
-
-	fmt.Println(types.NowBetween("18:01", "20:50"))
-	return
-
 	tPing := time.NewTicker(10 * time.Second)
 	defer tPing.Stop()
 	t1m := time.NewTicker(1 * time.Minute)
