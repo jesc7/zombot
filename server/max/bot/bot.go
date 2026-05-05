@@ -17,16 +17,6 @@ import (
 	"github.com/jesc7/zombot/server/types"
 )
 
-const (
-	MSG_HELP = `<b>Команды бота:</b>
-
-помощь - эта помощь
-дежур[...] [кто] [дней] - дежурства
-отсутств[...] - кто отсутствует
-день|дни рожд[...] [дней] - ДР в ближайшие дни
-`
-)
-
 var otherMessengers = []string{types.BUS_BOTTG}
 
 type Bot struct {
@@ -127,7 +117,7 @@ out:
 					}
 					switch upd.GetCommand() {
 					case "/help": //помощь
-						b.SendText(MSG_HELP)
+						b.SendText(types.MSG_HELP)
 						return
 					}
 

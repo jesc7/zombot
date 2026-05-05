@@ -10,6 +10,16 @@ import (
 	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
 )
 
+const (
+	MSG_HELP = `<b>Команды бота:</b>
+
+помощь - эта помощь
+дежур[...] [кто] [дней] - дежурства
+отсутств[...] - кто отсутствует
+день|дни рожд[...] [дней] - ДР в ближайшие дни
+`
+)
+
 var (
 	reHelp     = regexp.MustCompile(`(?i)^помощь$`)
 	reDuty     = regexp.MustCompile(`(?i)^дежур[а-я]*(?:(?:\s+(?P<name>[а-я]+))?(?:\s+(?P<days>\d+))?)?$`)
@@ -64,26 +74,27 @@ func isBirthday(value string) (bool, int) {
 	return b, days
 }
 
-func IsCommand(b *bus.Bus, text string) bool {
-	_command := func(text string) (string, bool) {
-		if strings.Index(text, "/") == 0 {
-			if strings.Contains(text, ":") {
-				return strings.Split(text, ":")[0], true
-			}
-			return text, true
+func GetCommand(text string) (string, bool) {
+	if strings.Index(text, "/") == 0 {
+		if strings.Contains(text, ":") {
+			return strings.Split(text, ":")[0], true
 		}
-		return "", false
+		return text, true
 	}
-	_params := func(text string) string {
-		if strings.Index(text, "/") == 0 {
-			if strings.Contains(text, ":") {
-				return strings.Split(text, ":")[1]
-			}
-			return ""
+	return "", false
+}
+
+func GetParams(text string) string {
+	if strings.Index(text, "/") == 0 {
+		if strings.Contains(text, ":") {
+			return strings.Split(text, ":")[1]
 		}
 		return ""
 	}
+	return ""
+}
 
+func IsCommand(b *bus.Bus, text string) bool {
 	if duty, name, days := isDuty(text); duty {
 		text = fmt.Sprintf("/duty:%s#%d", name, days)
 	} else if isAbsent(text) {
@@ -91,14 +102,14 @@ func IsCommand(b *bus.Bus, text string) bool {
 	} else if bd, days := isBirthday(text); bd {
 		text = fmt.Sprintf("/birthday:%d", days)
 	}
-	cmd, ok := _command(text)
+	cmd, ok := GetCommand(text)
 	if !ok {
 		return false
 	}
 
 	switch cmd {
 	case "/duty": //дежурства
-		params := strings.Split(_params(text), "#")
+		params := strings.Split(GetParams(text), "#")
 		name, days := params[0], 7
 		if len(params) > 1 {
 			days, _ = strconv.Atoi(params[1])
@@ -122,7 +133,7 @@ func IsCommand(b *bus.Bus, text string) bool {
 		b.Write(WsBusName(CT_ZSPY), env)
 
 	case "/birthday": //дни рождения
-		days, _ := strconv.Atoi(_params(text))
+		days, _ := strconv.Atoi(GetParams(text))
 		if days <= 0 {
 			days = 31
 		}

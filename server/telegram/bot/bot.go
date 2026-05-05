@@ -136,9 +136,10 @@ out:
 				if types.IsHelp(update.Message.Text) {
 					update.Message.Text = "/help"
 				}
-				switch tu.ParseCommand() update. upd.GetCommand() {
+				cmd, _ := types.GetCommand(update.Message.Text)
+				switch cmd {
 				case "/help": //помощь
-					b.SendText(MSG_HELP)
+					b.SendText(types.MSG_HELP)
 					return
 				}
 
