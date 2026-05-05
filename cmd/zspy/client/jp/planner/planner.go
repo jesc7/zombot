@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"slices"
 	"time"
 
 	"github.com/jesc7/zombot/cmd/zspy/client/daytypes"
@@ -310,7 +309,8 @@ func EowList(ctx context.Context, db *sql.DB) string {
 		  and h.comments_id = 2 
 		  and h.dt = current_date 
 		  and h.time_out < a.tto 
-		  and datediff(second, h.time_out, time '%s') < 50
+		  --and datediff(second, h.time_out, time '%s') < 50
+		order by 2, 1
 	`, time.Now().Format("15:04")))
 	if e != nil {
 		return ""
@@ -326,14 +326,19 @@ func EowList(ctx context.Context, db *sql.DB) string {
 		p[fmt.Sprintf("%s (%s)", user, t.Format("15:04"))] = g
 		eowCurr = append(eowCurr, eow{t, user, g})
 	}
-	slices.Reverse()
 	res := ""
+	for _, v := range eowCurr[len(eowList):] {
+		res += fmt.Sprintf("%s %s (%s)\n", types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[v.gender]...), v.name, v.eot.Format("15:04"))
+	}
+	eowList = eowCurr
+
+	/*res := ""
 	for k, v := range p {
 		if _, ok := lastEOW[k]; !ok {
 			res += types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[v]...) + " " + k + "\n"
 		}
 	}
-	lastEOW = p
+	lastEOW = p*/
 	if len(res) != 0 {
 		res = fmt.Sprintf("<b>%s</b>\n\n%s", _getPhrase(g), res)
 	}

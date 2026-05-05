@@ -136,6 +136,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 		}
 	}()
 
+	planner.EowList(ctx, db)
+
 	tPing := time.NewTicker(10 * time.Second)
 	defer tPing.Stop()
 	t1m := time.NewTicker(1 * time.Minute)
