@@ -218,10 +218,16 @@ func SowList(ctx context.Context, db *sql.DB, cwd string) string {
 	return fmt.Sprintf("<b>Я на месте</b>\n%s", res)
 }
 
-var eow []string
+type eow struct {
+	eot    time.Time
+	name   string
+	gender int
+}
+
+var eowList []eow
 
 func EowClear() {
-	eow = []string{}
+	eowList = []eow{}
 }
 
 // EowList (EndOfWork list) выводит список сотрудников, окончивших работу ДО окончания рабочего дня согласно рабочего расписания
