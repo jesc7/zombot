@@ -170,9 +170,11 @@ func CriticalTasks(ctx context.Context, db *sql.DB, minutes int) string {
 	return res
 }
 
-type notes map[string]int
+//type notes map[string]int
 
-var lastEOW, lastSOW notes
+//var lastEOW, lastSOW notes
+
+var sowTime time.Time
 
 // SowList (StartOfWork list) сообщает, что дежурный начал работу
 func SowList(ctx context.Context, db *sql.DB, cwd string) string {
@@ -189,13 +191,16 @@ func SowList(ctx context.Context, db *sql.DB, cwd string) string {
 		where 1=1
 			and h.comments_id = 1 
 			and h.dt = current_date	
-			and datediff(minute, h.time_in, time '%s') < 5
+			--and datediff(minute, h.time_in, time '%s') < 5
 	`, time.Now().Format("15:04")))
 	if e != nil {
 		return ""
 	}
 	defer rows.Close()
 
+	if t := types.ClearTime(time.Now()); t != types.ClearTime(sowTime) {
+		sowTime = t
+	}
 	p, user, t, g := notes{}, "", time.Time{}, 0
 	for rows.Next() {
 		if e = rows.Scan(&user, &t, &g); e != nil {
@@ -217,17 +222,6 @@ func SowList(ctx context.Context, db *sql.DB, cwd string) string {
 	}
 	return fmt.Sprintf("<b>Я на месте</b>\n%s", res)
 }
-
-/*type eow struct {
-	eot    time.Time
-	name   string
-	gender int
-}
-
-var eowList struct {
-	t    time.Time
-	list []eow
-}*/
 
 var eowTime time.Time
 
@@ -296,7 +290,6 @@ func EowList(ctx context.Context, db *sql.DB) string {
 	if t := types.ClearTime(time.Now()); t != types.ClearTime(eowTime) {
 		eowTime = t
 	}
-
 	res, g := "", 0
 	for rows.Next() {
 		n, t := "", time.Time{}
