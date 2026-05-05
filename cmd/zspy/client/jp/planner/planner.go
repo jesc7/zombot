@@ -164,10 +164,10 @@ func CriticalTasks(ctx context.Context, db *sql.DB, minutes int) string {
 		}
 		res = fmt.Sprintf("%s\n\n#<b>%d</b> (%d мин.) %s%s\n%s", res, id, dur, caption, clientInfo, text)
 	}
-	if len(res) != 0 {
-		res = "⚡ <b>Срочные заявки</b>" + res
+	if res == "" {
+		return ""
 	}
-	return res
+	return "⚡ <b>Срочные заявки</b>" + res
 }
 
 var sowTime time.Time
