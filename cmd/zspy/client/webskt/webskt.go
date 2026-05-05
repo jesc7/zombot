@@ -148,17 +148,17 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 	t30m := time.NewTicker(30 * time.Minute)
 	defer t30m.Stop()
 
-	t08_00 := time.NewTimer(types.NextTime("10:09"))
+	t08_00 := time.NewTimer(types.NextTime("10:19"))
 	defer t08_00.Stop()
-	t08_10 := time.NewTimer(types.NextTime("10:09"))
+	t08_10 := time.NewTimer(types.NextTime("10:19"))
 	defer t08_10.Stop()
-	t09_00 := time.NewTimer(types.NextTime("10:09"))
+	t09_00 := time.NewTimer(types.NextTime("10:19"))
 	defer t09_00.Stop()
-	t11_00 := time.NewTimer(types.NextTime("10:09"))
+	t11_00 := time.NewTimer(types.NextTime("10:19"))
 	defer t11_00.Stop()
-	t18_00 := time.NewTimer(types.NextTime("10:09"))
+	t18_00 := time.NewTimer(types.NextTime("10:19"))
 	defer t18_00.Stop()
-	t20_00 := time.NewTimer(types.NextTime("10:09"))
+	t20_00 := time.NewTimer(types.NextTime("10:19"))
 	defer t20_00.Stop()
 
 	for {
@@ -180,13 +180,13 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 			log.Println("08_00")
 
-			wg := &sync.WaitGroup{}
-			wg.Go(func() { //update phone base
+			//wg := &sync.WaitGroup{}
+			go func() { //update phone base
 				log.Println("PbUpdate")
 				phones.PbUpdate(ws.cwd, []string{})
-			})
+			}()
 
-			wg.Go(func() { //checks EC
+			go func() { //checks EC
 				if s := checks.CheckEC(cfg.EC); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
@@ -200,8 +200,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				} else {
 					log.Println("CheckEC: nothing to say")
 				}
-			})
-			wg.Wait()
+			}()
+			//wg.Wait()
 
 			log.Println("08_00 0ff")
 
@@ -210,8 +210,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 			log.Println("08_10")
 
-			wg := &sync.WaitGroup{}
-			wg.Go(func() { //birthdays today
+			//wg := &sync.WaitGroup{}
+			go func() { //birthdays today
 				var (
 					pay shared.MessageBirthdays
 					e   error
@@ -227,9 +227,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				}
 				log.Println("Birthdays:", len(pay.Birthdays))
 				ws.Write(env)
-			})
+			}()
 
-			wg.Go(func() { //another countries holiday
+			go func() { //another countries holiday
 				if s := planner.ForeignHoliday(ws.cwd); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
@@ -243,9 +243,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				} else {
 					log.Println("ForeignHoliday: nothing to say")
 				}
-			})
+			}()
 
-			wg.Go(func() { //check domains registration
+			go func() { //check domains registration
 				if s := checks.CheckWhois(cfg.CheckDomains, 10); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
@@ -259,8 +259,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				} else {
 					log.Println("CheckWhois: nothing to say")
 				}
-			})
-			wg.Wait()
+			}()
+			//wg.Wait()
 
 			log.Println("08_10 off")
 
@@ -269,8 +269,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 			log.Println("09_00")
 
-			wg := &sync.WaitGroup{}
-			wg.Go(func() { //who's absent today
+			//wg := &sync.WaitGroup{}
+			go func() { //who's absent today
 				pay, e := planner.Absents(ctx, db)
 				if e != nil || len(pay) == 0 {
 					log.Println("Absents: nothing to say")
@@ -284,9 +284,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				}
 				log.Println("Absents Write:", len(pay))
 				ws.Write(env)
-			})
+			}()
 
-			wg.Go(func() { //missing duties
+			go func() { //missing duties
 				if s := duties.MissDuties(ctx, db, ws.cwd, 20); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
@@ -300,8 +300,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				} else {
 					log.Println("MissDuties: nothing to say")
 				}
-			})
-			wg.Wait()
+			}()
+			//wg.Wait()
 
 			log.Println("09_00 off")
 
@@ -310,8 +310,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 			log.Println("11_00")
 
-			wg := &sync.WaitGroup{}
-			wg.Go(func() { //ratings
+			//wg := &sync.WaitGroup{}
+			go func() { //ratings
 				if time.Now().Weekday() == time.Friday {
 					//weekly ratings
 
@@ -319,8 +319,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 						//monthly ratings
 					}
 				}
-			})
-			wg.Wait()
+			}()
+			//wg.Wait()
 
 			log.Println("11_00 off")
 
@@ -329,8 +329,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 			log.Println("18_00")
 
-			wg := &sync.WaitGroup{}
-			wg.Go(func() { //holidays detector
+			//wg := &sync.WaitGroup{}
+			go func() { //holidays detector
 				if i := duties.HolidaysCount(ctx, db); i > 0 {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: fmt.Sprintf("🤖 Уважаемые гуманоиды!\nВпереди %d выходных, желаю всем хорошо отдохнуть!", i),
@@ -344,8 +344,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				} else {
 					log.Println("HolidaysCount: nothing to say")
 				}
-			})
-			wg.Wait()
+			}()
+			//wg.Wait()
 
 			log.Println("18_00 off")
 
@@ -354,8 +354,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 			log.Println("20_00")
 
-			wg := &sync.WaitGroup{}
-			wg.Go(func() { //tomorrow duties
+			//wg := &sync.WaitGroup{}
+			go func() { //tomorrow duties
 				if s := duties.TomorrowDuties(ctx, db); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
@@ -369,9 +369,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				} else {
 					log.Println("TomorrowDuties: nothing to say")
 				}
-			})
+			}()
 
-			wg.Go(func() { //find duties for next 2 days
+			go func() { //find duties for next 2 days
 				var (
 					pay shared.MessageDuties
 					e   error
@@ -389,8 +389,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				}
 				log.Println("Duty Write:", len(pay.A))
 				ws.Write(env)
-			})
-			wg.Wait()
+			}()
+			//wg.Wait()
 
 			log.Println("20_00 off")
 
