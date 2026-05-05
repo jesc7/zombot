@@ -147,7 +147,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 	}
 	time.Sleep(5 * time.Second)
 
-	if s := planner.EowList(ctx, db, 0); s != "" {
+	if s := planner.EowList(ctx, db, 10); s != "" {
 		env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 			Text: s,
 		})
@@ -354,7 +354,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				if t := time.Now().Hour(); t < 15 || t > 18 {
 					return
 				}
-				if s := planner.EowList(ctx, db); s != "" {
+				if s := planner.EowList(ctx, db, 10); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
 					})

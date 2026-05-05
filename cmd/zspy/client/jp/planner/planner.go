@@ -231,7 +231,7 @@ func EowClear() {
 }
 
 // EowList (EndOfWork list) выводит список сотрудников, окончивших работу ДО окончания рабочего дня согласно рабочего расписания
-func EowList(ctx context.Context, db *sql.DB, cnt int) string {
+func EowList(ctx context.Context, db *sql.DB, first int) string {
 	_getPhrase := func(g int) string {
 		phrases := []string{
 			"Алоха",
@@ -299,7 +299,9 @@ func EowList(ctx context.Context, db *sql.DB, cnt int) string {
 	}
 
 	rows, e := db.QueryContext(ctx, fmt.Sprintf(`
-		select u.username, h.time_out, coalesce(p.gender, 0) as g
+		select first %d
+
+		u.username, h.time_out, coalesce(p.gender, 0) as g
 		from tabel_history h
 		join tabel t on h.user_id = t.user_id and h.dt = t.dt
 		join sp$users u on h.user_id = u.id
@@ -311,7 +313,7 @@ func EowList(ctx context.Context, db *sql.DB, cnt int) string {
 		  and h.time_out < a.tto 
 		  --and datediff(second, h.time_out, time '%s') < 50
 		order by 2, 1
-	`, time.Now().Format("15:04")))
+	`, first, time.Now().Format("15:04")))
 	if e != nil {
 		return ""
 	}
