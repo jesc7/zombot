@@ -45,7 +45,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 		case <-readError: //ошибка чтения сокета - выходим
 			return
 
-		case msg := <-ch: //наконец-то делаем что-то полезное
+		case msg := <-ch: //требуется переслать сообщение клиенту zspy
 			switch mt := msg.(type) {
 			case shared.Envelope:
 				if e := shared.Write(ws.zspy, mt); e != nil {
