@@ -3,6 +3,7 @@ package webskt
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -128,6 +129,14 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 		}
 	}()
 
+	go func() {
+		for env := range ws.ch {
+			if e := shared.Write(ws.conn, env); e != nil { //send message to WebSocket server
+				log.Println(e)
+			}
+		}
+	}()
+
 	tPing := time.NewTicker(10 * time.Second)
 	defer tPing.Stop()
 	t1m := time.NewTicker(1 * time.Minute)
@@ -139,20 +148,18 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 	t30m := time.NewTicker(30 * time.Minute)
 	defer t30m.Stop()
 
-	t08_00 := time.NewTimer(types.NextTime("09:39"))
+	t08_00 := time.NewTimer(types.NextTime("10:09"))
 	defer t08_00.Stop()
-	t08_10 := time.NewTimer(types.NextTime("09:39"))
+	t08_10 := time.NewTimer(types.NextTime("10:09"))
 	defer t08_10.Stop()
-	t09_00 := time.NewTimer(types.NextTime("09:39"))
+	t09_00 := time.NewTimer(types.NextTime("10:09"))
 	defer t09_00.Stop()
-	t11_00 := time.NewTimer(types.NextTime("09:39"))
+	t11_00 := time.NewTimer(types.NextTime("10:09"))
 	defer t11_00.Stop()
-	t18_00 := time.NewTimer(types.NextTime("09:39"))
+	t18_00 := time.NewTimer(types.NextTime("10:09"))
 	defer t18_00.Stop()
-	t20_00 := time.NewTimer(types.NextTime("09:39"))
+	t20_00 := time.NewTimer(types.NextTime("10:09"))
 	defer t20_00.Stop()
-
-	//duties.MissDuties(ctx, db, ws.cwd, 20)
 
 	for {
 		select {
@@ -196,13 +203,15 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			})
 			wg.Wait()
 
+			log.Println("08_00 0ff")
+
 		case <-t08_10.C: //everyday 8:10
 			t08_10.Reset(24 * time.Hour)
 
 			log.Println("08_10")
 
 			wg := &sync.WaitGroup{}
-			/*wg.Go(func() { //birthdays today
+			wg.Go(func() { //birthdays today
 				var (
 					pay shared.MessageBirthdays
 					e   error
@@ -250,8 +259,10 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				} else {
 					log.Println("CheckWhois: nothing to say")
 				}
-			})*/
+			})
 			wg.Wait()
+
+			log.Println("08_10 off")
 
 		case <-t09_00.C: //everyday 9:00
 			t09_00.Reset(24 * time.Hour)
@@ -292,13 +303,15 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			})
 			wg.Wait()
 
+			log.Println("09_00 off")
+
 		case <-t11_00.C: //everyday 11:00
 			t11_00.Reset(24 * time.Hour)
 
 			log.Println("11_00")
 
 			wg := &sync.WaitGroup{}
-			/*wg.Go(func() { //ratings
+			wg.Go(func() { //ratings
 				if time.Now().Weekday() == time.Friday {
 					//weekly ratings
 
@@ -306,8 +319,10 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 						//monthly ratings
 					}
 				}
-			})*/
+			})
 			wg.Wait()
+
+			log.Println("11_00 off")
 
 		case <-t18_00.C: //everyday 18:00
 			t18_00.Reset(24 * time.Hour)
@@ -315,7 +330,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			log.Println("18_00")
 
 			wg := &sync.WaitGroup{}
-			/*wg.Go(func() { //holidays detector
+			wg.Go(func() { //holidays detector
 				if i := duties.HolidaysCount(ctx, db); i > 0 {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: fmt.Sprintf("🤖 Уважаемые гуманоиды!\nВпереди %d выходных, желаю всем хорошо отдохнуть!", i),
@@ -329,8 +344,10 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				} else {
 					log.Println("HolidaysCount: nothing to say")
 				}
-			})*/
+			})
 			wg.Wait()
+
+			log.Println("18_00 off")
 
 		case <-t20_00.C: //everyday 20:00
 			t20_00.Reset(24 * time.Hour)
@@ -338,7 +355,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			log.Println("20_00")
 
 			wg := &sync.WaitGroup{}
-			/*wg.Go(func() { //tomorrow duties
+			wg.Go(func() { //tomorrow duties
 				if s := duties.TomorrowDuties(ctx, db); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
@@ -372,19 +389,23 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				}
 				log.Println("Duty Write:", len(pay.A))
 				ws.Write(env)
-			})*/
+			})
 			wg.Wait()
+
+			log.Println("20_00 off")
 
 		case <-t1m.C: //every 1 minutes
 
 			wg := &sync.WaitGroup{}
 			wg.Go(func() { //End-of-work list
 				if s := planner.EowList(ctx, db); s != "" {
-					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
-					}); e == nil {
-						ws.Write(env)
+					})
+					if e != nil {
+						return
 					}
+					ws.Write(env)
 				}
 			})
 			wg.Wait()
@@ -394,21 +415,25 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			wg := &sync.WaitGroup{}
 			wg.Go(func() { //start-of-work for duties
 				if s := planner.SowList(ctx, db, ws.cwd); s != "" {
-					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
-					}); e == nil {
-						ws.Write(env)
+					})
+					if e != nil {
+						return
 					}
+					ws.Write(env)
 				}
 			})
 
 			wg.Go(func() { //zsrv watcher
 				if s := checks.WatchZsrv(cfg.ZSrv); s != "" {
-					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
-					}); e == nil {
-						ws.Write(env)
+					})
+					if e != nil {
+						return
 					}
+					ws.Write(env)
 				}
 			})
 			wg.Wait()
@@ -418,11 +443,13 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			wg := &sync.WaitGroup{}
 			wg.Go(func() { //cf tasks
 				if s := checks.CheckCFResources(cfg.CFChecks); s != "" {
-					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
-					}); e == nil {
-						ws.Write(env)
+					})
+					if e != nil {
+						return
 					}
+					ws.Write(env)
 				}
 			})
 			wg.Wait()
@@ -432,29 +459,28 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			wg := &sync.WaitGroup{}
 			wg.Go(func() { //critical tasks
 				if s := planner.CriticalTasks(ctx, db, 30); s != "" {
-					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
-					}); e == nil {
-						ws.Write(env)
+					})
+					if e != nil {
+						return
 					}
+					ws.Write(env)
 				}
 			})
 
 			wg.Go(func() { //check resources
 				if s := checks.CheckResources(cfg.Checks); s != "" {
-					if env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
-					}); e == nil {
-						ws.Write(env)
+					})
+					if e != nil {
+						return
 					}
+					ws.Write(env)
 				}
 			})
 			wg.Wait()
-
-		case env := <-ws.ch: //наконец-то делаем что-то полезное
-			if e := shared.Write(ws.conn, env); e != nil { //send message to WebSocket server
-				log.Println(e)
-			}
 		}
 	}
 }
