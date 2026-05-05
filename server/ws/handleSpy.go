@@ -52,17 +52,16 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				if e != nil {
 					continue
 				}
+
 				sb := strings.Builder{}
 				if len(m.A) == 0 {
 					sb.WriteString("😟 Дежурства не найдены")
 				} else {
-
 					sb.WriteString("👷 <b>Дежурные</b>\n\n")
 					for _, v := range m.A {
 						fmt.Fprintf(&sb, "%s%s: %s\n", v.Date.Format("02.01"), _tipDay(v.Date), v.Caption)
 					}
 				}
-
 				env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{
 					Text: sb.String(),
 				})
@@ -83,7 +82,12 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				for _, v := range m.Changes {
 					fmt.Fprintf(&sb, "%s %s%s: %s\n", signs[v.ChangeType], v.Date.Format("02.01"), _tipDay(v.Date), v.Caption)
 				}
-				b.SendText(sb.String())
+				env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{
+					Text: sb.String(),
+				})
+				if e != nil {
+					return
+				}
 
 			//отсутствующие
 			case shared.TypeMessageAbsents:
@@ -91,34 +95,39 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				if e != nil {
 					continue
 				}
-				if len(m.Absents) == 0 {
-					b.SendText("🙂 Все на месте")
-					break
-				}
 
 				sb := strings.Builder{}
-				sb.WriteString("👤 <b>Отсутствующие</b>\n\n")
-				for _, v := range m.Absents {
-					var tip string
-					switch v.Type {
-					case shared.AT_DUNNO:
-						tip = types.Dunno(int(v.Gender)) //неизвестно
-					case shared.AT_ILL:
-						tip = types.RndFrom("🤕", "😷", "🤧", "🤒") //больничный
-					case shared.AT_LEAVE:
-						tip = types.RndFrom("🏖", "⛱️", "🏕️", "🏝️", "⛰️", "✈️") //отпуск
-					case shared.AT_DINNER:
-						tip = types.RndFrom("🍔", "🍳", "🥘", "🥗", "🍱") //обед
-					case shared.AT_OFF:
-						tip = types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️"}}[v.Gender]...) //ушел
-					case shared.AT_WORK:
-						tip = types.RndFrom([2][]string{{"👷‍♀️", "👩‍🔧"}, {"👷", "👨‍🔧"}}[v.Gender]...) //по рабочим делам
-					default:
-						tip = types.Dunno(int(v.Gender)) //неизвестно
+				if len(m.Absents) == 0 {
+					sb.WriteString("🙂 Все на месте")
+				} else {
+					sb.WriteString("👤 <b>Отсутствующие</b>\n\n")
+					for _, v := range m.Absents {
+						var tip string
+						switch v.Type {
+						case shared.AT_DUNNO:
+							tip = types.Dunno(int(v.Gender)) //неизвестно
+						case shared.AT_ILL:
+							tip = types.RndFrom("🤕", "😷", "🤧", "🤒") //больничный
+						case shared.AT_LEAVE:
+							tip = types.RndFrom("🏖", "⛱️", "🏕️", "🏝️", "⛰️", "✈️") //отпуск
+						case shared.AT_DINNER:
+							tip = types.RndFrom("🍔", "🍳", "🥘", "🥗", "🍱") //обед
+						case shared.AT_OFF:
+							tip = types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️"}}[v.Gender]...) //ушел
+						case shared.AT_WORK:
+							tip = types.RndFrom([2][]string{{"👷‍♀️", "👩‍🔧"}, {"👷", "👨‍🔧"}}[v.Gender]...) //по рабочим делам
+						default:
+							tip = types.Dunno(int(v.Gender)) //неизвестно
+						}
+						fmt.Fprintf(&sb, "%s %s%s\n", tip, v.Name, types.Iif(len(v.Comment) != 0, " - "+v.Comment, ""))
 					}
-					fmt.Fprintf(&sb, "%s %s%s\n", tip, v.Name, types.Iif(len(v.Comment) != 0, " - "+v.Comment, ""))
 				}
-				b.SendText(sb.String())
+				env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{
+					Text: sb.String(),
+				})
+				if e != nil {
+					return
+				}
 
 			//дни рождения
 			case shared.TypeMessageBirthdays:
