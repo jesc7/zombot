@@ -218,7 +218,7 @@ func SowList(ctx context.Context, db *sql.DB, cwd string) string {
 	return fmt.Sprintf("<b>Я на месте</b>\n%s", res)
 }
 
-type eow struct {
+/*type eow struct {
 	eot    time.Time
 	name   string
 	gender int
@@ -227,7 +227,9 @@ type eow struct {
 var eowList struct {
 	t    time.Time
 	list []eow
-}
+}*/
+
+var eowTime time.Time
 
 // EowList (EndOfWork list) выводит список сотрудников, окончивших работу ДО окончания рабочего дня согласно рабочего расписания
 func EowList(ctx context.Context, db *sql.DB) string {
@@ -273,14 +275,8 @@ func EowList(ctx context.Context, db *sql.DB) string {
 		}
 	}
 
-	if t := types.ClearTime(time.Now()); t != types.ClearTime(eowList.t) {
-		eowList.t = t
-		eowList.list = []eow{}
-	}
-
 	rows, e := db.QueryContext(ctx, `
-		select
-		u.username, h.time_out, coalesce(p.gender, 0) as g
+		select u.username, h.time_out, coalesce(p.gender, 0) as g
 		from tabel_history h
 		join tabel t on h.user_id = t.user_id and h.dt = t.dt
 		join sp$users u on h.user_id = u.id
@@ -297,38 +293,24 @@ func EowList(ctx context.Context, db *sql.DB) string {
 	}
 	defer rows.Close()
 
-	res, n, t, g := "", "", time.Time{}, 0
+	if t := types.ClearTime(time.Now()); t != types.ClearTime(eowTime) {
+		eowTime = t
+	}
+
+	var res string
 	for rows.Next() {
+		n, t, g := "", time.Time{}, 0
 		if e = rows.Scan(&n, &t, &g); e != nil {
 			return ""
 		}
-		if t = time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), t.Hour(), t.Minute(), t.Second(), 0, t.Location()); t.After(eowList.t) {
-			eowList.t = t
-			res += fmt.Sprintf("%s %s (%s)\n", types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[v.gender]...), v.name, v.eot.Format("15:04"))
+		if t = time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), t.Hour(), t.Minute(), t.Second(), 0, t.Location()); t.After(eowTime) {
+			eowTime = t
+			res += fmt.Sprintf("%s %s (%s)\n", types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[g]...), n, t.Format("15:04"))
 		}
 	}
 	if res != "" {
 		res = fmt.Sprintf("<b>%s</b>\n\n%s", _getPhrase(g), res)
 	}
-
-	if len(curr) > len(eowList.list) {
-		for _, v := range curr[len(eowList.list):] {
-			res += fmt.Sprintf("%s %s (%s)\n", types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[v.gender]...), v.name, v.eot.Format("15:04"))
-		}
-		eowList.list = curr
-		res = fmt.Sprintf("<b>%s</b>\n\n%s", _getPhrase(g), res)
-	}
-
-	/*res := ""
-	for k, v := range p {
-		if _, ok := lastEOW[k]; !ok {
-			res += types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[v]...) + " " + k + "\n"
-		}
-	}
-	lastEOW = p
-	if len(res) != 0 {
-		res = fmt.Sprintf("<b>%s</b>\n\n%s", _getPhrase(g), res)
-	}*/
 	return res
 }
 
