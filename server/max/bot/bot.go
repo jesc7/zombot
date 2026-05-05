@@ -77,7 +77,6 @@ out:
 		case msg := <-b.ch: //разгребаем пакеты, пришедшие боту
 			switch mt := msg.(type) {
 			case shared.Envelope: //пакеты zspy
-				log.Println("Bot", mt.Type)
 
 				switch mt.Type {
 				//просто текст
@@ -110,24 +109,29 @@ out:
 		case update := <-b.bot.GetUpdates(ctx): //приехали апдейты с сервера
 			switch upd := update.(type) {
 			case *schemes.MessageCreatedUpdate:
-				log.Println("Message from", upd.GetChatID())
+				func() {
+					log.Println("Message from", upd.GetChatID())
 
-				//только групповой чат из настроек
-				if upd.Message.Recipient.ChatType != schemes.CHAT || upd.GetChatID() != b.chatID {
-					break
-				}
-				//отсеиваем команды
-				if types.IsCommand(b.b, upd.Message.Body.Text) {
-					break
-				}
+					//только групповой чат из настроек
+					if upd.Message.Recipient.ChatType != schemes.CHAT || upd.GetChatID() != b.chatID {
+						return
+					}
+					//отсеиваем команды
+					if types.IsCommand(b.b, upd.Message.Body.Text) {
+						return
+					}
 
-				if types.IsHelp(upd.Message.Body.Text) {
-					upd.Message.Body.Text = "/help"
-				}
-				switch upd.GetCommand() {
-				case "/help": //помощь
-					b.SendText(MSG_HELP)
-				}
+					if types.IsHelp(upd.Message.Body.Text) {
+						upd.Message.Body.Text = "/help"
+					}
+					switch upd.GetCommand() {
+					case "/help": //помощь
+						b.SendText(MSG_HELP)
+						return
+					}
+
+					//сообщения-не-команды
+				}()
 			}
 		}
 	}
