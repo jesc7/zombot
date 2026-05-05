@@ -12,6 +12,8 @@ import (
 
 const ct_ZSPY clientType = "zspy"
 
+var BUS_NAMES = []string{types.BUS_BOTMAX, types.BUS_BOTTG}
+
 func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, ch chan any) {
 	ws.zspy = conn
 	defer func() {
@@ -28,7 +30,9 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 			if e != nil { //ошибка чтения сокета - выходим
 				return
 			}
-			ws.b.Write(types.BUS_BOTMAX, env)
+			for _, v := range BUS_NAMES {
+				ws.b.Write(v, env)
+			}
 		}
 	}()
 
