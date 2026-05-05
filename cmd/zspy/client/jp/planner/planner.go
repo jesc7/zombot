@@ -248,30 +248,6 @@ func EowList(ctx context.Context, db *sql.DB, first int) string {
 			"Гудбайте",
 			"Покедова",
 		}
-		/*phrasesMale := []string{
-			"Всё, я ушел",
-			"Ушёл, всем пока",
-			"Пора валить",
-			"Досвидос",
-			"Я устал, я ухожу",
-			"Давай до свидания",
-		}
-		phrasesFemale := []string{
-			"Ой, всё",
-			"Пошла я",
-			"Я ушла",
-			"Оревуар",
-			"Покасики",
-			"Досвидули",
-			"Я побежала",
-		}
-		switch g {
-		case 0:
-			phrases = append(phrasesFemale, phrases...)
-		default:
-			phrases = append(phrasesMale, phrases...)
-		}*/
-
 		phrasesByGender := [][]string{{
 			"Ой, всё",
 			"Пошла я",
@@ -288,7 +264,7 @@ func EowList(ctx context.Context, db *sql.DB, first int) string {
 			"Я устал, я ухожу",
 			"Давай до свидания",
 		}}
-		phrases = append(phrases, phrasesByGender[g]...)
+		phrases = append(phrasesByGender[g], phrases...)
 
 		switch types.Rnd(0, 100) < 50 {
 		case true:
@@ -300,7 +276,6 @@ func EowList(ctx context.Context, db *sql.DB, first int) string {
 
 	rows, e := db.QueryContext(ctx, fmt.Sprintf(`
 		select first %d
-
 		u.username, h.time_out, coalesce(p.gender, 0) as g
 		from tabel_history h
 		join tabel t on h.user_id = t.user_id and h.dt = t.dt
@@ -321,20 +296,21 @@ func EowList(ctx context.Context, db *sql.DB, first int) string {
 
 	p, user, t, g := notes{}, "", time.Time{}, 0
 	_ = p
-	var eowCurr []eow
+	var curr []eow
 	for rows.Next() {
 		if e = rows.Scan(&user, &t, &g); e != nil {
 			return ""
 		}
 		//p[fmt.Sprintf("%s (%s)", user, t.Format("15:04"))] = g
-		eowCurr = append(eowCurr, eow{t, user, g})
+		curr = append(curr, eow{t, user, g})
 	}
 	res := ""
-	if len(eowCurr) > len(eowList) {
-		for _, v := range eowCurr[len(eowList):] {
+	if len(curr) > len(eowList) {
+		for _, v := range curr[len(eowList):] {
 			res += fmt.Sprintf("%s %s (%s)\n", types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[v.gender]...), v.name, v.eot.Format("15:04"))
 		}
-		eowList = eowCurr
+		eowList = curr
+		res = fmt.Sprintf("<b>%s</b>\n\n%s", _getPhrase(g), res)
 	}
 
 	/*res := ""
@@ -343,10 +319,10 @@ func EowList(ctx context.Context, db *sql.DB, first int) string {
 			res += types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[v]...) + " " + k + "\n"
 		}
 	}
-	lastEOW = p*/
+	lastEOW = p
 	if len(res) != 0 {
 		res = fmt.Sprintf("<b>%s</b>\n\n%s", _getPhrase(g), res)
-	}
+	}*/
 	return res
 }
 
