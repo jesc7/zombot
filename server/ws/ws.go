@@ -114,7 +114,7 @@ func jwtGenerate(key []byte, ct clientType) (string, error) {
 		&Claims{
 			Type: ct,
 			RegisteredClaims: jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(ctypes.ClearTime(time.Now()).Add(time.Hour * 24 * 365 * 10)), //10 years
+				ExpiresAt: jwt.NewNumericDate(ctypes.ClearTime(time.Now()).AddDate(10, 0, 0)), //10 years
 			},
 		},
 	).SignedString(key)
