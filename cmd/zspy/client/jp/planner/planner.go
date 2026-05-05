@@ -236,7 +236,7 @@ func EowList(ctx context.Context, db *sql.DB) string {
 			"Гудбайте",
 			"Покедова",
 		}
-		phrasesMale := []string{
+		/*phrasesMale := []string{
 			"Всё, я ушел",
 			"Ушёл, всем пока",
 			"Пора валить",
@@ -258,17 +258,9 @@ func EowList(ctx context.Context, db *sql.DB) string {
 			phrases = append(phrasesFemale, phrases...)
 		default:
 			phrases = append(phrasesMale, phrases...)
-		}
+		}*/
 
 		phrasesByGender := [][]string{{
-			"Всё, я ушел",
-			"Ушёл, всем пока",
-			"Пора валить",
-			"Досвидос",
-			"Я устал, я ухожу",
-			"Давай до свидания",
-		}, {
-
 			"Ой, всё",
 			"Пошла я",
 			"Я ушла",
@@ -276,7 +268,15 @@ func EowList(ctx context.Context, db *sql.DB) string {
 			"Покасики",
 			"Досвидули",
 			"Я побежала",
+		}, {
+			"Всё, я ушел",
+			"Ушёл, всем пока",
+			"Пора валить",
+			"Досвидос",
+			"Я устал, я ухожу",
+			"Давай до свидания",
 		}}
+		phrases = append(phrases, phrasesByGender[g]...)
 
 		switch types.Rnd(0, 100) < 50 {
 		case true:
