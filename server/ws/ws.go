@@ -65,7 +65,9 @@ func (ws *WebSocketServer) Run(ctx context.Context) error {
 	return ctx.Err()
 }
 
-func WsChan(t)
+func WsBusName(t ClientType) string {
+	return fmt.Sprintf("%s_%s", types.BUS_WS, t)
+}
 
 func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	auth := r.Header.Get("Authorization")
@@ -91,7 +93,7 @@ func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r 
 	log.Printf("Connect %s", conn.RemoteAddr())
 	defer log.Printf("Disconnect %s", conn.RemoteAddr())
 
-	ch := ws.b.Register(fmt.Sprintf("%s_%s", types.BUS_WS, claims.Type))
+	ch := ws.b.Register(WsBusName(claims.Type))
 	switch claims.Type {
 	case CT_ZSPY:
 		if ws.zspy != nil {
