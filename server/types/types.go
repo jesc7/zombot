@@ -1,5 +1,9 @@
 package types
 
+import (
+	"fmt"
+)
+
 type Config struct {
 	Max struct {
 		Token  string `json:"token"`
@@ -28,3 +32,7 @@ const (
 type ClientType string
 
 const CT_ZSPY ClientType = "zspy"
+
+func WsBusName(t ClientType) string {
+	return fmt.Sprintf("%s_%s", BUS_WS, t)
+}

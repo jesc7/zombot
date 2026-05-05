@@ -6,10 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jesc7/zombot/cmd/zspy/server/ws"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
-	"github.com/jesc7/zombot/server/ws"
 )
 
 var (
@@ -120,14 +118,14 @@ func IsCommand(b *bus.Bus, text string) bool {
 		if e != nil {
 			break
 		}
-		b.Write(ws.WsBusName(ws.CT_ZSPY), env)
+		b.Write(WsBusName(CT_ZSPY), env)
 
 	case "/absent": //отсутствующие
 		env, e := shared.Pack(shared.TypeMessageAbsents, shared.MessageAbsents{})
 		if e != nil {
 			break
 		}
-		b.Write(ws.WsBusName(ws.CT_ZSPY), env)
+		b.Write(WsBusName(CT_ZSPY), env)
 
 	case "/birthday": //дни рождения
 		days, _ := strconv.Atoi(_params(text))
@@ -138,7 +136,7 @@ func IsCommand(b *bus.Bus, text string) bool {
 		if e != nil {
 			break
 		}
-		b.Write(ws.WsBusName(ws.CT_ZSPY), env)
+		b.Write(WsBusName(CT_ZSPY), env)
 
 	case "/ci": //инфо о клиентах
 
