@@ -136,7 +136,28 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 		}
 	}()
 
-	planner.EowList(ctx, db)
+	if s := planner.EowList(ctx, db, 1); s != "" {
+		env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+			Text: s,
+		})
+		if e != nil {
+			return
+		}
+		ws.Write(env)
+	}
+	time.Sleep(5 * time.Second)
+
+	if s := planner.EowList(ctx, db, 0); s != "" {
+		env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+			Text: s,
+		})
+		if e != nil {
+			return
+		}
+		ws.Write(env)
+	}
+	time.Sleep(5 * time.Second)
+	return
 
 	tPing := time.NewTicker(10 * time.Second)
 	defer tPing.Stop()
