@@ -65,7 +65,7 @@ func (ws *WebSocketServer) Run(ctx context.Context) error {
 	return ctx.Err()
 }
 
-func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request, ch chan any /*shared.Envelope*/) {
+func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request, ch chan any) {
 	auth := r.Header.Get("Authorization")
 	tokenStr := strings.TrimPrefix(auth, "Bearer ")
 	if auth == "" || tokenStr == auth {
