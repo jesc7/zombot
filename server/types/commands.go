@@ -32,7 +32,7 @@ func findCommand(re *regexp.Regexp, value string) (bool, map[string]string) {
 	return true, groups
 }
 
-func isHelp(value string) bool {
+func IsHelp(value string) bool {
 	b, _ := findCommand(reHelp, value)
 	return b
 }
