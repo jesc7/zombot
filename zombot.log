@@ -183,3 +183,10 @@
 2026/05/02 12:27:51 Disconnect 127.0.0.1:37036
 2026/05/02 12:36:04 context canceled
 2026/05/02 12:36:04 .
+2026/05/05 23:46:42 WebSocket server started, here the tokens:
+2026/05/05 23:46:42 zspy=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoienNweSIsImV4cCI6MjA5MzU1ODQwMH0.Bubs0imleevkaxhSaok_QXaZVX_mn8jzHoKnr8I7-pE (<nil>)
+2026/05/05 23:46:48 Connect 127.0.0.1:50970
+2026/05/05 23:46:57 Message from -74063217832624
+2026/05/05 23:47:04 Message from -74063217832624
+2026/05/05 23:47:42 context canceled
+2026/05/05 23:47:42 Disconnect 127.0.0.1:50970

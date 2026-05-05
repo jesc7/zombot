@@ -13,7 +13,7 @@ import (
 	"github.com/jesc7/zombot/server/types"
 )
 
-var BUS_NAMES = []string{types.BUS_BOTMAX, types.BUS_BOTTG}
+var BUS_MESSENGERS = []string{types.BUS_BOTMAX, types.BUS_BOTTG}
 
 func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, ch chan any) {
 	ws.zspy = conn
@@ -140,7 +140,6 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				if len(m.Birthdays) == 0 {
 					sb.WriteString(fmt.Sprintf("☹ В ближайшие %d дней нет ДР", m.Days))
 				} else {
-
 					today := ctypes.ClearTime(time.Now())
 					bdToday, bdAfter := []string{}, []string{}
 					for _, v := range m.Birthdays {
@@ -217,7 +216,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				}
 			}
 
-			for _, v := range BUS_NAMES {
+			for _, v := range BUS_MESSENGERS {
 				ws.b.Write(v, env)
 			}
 		}
