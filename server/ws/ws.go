@@ -107,8 +107,6 @@ func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r 
 	}
 }
 
-type ClientType string
-
 type Claims struct {
 	Type ClientType `json:"type"`
 	jwt.RegisteredClaims

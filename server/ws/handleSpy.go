@@ -10,8 +10,6 @@ import (
 	"github.com/jesc7/zombot/server/types"
 )
 
-const CT_ZSPY ClientType = "zspy"
-
 var BUS_NAMES = []string{types.BUS_BOTMAX, types.BUS_BOTTG}
 
 func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, ch chan any) {

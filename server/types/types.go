@@ -24,3 +24,7 @@ const (
 	BUS_BOTTG  = "bot_tg"
 	BUS_WS     = "ws"
 )
+
+type ClientType string
+
+const CT_ZSPY ClientType = "zspy"
