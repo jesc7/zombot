@@ -260,6 +260,24 @@ func EowList(ctx context.Context, db *sql.DB) string {
 			phrases = append(phrasesMale, phrases...)
 		}
 
+		phrasesByGender := [][]string{{
+			"Всё, я ушел",
+			"Ушёл, всем пока",
+			"Пора валить",
+			"Досвидос",
+			"Я устал, я ухожу",
+			"Давай до свидания",
+		}, {
+
+			"Ой, всё",
+			"Пошла я",
+			"Я ушла",
+			"Оревуар",
+			"Покасики",
+			"Досвидули",
+			"Я побежала",
+		}}
+
 		switch types.Rnd(0, 100) < 50 {
 		case true:
 			return phrases[0]
