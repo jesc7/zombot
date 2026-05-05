@@ -65,7 +65,7 @@ func (ws *WebSocketServer) Run(ctx context.Context) error {
 	return ctx.Err()
 }
 
-func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request /*, ch chan any*/) {
+func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	auth := r.Header.Get("Authorization")
 	tokenStr := strings.TrimPrefix(auth, "Bearer ")
 	if auth == "" || tokenStr == auth {
@@ -89,8 +89,7 @@ func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r 
 	log.Printf("Connect %s", conn.RemoteAddr())
 	defer log.Printf("Disconnect %s", conn.RemoteAddr())
 
-	ws.b.Register(fmt.Sprintf("%s_%s", types.BUS_WS, claims.Type))
-
+	ch := ws.b.Register(fmt.Sprintf("%s_%s", types.BUS_WS, claims.Type))
 	switch claims.Type {
 	case ct_ZSPY:
 		if ws.zspy != nil {
