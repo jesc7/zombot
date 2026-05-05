@@ -278,13 +278,13 @@ out:
 				})
 				b.b.Write(types.BUS_BOTTG, env)*/
 
-				if isHelp(upd.Message.Body.Text) {
+				if types.IsHelp(upd.Message.Body.Text) {
 					upd.Message.Body.Text = "/help"
-				} else if duty, name, days := isDuty(upd.Message.Body.Text); duty {
+				} else if duty, name, days := types.IsDuty(upd.Message.Body.Text); duty {
 					upd.Message.Body.Text = fmt.Sprintf("/duty:%s#%d", name, days)
-				} else if isAbsent(upd.Message.Body.Text) {
+				} else if types.IsAbsent(upd.Message.Body.Text) {
 					upd.Message.Body.Text = "/absent"
-				} else if bd, days := isBirthday(upd.Message.Body.Text); bd {
+				} else if bd, days := types.IsBirthday(upd.Message.Body.Text); bd {
 					upd.Message.Body.Text = fmt.Sprintf("/birthday:%d", days)
 				}
 

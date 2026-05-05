@@ -1,4 +1,4 @@
-package bot
+package types
 
 import (
 	"regexp"
@@ -27,12 +27,12 @@ func findCommand(re *regexp.Regexp, value string) (bool, map[string]string) {
 	return true, groups
 }
 
-func isHelp(value string) bool {
+func IsHelp(value string) bool {
 	b, _ := findCommand(reHelp, value)
 	return b
 }
 
-func isDuty(value string) (bool, string, int) {
+func IsDuty(value string) (bool, string, int) {
 	b, m := findCommand(reDuty, value)
 	if !b {
 		return b, "", 0
@@ -42,12 +42,12 @@ func isDuty(value string) (bool, string, int) {
 	return b, name, days
 }
 
-func isAbsent(value string) bool {
+func IsAbsent(value string) bool {
 	b, _ := findCommand(reAbsent, value)
 	return b
 }
 
-func isBirthday(value string) (bool, int) {
+func IsBirthday(value string) (bool, int) {
 	b, m := findCommand(reBirthday, value)
 	if !b {
 		return b, 0
