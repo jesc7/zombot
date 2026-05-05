@@ -81,9 +81,7 @@ func IsCommand(text string) bool {
 		return ""
 	}
 
-	if isHelp(text) {
-		text = "/help"
-	} else if duty, name, days := isDuty(text); duty {
+	if duty, name, days := isDuty(text); duty {
 		text = fmt.Sprintf("/duty:%s#%d", name, days)
 	} else if isAbsent(text) {
 		text = "/absent"
@@ -97,11 +95,8 @@ func IsCommand(text string) bool {
 	}
 
 	switch cmd {
-	case "/help": //помощь
-		b.SendText(MSG_HELP)
-
 	case "/duty": //дежурства
-		params := strings.Split(upd.GetParam(), "#")
+		params := strings.Split(_params(text), "#")
 		name, days := params[0], 7
 		if len(params) > 1 {
 			days, _ = strconv.Atoi(params[1])
@@ -125,7 +120,7 @@ func IsCommand(text string) bool {
 		b.b.Write(types.BUS_WS, env)
 
 	case "/birthday": //дни рождения
-		days, _ := strconv.Atoi(upd.GetParam())
+		days, _ := strconv.Atoi(_params(text))
 		if days <= 0 {
 			days = 31
 		}

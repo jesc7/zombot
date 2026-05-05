@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
@@ -278,56 +277,16 @@ out:
 				})
 				b.b.Write(types.BUS_BOTTG, env)*/
 
-				if types.IsHelp(upd.Message.Body.Text) {
-					upd.Message.Body.Text = "/help"
-				} else if duty, name, days := types.IsDuty(upd.Message.Body.Text); duty {
-					upd.Message.Body.Text = fmt.Sprintf("/duty:%s#%d", name, days)
-				} else if types.IsAbsent(upd.Message.Body.Text) {
-					upd.Message.Body.Text = "/absent"
-				} else if bd, days := types.IsBirthday(upd.Message.Body.Text); bd {
-					upd.Message.Body.Text = fmt.Sprintf("/birthday:%d", days)
+				if types.IsCommand(upd.Message.Body.Text) {
+					break
 				}
 
+				if types.IsHelp(upd.Message.Body.Text) {
+					upd.Message.Body.Text = "/help"
+				}
 				switch upd.GetCommand() {
 				case "/help": //помощь
 					b.SendText(MSG_HELP)
-
-				case "/duty": //дежурства
-					params := strings.Split(upd.GetParam(), "#")
-					name, days := params[0], 7
-					if len(params) > 1 {
-						days, _ = strconv.Atoi(params[1])
-					}
-					env, e := shared.Pack(shared.TypeMessageDuties, shared.MessageDuties{
-						Q: shared.DutyQuery{
-							Name: name,
-							Days: days,
-						},
-					})
-					if e != nil {
-						break
-					}
-					b.b.Write(types.BUS_WS, env)
-
-				case "/absent": //отсутствующие
-					env, e := shared.Pack(shared.TypeMessageAbsents, shared.MessageAbsents{})
-					if e != nil {
-						break
-					}
-					b.b.Write(types.BUS_WS, env)
-
-				case "/birthday": //дни рождения
-					days, _ := strconv.Atoi(upd.GetParam())
-					if days <= 0 {
-						days = 31
-					}
-					env, e := shared.Pack(shared.TypeMessageBirthdays, shared.MessageBirthdays{Days: days})
-					if e != nil {
-						break
-					}
-					b.b.Write(types.BUS_WS, env)
-
-				case "/ci": //инфо о клиентах
 				}
 			}
 		}
