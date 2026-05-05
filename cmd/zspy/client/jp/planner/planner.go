@@ -297,14 +297,20 @@ func EowList(ctx context.Context, db *sql.DB) string {
 	}
 	defer rows.Close()
 
-	curr, n, t, g := []eow{}, "", time.Time{}, 0
+	res, n, t, g := "", "", time.Time{}, 0
 	for rows.Next() {
 		if e = rows.Scan(&n, &t, &g); e != nil {
 			return ""
 		}
-		curr = append(curr, eow{t, n, g})
+		if t = time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), t.Hour(), t.Minute(), t.Second(), 0, t.Location()); t.After(eowList.t) {
+			eowList.t = t
+			res += fmt.Sprintf("%s %s (%s)\n", types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[v.gender]...), v.name, v.eot.Format("15:04"))
+		}
 	}
-	res := ""
+	if res != "" {
+		res = fmt.Sprintf("<b>%s</b>\n\n%s", _getPhrase(g), res)
+	}
+
 	if len(curr) > len(eowList.list) {
 		for _, v := range curr[len(eowList.list):] {
 			res += fmt.Sprintf("%s %s (%s)\n", types.RndFrom([2][]string{{"🚶‍♀️", "🏃‍♀️", "🙋‍♀️"}, {"🚶🏻‍♂️", "🏃‍♂️", "🙋‍♂️"}}[v.gender]...), v.name, v.eot.Format("15:04"))
