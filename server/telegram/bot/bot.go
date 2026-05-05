@@ -16,6 +16,8 @@ import (
 	"github.com/jesc7/zombot/server/types"
 )
 
+var otherMessengers = []string{types.BUS_BOTMAX}
+
 type Bot struct {
 	bot    *tg.Bot
 	me     *tg.User
@@ -81,7 +83,6 @@ func (b *Bot) Run(ctx context.Context) error {
 	}
 	defer b.bot.StopPoll(ctx, nil)
 
-	//go func() {
 out:
 	for {
 		select {
@@ -119,19 +120,37 @@ out:
 			}
 
 		case update := <-updates:
-			fmt.Println(update)
+			func() {
+				if update.Message == nil {
+					return
+				}
+				//только групповой чат из настроек
+				if update.Message.Chat.ID != b.chatID {
+					return
+				}
+				//отсеиваем команды
+				if types.IsCommand(b.b, update.Message.Text) {
+					return
+				}
 
+				if types.IsHelp(update.Message.Text) {
+					update.Message.Text = "/help"
+				}
+				switch tu.ParseCommand() update. upd.GetCommand() {
+				case "/help": //помощь
+					b.SendText(MSG_HELP)
+					return
+				}
+
+				//сообщения-не-команды
+				for _, v := range otherMessengers {
+					env, _ := shared.Pack(shared.TypeMessageText, shared.MessageText{
+						Text: "<b>(TG) " + update.Message.From.FirstName + "</b>\n" + update.Message.Text,
+					})
+					b.b.Write(v, env)
+				}
+			}()
 		}
 	}
-	//}()
-
-	/*bh, e := th.NewBotHandler(b.bot, updates)
-	if e != nil {
-		return e
-	}
-	defer bh.Stop()
-	//do work
-
-	return bh.Start()*/
 	return nil
 }
