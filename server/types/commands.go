@@ -74,7 +74,7 @@ func isBirthday(value string) (bool, int) {
 	return b, days
 }
 
-func GetCommand(text string) (string, bool) {
+func getCommand(text string) (string, bool) {
 	if strings.Index(text, "/") == 0 {
 		if strings.Contains(text, ":") {
 			return strings.Split(text, ":")[0], true
@@ -84,7 +84,7 @@ func GetCommand(text string) (string, bool) {
 	return "", false
 }
 
-func GetParams(text string) string {
+func getParams(text string) string {
 	if strings.Index(text, "/") == 0 {
 		if strings.Contains(text, ":") {
 			return strings.Split(text, ":")[1]
@@ -95,17 +95,6 @@ func GetParams(text string) string {
 }
 
 func IsCommand(b *bus.Bus, name, text string) bool {
-	/*
-		if types.IsHelp(upd.Message.Body.Text) {
-			upd.Message.Body.Text = "/help"
-		}
-		switch upd.GetCommand() {
-		case "/help": //помощь
-			b.SendText(types.MSG_HELP)
-			return
-		}
-	*/
-
 	if isHelp(text) {
 		text = "/help"
 	} else if duty, name, days := isDuty(text); duty {
@@ -115,7 +104,7 @@ func IsCommand(b *bus.Bus, name, text string) bool {
 	} else if bd, days := isBirthday(text); bd {
 		text = fmt.Sprintf("/birthday:%d", days)
 	}
-	cmd, ok := GetCommand(text)
+	cmd, ok := getCommand(text)
 	if !ok {
 		return false
 	}
@@ -131,7 +120,7 @@ func IsCommand(b *bus.Bus, name, text string) bool {
 		b.Write(name, env)
 
 	case "/duty": //дежурства
-		params := strings.Split(GetParams(text), "#")
+		params := strings.Split(getParams(text), "#")
 		name, days := params[0], 7
 		if len(params) > 1 {
 			days, _ = strconv.Atoi(params[1])
@@ -155,7 +144,7 @@ func IsCommand(b *bus.Bus, name, text string) bool {
 		b.Write(BUS_WSSPY, env)
 
 	case "/birthday": //дни рождения
-		days, _ := strconv.Atoi(GetParams(text))
+		days, _ := strconv.Atoi(getParams(text))
 		if days <= 0 {
 			days = 31
 		}
