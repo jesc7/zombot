@@ -136,7 +136,7 @@ out:
 				//сообщения-не-команды
 				for _, v := range otherMessengers {
 					env, _ := shared.Pack(shared.TypeMessageText, shared.MessageText{
-						Text: "<b>(Tg) " + update.Message.From.FirstName + "</b>\n" + update.Message.Text,
+						Text: "<b><u>Telegram</u> | " + update.Message.From.FirstName + "</b>\n" + update.Message.Text,
 					})
 					b.b.Write(v, env)
 				}

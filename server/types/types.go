@@ -26,5 +26,3 @@ const (
 )
 
 type ClientType string
-
-const CT_ZSPY ClientType = "zspy"
