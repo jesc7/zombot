@@ -85,7 +85,7 @@ func getCommand(text string) (string, bool) {
 	return "", false
 }
 
-func getParams(text string) string {
+func getParam(text string) string {
 	if strings.Index(text, "/") == 0 {
 		if strings.Contains(text, ":") {
 			return strings.Split(text, ":")[1]
@@ -121,7 +121,7 @@ func IsCommand(b *bus.Bus, busName, text string) bool {
 		b.Write(busName, env)
 
 	case "/duty": //дежурства
-		params := strings.Split(getParams(text), "#")
+		params := strings.Split(getParam(text), "#")
 		name, days := params[0], 7
 		if len(params) > 1 {
 			days, _ = strconv.Atoi(params[1])
@@ -145,7 +145,7 @@ func IsCommand(b *bus.Bus, busName, text string) bool {
 		b.Write(BUS_WSSPY, env)
 
 	case "/birthday": //дни рождения
-		days, _ := strconv.Atoi(getParams(text))
+		days, _ := strconv.Atoi(getParam(text))
 		if days <= 0 {
 			days = 31
 		}
