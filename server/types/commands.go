@@ -94,7 +94,7 @@ func getParams(text string) string {
 	return ""
 }
 
-func IsCommand(b *bus.Bus, name, text string) bool {
+func IsCommand(b *bus.Bus, busName, text string) bool {
 	if isHelp(text) {
 		text = "/help"
 	} else if duty, name, days := isDuty(text); duty {
@@ -117,7 +117,7 @@ func IsCommand(b *bus.Bus, name, text string) bool {
 		if e != nil {
 			break
 		}
-		b.Write(name, env)
+		b.Write(busName, env)
 
 	case "/duty": //дежурства
 		params := strings.Split(getParams(text), "#")
