@@ -129,17 +129,7 @@ out:
 					return
 				}
 				//отсеиваем команды
-				if types.IsCommand(b.b, update.Message.Text) {
-					return
-				}
-
-				if types.IsHelp(update.Message.Text) {
-					update.Message.Text = "/help"
-				}
-				cmd, _ := types.GetCommand(update.Message.Text)
-				switch cmd {
-				case "/help": //помощь
-					b.SendText(types.MSG_HELP)
+				if types.IsCommand(b.b, types.BUS_BOTTG, update.Message.Text) {
 					return
 				}
 
