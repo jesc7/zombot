@@ -89,13 +89,13 @@ func (ws *WebSocketServer) handle(ctx context.Context, w http.ResponseWriter, r 
 	log.Printf("Connect %s", conn.RemoteAddr())
 	defer log.Printf("Disconnect %s", conn.RemoteAddr())
 
-	ch := ws.b.Register(types.WsBusName(claims.Type))
 	switch claims.Type {
 	case types.CT_ZSPY:
 		if ws.zspy != nil {
 			http.Error(w, "ZSpy already connected", http.StatusNotAcceptable)
 			return
 		}
+		ch := ws.b.Register(types.BUS_WSSPY)
 		ws.handleSpy(ctx, conn, ch)
 
 	default:

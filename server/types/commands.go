@@ -123,14 +123,14 @@ func IsCommand(b *bus.Bus, text string) bool {
 		if e != nil {
 			break
 		}
-		b.Write(WsBusName(CT_ZSPY), env)
+		b.Write(BUS_WSSPY, env)
 
 	case "/absent": //отсутствующие
 		env, e := shared.Pack(shared.TypeMessageAbsents, shared.MessageAbsents{})
 		if e != nil {
 			break
 		}
-		b.Write(WsBusName(CT_ZSPY), env)
+		b.Write(BUS_WSSPY, env)
 
 	case "/birthday": //дни рождения
 		days, _ := strconv.Atoi(GetParams(text))
@@ -141,7 +141,7 @@ func IsCommand(b *bus.Bus, text string) bool {
 		if e != nil {
 			break
 		}
-		b.Write(WsBusName(CT_ZSPY), env)
+		b.Write(BUS_WSSPY, env)
 
 	case "/ci": //инфо о клиентах
 
