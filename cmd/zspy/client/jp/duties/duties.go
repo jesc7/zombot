@@ -176,10 +176,10 @@ func TomorrowDuties(ctx context.Context, db *sql.DB) string {
 			res += fmt.Sprintf("%s - %s\n", types.Iif(ttype == 6, "🌒 Утро", "☀️ День"), strings.Trim(name, " "))
 		}
 	}
-	if len(res) != 0 {
-		res = "<b>👷 Дежурные на завтра</b>\n" + types.Iif(strings.Count(res, "\n") > 1, "\n", "") + res
+	if res == "" {
+		return ""
 	}
-	return res
+	return "<b>👷 Дежурные на завтра</b>\n" + types.Iif(strings.Count(res, "\n") > 1, "\n", "") + res
 }
 
 func HolidaysCount(ctx context.Context, db *sql.DB) int {
