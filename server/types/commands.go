@@ -8,6 +8,7 @@ import (
 
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
+	"github.com/jesc7/zombot/server/types"
 )
 
 const (
@@ -95,6 +96,20 @@ func GetParams(text string) string {
 }
 
 func IsCommand(b *bus.Bus, text string) bool {
+	/*
+		if types.IsHelp(upd.Message.Body.Text) {
+			upd.Message.Body.Text = "/help"
+		}
+		switch upd.GetCommand() {
+		case "/help": //помощь
+			b.SendText(types.MSG_HELP)
+			return
+		}
+	*/
+
+	if types.IsHelp(upd.Message.Body.Text) {
+		upd.Message.Body.Text = "/help"
+	}
 	if duty, name, days := isDuty(text); duty {
 		text = fmt.Sprintf("/duty:%s#%d", name, days)
 	} else if isAbsent(text) {
