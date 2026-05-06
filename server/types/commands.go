@@ -8,7 +8,6 @@ import (
 
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
-	"github.com/jesc7/zombot/server/types"
 )
 
 const (
@@ -43,7 +42,7 @@ func findCommand(re *regexp.Regexp, value string) (bool, map[string]string) {
 	return true, groups
 }
 
-func IsHelp(value string) bool {
+func isHelp(value string) bool {
 	b, _ := findCommand(reHelp, value)
 	return b
 }
@@ -95,7 +94,7 @@ func GetParams(text string) string {
 	return ""
 }
 
-func IsCommand(b *bus.Bus, text string) bool {
+func IsCommand(b *bus.Bus, name, text string) bool {
 	/*
 		if types.IsHelp(upd.Message.Body.Text) {
 			upd.Message.Body.Text = "/help"
@@ -107,10 +106,9 @@ func IsCommand(b *bus.Bus, text string) bool {
 		}
 	*/
 
-	if types.IsHelp(upd.Message.Body.Text) {
-		upd.Message.Body.Text = "/help"
-	}
-	if duty, name, days := isDuty(text); duty {
+	if isHelp(text) {
+		text = "/help"
+	} else if duty, name, days := isDuty(text); duty {
 		text = fmt.Sprintf("/duty:%s#%d", name, days)
 	} else if isAbsent(text) {
 		text = "/absent"
@@ -123,6 +121,15 @@ func IsCommand(b *bus.Bus, text string) bool {
 	}
 
 	switch cmd {
+	case "/help": //помощь
+		env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
+			Text: MSG_HELP,
+		})
+		if e != nil {
+			break
+		}
+		b.Write(name, env)
+
 	case "/duty": //дежурства
 		params := strings.Split(GetParams(text), "#")
 		name, days := params[0], 7

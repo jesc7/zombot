@@ -108,16 +108,7 @@ out:
 						return
 					}
 					//отсеиваем команды
-					if types.IsCommand(b.b, upd.Message.Body.Text) {
-						return
-					}
-
-					if types.IsHelp(upd.Message.Body.Text) {
-						upd.Message.Body.Text = "/help"
-					}
-					switch upd.GetCommand() {
-					case "/help": //помощь
-						b.SendText(types.MSG_HELP)
+					if types.IsCommand(b.b, types.BUS_BOTMAX, upd.Message.Body.Text) {
 						return
 					}
 
