@@ -9,21 +9,21 @@ type UniMessage interface {
 	UniID() string
 }
 
-type UniMessageCore struct {
+type UniCore struct {
 	ID string
 }
 
-func (m *UniMessageCore) UniID() string {
+func (m *UniCore) UniID() string {
 	return m.ID
 }
 
 type UniMessageText struct {
-	UniMessageCore
+	UniCore
 	Text string
 }
 
 type UniMessageFile struct {
-	UniMessageCore
+	UniCore
 	Name    string
 	Caption string
 	File    []byte
@@ -57,23 +57,23 @@ type Contact struct {
 }
 
 type UniMessageContact struct {
-	UniMessageCore
+	UniCore
 	Contact
 }
 
 type UniMessageContacts struct {
-	UniMessageCore
+	UniCore
 	Contacts []Contact
 }
 
 type UniMessageQuoted struct {
-	UniMessageCore
+	UniCore
 	Quoted *UniMessage
 	Text   string
 }
 
 type UniMessageReaction struct {
-	UniMessageCore
+	UniCore
 	Reacted  *UniMessage
 	Reaction string
 }

@@ -66,14 +66,14 @@ out:
 		case <-ctx.Done():
 			break out
 
-		case msg := <-b.ch: //разгребаем пакеты, пришедшие боту
-			switch mt := msg.(type) {
+		case o := <-b.ch: //разгребаем пакеты, пришедшие боту
+			switch env := o.(type) {
 			case shared.Envelope: //пакеты zspy
 
-				switch mt.Type {
+				switch env.Type {
 				//просто текст
 				case shared.TypeMessageText:
-					m, e := shared.Unpack[shared.MessageText](mt)
+					m, e := shared.Unpack[shared.MessageText](env)
 					if e != nil {
 						continue
 					}
@@ -81,14 +81,14 @@ out:
 				}
 			}
 
-		case msg := <-b.QWait.Q: //разгребаем локальную очередь сообщений
-			wo, ok := msg.(*queue.WaitObj)
+		case o := <-b.QWait.Q: //разгребаем локальную очередь сообщений
+			wo, ok := o.(*queue.WaitObj)
 			if !ok {
 				break
 			}
-			switch mt := wo.O.(type) {
+			switch msg := wo.O.(type) {
 			case *max.Message:
-				b.bot.Messages.Send(ctx, mt.
+				b.bot.Messages.Send(ctx, msg.
 					SetChat(b.chatID).
 					SetFormat(schemes.HTML),
 				)
