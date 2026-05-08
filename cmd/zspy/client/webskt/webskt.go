@@ -182,7 +182,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				log.Println("PbUpdate begin")
 				defer func() { log.Println("PbUpdate end:", e) }()
 
-				phones.PbUpdate(ws.cwd, []string{})
+				e = phones.PbUpdate(ws.cwd, []string{})
 			}()
 
 			go func() { //checks EC
