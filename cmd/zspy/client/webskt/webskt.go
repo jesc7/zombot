@@ -195,7 +195,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
 						return
 					}
-					log.Println("CheckEC env")
+					log.Println("CheckEC", env)
 					ws.Write(env)
 				}
 			}()
@@ -217,7 +217,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				if e != nil {
 					return
 				}
-				log.Println("Birthdays env")
+				log.Println("Birthdays", env)
 				ws.Write(env)
 			}()
 
@@ -231,7 +231,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
 						return
 					}
-					log.Println("ForeignHoliday env")
+					log.Println("ForeignHoliday", env)
 					ws.Write(env)
 				}
 			}()
@@ -246,7 +246,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
 						return
 					}
-					log.Println("CheckWhois env")
+					log.Println("CheckWhois", env)
 					ws.Write(env)
 				}
 			}()
@@ -267,7 +267,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				if e != nil {
 					return
 				}
-				log.Println("Absents env")
+				log.Println("Absents", env)
 				ws.Write(env)
 			}()
 
@@ -281,7 +281,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
 						return
 					}
-					log.Println("MissDuties env")
+					log.Println("MissDuties", env)
 					ws.Write(env)
 				}
 			}()
@@ -314,7 +314,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					}); e != nil {
 						return
 					}
-					log.Println("HolidaysCount env")
+					log.Println("HolidaysCount", env)
 					ws.Write(env)
 				}
 			}()
@@ -332,7 +332,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
 						return
 					}
-					log.Println("TomorrowDuties env")
+					log.Println("TomorrowDuties", env)
 					ws.Write(env)
 				}
 			}()
@@ -352,7 +352,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				if e != nil {
 					return
 				}
-				log.Println("Duty env")
+				log.Println("Duty", env)
 				ws.Write(env)
 			}()
 
