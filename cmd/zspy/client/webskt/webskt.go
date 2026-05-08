@@ -195,6 +195,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
 						return
 					}
+					log.Println("CheckEC env")
 					ws.Write(env)
 				}
 			}()
@@ -216,29 +217,36 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				if e != nil {
 					return
 				}
+				log.Println("Birthdays env")
 				ws.Write(env)
 			}()
 
 			go func() { //another countries holiday
+				var e error
+				log.Println("ForeignHoliday begin")
+				defer func() { log.Println("ForeignHoliday end:", e) }()
+
 				if s := planner.ForeignHoliday(ws.cwd); s != "" {
-					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
-						Text: s,
-					})
-					if e != nil {
+					var env shared.Envelope
+					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
 						return
 					}
+					log.Println("ForeignHoliday env")
 					ws.Write(env)
 				}
 			}()
 
 			go func() { //check domains registration
+				var e error
+				log.Println("CheckWhois begin")
+				defer func() { log.Println("CheckWhois end:", e) }()
+
 				if s := checks.CheckWhois(cfg.CheckDomains, 10); s != "" {
-					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
-						Text: s,
-					})
-					if e != nil {
+					var env shared.Envelope
+					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
 						return
 					}
+					log.Println("CheckWhois env")
 					ws.Write(env)
 				}
 			}()
@@ -247,27 +255,33 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			t09_00.Reset(24 * time.Hour)
 
 			go func() { //who's absent today
+				var e error
+				log.Println("Absents begin")
+				defer func() { log.Println("Absents end:", e) }()
+
 				pay, e := planner.Absents(ctx, db)
 				if e != nil || len(pay) == 0 {
 					return
 				}
-				env, e := shared.Pack(shared.TypeMessageAbsents, shared.MessageAbsents{
-					Absents: pay,
-				})
+				env, e := shared.Pack(shared.TypeMessageAbsents, shared.MessageAbsents{Absents: pay})
 				if e != nil {
 					return
 				}
+				log.Println("Absents env")
 				ws.Write(env)
 			}()
 
 			go func() { //missing duties
+				var e error
+				log.Println("MissDuties begin")
+				defer func() { log.Println("MissDuties end:", e) }()
+
 				if s := duties.MissDuties(ctx, db, ws.cwd, 20); s != "" {
-					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
-						Text: s,
-					})
-					if e != nil {
+					var env shared.Envelope
+					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
 						return
 					}
+					log.Println("MissDuties env")
 					ws.Write(env)
 				}
 			}()
