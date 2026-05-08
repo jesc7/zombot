@@ -170,9 +170,7 @@ func TomorrowDuties(ctx context.Context, db *sql.DB) string {
 	)
 	for rows.Next() {
 		if e = rows.Scan(&dt, &ttype, &name, &gender, &tg_id, &sched_id); e == nil {
-			if gender < 0 || gender > 1 {
-				gender = 0
-			}
+			gender = types.Iif(gender == 1, 1, 0)
 			res += fmt.Sprintf("%s - %s\n", types.Iif(ttype == 6, "🌒 Утро", "☀️ День"), strings.Trim(name, " "))
 		}
 	}
