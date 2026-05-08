@@ -178,49 +178,45 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			t08_00.Reset(24 * time.Hour)
 
 			go func() { //update phone base
-				text := "PbUpdate..."
+				var e error
+				log.Println("PbUpdate begin")
+				defer func() { log.Println("PbUpdate end:", e) }()
+
 				phones.PbUpdate(ws.cwd, []string{})
-				log.Println(text, "end")
 			}()
 
 			go func() { //checks EC
-				text := "Checks EC..."
+				var e error
+				log.Println("CheckEC begin")
+				defer func() { log.Println("CheckEC end:", e) }()
+
 				if s := checks.CheckEC(cfg.EC); s != "" {
-					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
-						Text: s,
-					})
-					if e != nil {
-						log.Println(text, e)
+					var env shared.Envelope
+					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
 						return
 					}
-					log.Println(text, "send result")
 					ws.Write(env)
-					return
 				}
-				log.Println(text, "end")
 			}()
 
 		case <-t08_10.C: //everyday 8:10
 			t08_10.Reset(24 * time.Hour)
 
 			go func() { //birthdays today
-				text := "MessageBirthdays..."
-				var (
-					pay shared.MessageBirthdays
-					e   error
-				)
+				var e error
+				log.Println("Birthdays begin")
+				defer func() { log.Println("Birthdays end:", e) }()
+
+				var pay shared.MessageBirthdays
 				pay.Birthdays, e = planner.Birthdays(ctx, db, 1)
 				if e != nil || len(pay.Birthdays) == 0 {
-					log.Println(text, pay.Birthdays, e)
 					return
 				}
 				env, e := shared.Pack(shared.TypeMessageBirthdays, pay)
 				if e != nil {
-					log.Println(text, e)
 					return
 				}
 				ws.Write(env)
-				log.Println(text, "send result")
 			}()
 
 			go func() { //another countries holiday
