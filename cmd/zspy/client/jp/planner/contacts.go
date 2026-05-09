@@ -16,9 +16,23 @@ type search struct {
 	Total, M, N int
 }
 
-var searches = make(map[string]search)
+var searches map[string]search
 
 func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shared.Contact, error) {
+	if searches == nil {
+		searches = make(map[string]search)
+		go func() {
+			t1m := time.NewTicker(time.Minute)
+			defer t1m.Stop()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				}
+			}
+		}()
+	}
+
 	if msg.Sender == "" || msg.Find == "" {
 		return nil, nil
 	}
