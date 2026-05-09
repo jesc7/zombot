@@ -172,6 +172,7 @@ type Contact struct {
 	Caption string `json:"caption"`
 	Phones  string `json:"phones,omitempty"`
 	Address string `json:"address,omitempty"`
+	End     bool   `json:"end,omitempty"`
 }
 
 type MessageContacts struct {

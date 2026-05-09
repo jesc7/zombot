@@ -115,6 +115,9 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 	if len(res) != 0 {
 		s.LastPID = res[len(res)-1].PID
 	}
+
+	//end?
+
 	mu.Lock()
 	searches[msg.Sender] = s
 	mu.Unlock()
