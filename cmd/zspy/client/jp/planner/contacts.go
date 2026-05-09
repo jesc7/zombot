@@ -70,9 +70,16 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 		searches[msg.Sender] = s
 		mu.Unlock()
 
-		go func(ctx context.Context, key string) {
-
-		}(ctx, msg.Sender)
+		go func(ctx context.Context, key, text string) {
+			var cnt int
+			if e := db.QueryRowContext(ctx, "select count(1) from pr_getclients_v3(?)", text).Scan(&cnt); e == nil {
+				mu.Lock()
+				defer mu.Unlock()
+				s := searches[key]
+				s.Total = cnt
+				searches[key] = s
+			}
+		}(ctx, msg.Sender, msg.Find)
 
 	} else if msg.Find != "/more" {
 		s = _new(msg.Sender, msg.Find)
