@@ -206,11 +206,13 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 					select h.dt, u.username, cast(h.insertdt as time) as t, cast(h.time_in as time) as tin, cast(h.time_out as time) as tout
 					from tabel_history h
 					join sp$users u on h.user_id = u.id
-					where u.status <> -1 and (((h.comments_id = 1) and (h.time_out is null)) or ((h.comments_id = 2) and (h.time_in is null)))	and h.dt between ? and current_date
+					where u.status <> -1 
+						and (((h.comments_id = 1) and (h.time_out is null)) or ((h.comments_id = 2) and (h.time_in is null)))
+						and h.dt between ? and current_date
 					order by h.dt desc
 				) a
 			) b
-			where (b.d1 = 1)
+			where b.d1 = 1
 			group by 1,2
 			order by 1 desc
 		`, minutes, t)
@@ -227,9 +229,9 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		)
 		for rows.Next() {
 			if e = rows.Scan(&dt, &name, &value); e != nil {
-				return
+				return nil
 			}
-			if _, ok := pl[time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.Local)]; !ok { //пропускаем дни с дежурствами
+			if _, ok := (*pl)[types.ClearTime(dt)]; !ok { //пропускаем дни с дежурствами
 				m[name] += value
 			}
 		}
@@ -240,15 +242,16 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 			item = append(item, k)
 			n[v] = item
 		}
+		var res []list
 		for k, v := range n {
 			sort.SliceStable(v, func(i, j int) bool { return v[i] < v[j] })
-			r = append(r, list{name: strings.Join(v, ", "), value: k})
+			res = append(res, list{name: strings.Join(v, ", "), value: k})
 		}
-		sort.SliceStable(r, func(i, j int) bool { return r[i].value > r[j].value })
-		return
+		sort.SliceStable(res, func(i, j int) bool { return res[i].value > res[j].value })
+		return res
 	}
 
-	res = funcs.Iif(weekly == 0, "<b>Рейтинг 'Неделька'</b>", "<b>Победители по итогам месяца</b> 🥁🥁🥁")
+	res := types.Iif(weekly, "<b>Рейтинг 'Неделька'</b>", "<b>Победители по итогам месяца</b> 🥁🥁🥁")
 	r := _continuous(start, 5, 5) //опоздания до 5 минут не считаются
 	if len(r) != 0 {
 		var s string
@@ -287,17 +290,17 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 
 	r = _lates(start, 5) //опоздания до 5 минут не считаются
 	if len(r) != 0 {
-		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Засоня %s'</b>\n%s (%d мин. опозданий)", funcs.Iif(weekly == 0, "недели", "месяца"), r[0].name, r[0].value)
+		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Засоня %s'</b>\n%s (%d мин. опозданий)", types.Iif(weekly, "недели", "месяца"), r[0].name, r[0].value)
 	}
 
 	r = _maxWorker(start) //величина переработки в минутах
 	if len(r) != 0 {
-		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Переработник %s'</b>\n%s (%+d мин.)", funcs.Iif(weekly == 0, "недели", "месяца"), r[0].name, r[0].value)
+		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Переработник %s'</b>\n%s (%+d мин.)", types.Iif(weekly, "недели", "месяца"), r[0].name, r[0].value)
 	}
 
 	r = _edited(start, 5) //гэп 5 минут не считается за редактирование
 	if len(r) != 0 {
-		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Гений фотошопа'</b>\n%s (%d исправлений)", r[0].name, r[0].value)
+		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Мастер фотошопа'</b>\n%s (%d исправлений)", r[0].name, r[0].value)
 	}
-	return
+	return res
 }
