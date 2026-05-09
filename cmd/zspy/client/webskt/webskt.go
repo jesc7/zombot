@@ -25,6 +25,7 @@ type WebSocketClient struct {
 	header http.Header
 	ch     chan shared.Envelope
 	conn   *websocket.Conn
+	db     *sql.DB
 	cwd    string
 }
 
@@ -41,12 +42,12 @@ func (ws *WebSocketClient) Write(env shared.Envelope) {
 	ws.ch <- env
 }
 
-func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) error {
-	db, e := sql.Open(cfg.DB.Driver, cfg.DB.ConnStr)
+func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) (e error) {
+	ws.db, e = sql.Open(cfg.DB.Driver, cfg.DB.ConnStr)
 	if e != nil {
 		return e
 	}
-	defer db.Close()
+	defer ws.db.Close()
 
 	ws.ch = make(chan shared.Envelope)
 	defer close(ws.ch)
@@ -61,11 +62,11 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) error {
 				continue
 			}
 		}
-		ws.handle(ctx, cfg, db)
+		ws.handle(ctx, cfg)
 	}
 }
 
-func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql.DB) {
+func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 	log.Printf("Connect %s", ws.conn.RemoteAddr())
 	defer log.Printf("Disconnect %s", ws.conn.RemoteAddr())
 
@@ -87,7 +88,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				if e != nil {
 					continue
 				}
-				pay.A, e = duties.Duty(ctx, db, pay.Q)
+				pay.A, e = duties.Duty(ctx, ws.db, pay.Q)
 				if e != nil {
 					continue
 				}
@@ -98,7 +99,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				ws.Write(env)
 
 			case shared.TypeMessageAbsents:
-				pay, e := planner.Absents(ctx, db)
+				pay, e := planner.Absents(ctx, ws.db)
 				if e != nil {
 					continue
 				}
@@ -115,7 +116,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				if e != nil {
 					continue
 				}
-				pay.Birthdays, e = planner.Birthdays(ctx, db, pay.Days)
+				pay.Birthdays, e = planner.Birthdays(ctx, ws.db, pay.Days)
 				if e != nil {
 					continue
 				}
@@ -130,7 +131,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				if e != nil {
 					continue
 				}
-				pay.Contacts, e = planner.Search(ctx, db, pay)
+				pay.Contacts, e = planner.Search(ctx, ws.db, pay)
 				if e != nil {
 					continue
 				}
@@ -224,7 +225,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				defer func() { log.Println("Birthdays end:", e) }()
 
 				var pay shared.MessageBirthdays
-				pay.Birthdays, e = planner.Birthdays(ctx, db, 1)
+				pay.Birthdays, e = planner.Birthdays(ctx, ws.db, 1)
 				if e != nil || len(pay.Birthdays) == 0 {
 					return
 				}
@@ -274,7 +275,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				log.Println("Absents begin")
 				defer func() { log.Println("Absents end:", e) }()
 
-				pay, e := planner.Absents(ctx, db)
+				pay, e := planner.Absents(ctx, ws.db)
 				if e != nil || len(pay) == 0 {
 					return
 				}
@@ -291,7 +292,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				log.Println("MissDuties begin")
 				defer func() { log.Println("MissDuties end:", e) }()
 
-				if s := duties.MissDuties(ctx, db, ws.cwd, 20); s != "" {
+				if s := duties.MissDuties(ctx, ws.db, ws.cwd, 20); s != "" {
 					var env shared.Envelope
 					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
 						return
@@ -311,7 +312,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					log.Println("Ratings weekly begin")
 					defer func() { log.Println("Ratings weekly end:", e) }()
 
-					if s := planner.Ratings(ctx, db, true, time.Now().AddDate(0, 0, -7)); s != "" {
+					if s := planner.Ratings(ctx, ws.db, true, time.Now().AddDate(0, 0, -7)); s != "" {
 						var env shared.Envelope
 						if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
 							return
@@ -326,7 +327,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 						log.Println("Ratings monthly begin")
 						defer func() { log.Println("Ratings monthly end:", e) }()
 
-						if s := planner.Ratings(ctx, db, false, time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC)); s != "" {
+						if s := planner.Ratings(ctx, ws.db, false, time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC)); s != "" {
 							var env shared.Envelope
 							if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
 								return
@@ -346,7 +347,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				log.Println("HolidaysCount begin")
 				defer func() { log.Println("HolidaysCount end:", e) }()
 
-				if i := duties.HolidaysCount(ctx, db); i > 0 {
+				if i := duties.HolidaysCount(ctx, ws.db); i > 0 {
 					var env shared.Envelope
 					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: fmt.Sprintf("🤖 Уважаемые гуманоиды!\nВпереди %d выходных, желаю всем хорошо отдохнуть!", i),
@@ -366,7 +367,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				log.Println("TomorrowDuties begin")
 				defer func() { log.Println("TomorrowDuties end:", e) }()
 
-				if s := duties.TomorrowDuties(ctx, db); s != "" {
+				if s := duties.TomorrowDuties(ctx, ws.db); s != "" {
 					var env shared.Envelope
 					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
 						return
@@ -383,7 +384,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 
 				var pay shared.MessageDuties
 				pay.Q.Days = 2
-				pay.A, e = duties.Duty(ctx, db, pay.Q)
+				pay.A, e = duties.Duty(ctx, ws.db, pay.Q)
 				if e != nil || len(pay.A) == 0 {
 					return
 				}
@@ -401,7 +402,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				if t := time.Now().Hour(); t < 14 || t > 18 {
 					return
 				}
-				if s := planner.EowList(ctx, db); s != "" {
+				if s := planner.EowList(ctx, ws.db); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
 					})
@@ -415,7 +416,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 		case <-t5m.C: //every 5 minutes
 
 			go func() { //start-of-work for duties
-				if s := planner.SowList(ctx, db, ws.cwd); s != "" {
+				if s := planner.SowList(ctx, ws.db, ws.cwd); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
 					})
@@ -455,7 +456,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 		case <-t30m.C: //every 30 minutes
 
 			go func() { //critical tasks
-				if s := planner.CriticalTasks(ctx, db, 30); s != "" {
+				if s := planner.CriticalTasks(ctx, ws.db, 30); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: s,
 					})
