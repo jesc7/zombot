@@ -18,6 +18,10 @@ type search struct {
 var searches = make(map[string]search)
 
 func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shared.Contact, error) {
+	if msg.Sender == "" || msg.Find == "" {
+		return nil, nil
+	}
+
 	_new := func(sender, text string) search {
 		return search{
 			Until:  time.Now().Add(30 * time.Minute),
