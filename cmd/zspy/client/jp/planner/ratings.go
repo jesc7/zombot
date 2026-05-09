@@ -23,9 +23,9 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 	}
 
 	type list struct {
-		name  string
-		value int
-		j     int
+		name   string
+		value  int
+		value2 int
 	}
 
 	/*
@@ -75,17 +75,21 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		_continuous возвращает список сотрудников и признак опоздал/нет
 		minutes - период в минутах, который не считается опозданием
 	*/
-	_continuous := func(t time.Time, cnt int, minutes uint) (r []list) {
+	_continuous := func(t time.Time, cnt int, minutes uint) []list {
 		rows, e := db.Query(`
 			select h.dt, u.username, iif(h.time_in <= dateadd(minute, ?, sc.tfrom), 0, 1)
 			from tabel t
 			join tabel_history h on h.user_id = t.user_id and h.dt = t.dt
 			join sp$users u on h.user_id = u.id
 			left join pr_getsched_v2(0, u.id, h.dt) sc on 1 = 1
-			where u.status <> -1 and h.comments_id = 1 and h.time_out is null and h.dt between ? and current_date
+			where 1=1
+				and u.status <> -1 
+				and h.comments_id = 1 
+				and h.time_out is null 
+				and h.dt between ? and current_date
 		`, minutes, t)
 		if e != nil {
-			return
+			return nil
 		}
 		defer rows.Close()
 
@@ -97,9 +101,9 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		)
 		for rows.Next() {
 			if e = rows.Scan(&dt, &name, &value); e != nil {
-				return
+				return nil
 			}
-			if _, ok := pl[time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.Local)]; !ok { //пропускаем дни с дежурствами
+			if _, ok := (*pl)[types.ClearTime(dt)]; !ok { //пропускаем дни с дежурствами
 				v := m[name]
 				v[0] += value
 				v[1]++
@@ -109,30 +113,31 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		var tmp []list
 		for k, v := range m {
 			if v[1] > 2 {
-				tmp = append(tmp, list{name: k, value: v[0], j: v[1]})
+				tmp = append(tmp, list{name: k, value: v[0], value2: v[1]})
 			}
 		}
 
 		if cnt < 0 {
 			for i := range tmp {
-				tmp[i].value = tmp[i].j - tmp[i].value
+				tmp[i].value = tmp[i].value2 - tmp[i].value
 			}
 			cnt = -cnt
 		}
 		sort.SliceStable(tmp, func(a, b int) bool {
-			return tmp[a].value < tmp[b].value || (tmp[a].value == tmp[b].value && tmp[a].j > tmp[b].j)
+			return tmp[a].value < tmp[b].value || (tmp[a].value == tmp[b].value && tmp[a].value2 > tmp[b].value2)
 		})
 
+		var res []list
 		for _, v := range tmp {
 			if v.value < cnt {
-				if len(r) == 0 || r[len(r)-1].value != v.value {
-					r = append(r, v)
+				if len(res) == 0 || res[len(res)-1].value != v.value {
+					res = append(res, v)
 				} else {
-					r[len(r)-1].name += ", " + v.name
+					res[len(res)-1].name += ", " + v.name
 				}
 			}
 		}
-		return r
+		return res
 	}
 
 	/*
