@@ -222,7 +222,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				}
 				sb := strings.Builder{}
 				for _, c := range m.Contacts {
-					_ = c
+					fmt.Fprintf(&sb, "%d.%d %s // %s: %s", c.CID, c.PID, c.Caption, c.Address, c.Phones)
 				}
 				env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{
 					Text: sb.String(),
