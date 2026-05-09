@@ -41,7 +41,7 @@ func Start(ctx context.Context, service bool) error {
 		}
 	})
 
-	wa := webapi.NewWebServer(cfg, cwd, skt)
+	wa := webapi.NewWebServer(ctx, cfg, cwd, skt)
 	wg.Go(func() { //run WebAPI server
 		defer cancel()
 		wa.Run(ctx)

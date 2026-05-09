@@ -114,9 +114,10 @@ type MessageZSRV struct {
 }
 
 type MessageCall struct {
-	Prefix string `json:"prefix"`
-	Phone  string `json:"phone"`
-	Region string `json:"region"`
+	Prefix   string    `json:"prefix"`
+	Phone    string    `json:"phone"`
+	Region   string    `json:"region"`
+	Contacts []Contact `json:"contacts"`
 }
 
 type GenderType int

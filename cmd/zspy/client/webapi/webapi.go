@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jesc7/zombot/cmd/zspy/client/jp/planner"
 	"github.com/jesc7/zombot/cmd/zspy/client/phones"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/client/webskt"
@@ -25,7 +26,7 @@ var (
 	reCall = regexp.MustCompile(`(?:\+?\d[\-\s]?\(?\s?\d{3,5}\s?\)?[\-\s]?)?(?:\d[\-\s]?){4,6}\d`)
 )
 
-func NewWebServer(cfg types.Config, cwd string, skt *webskt.WebSocketClient) *WebServer {
+func NewWebServer(ctx context.Context, cfg types.Config, cwd string, skt *webskt.WebSocketClient) *WebServer {
 	mux := http.NewServeMux()
 	//скрипт asterisk 192.168.67.11/etc/asterisk/IgorBot.php шлет запрос вида 'ip:8089/call?phone=XXXXXX'
 	mux.HandleFunc("/call", func(w http.ResponseWriter, r *http.Request) {
@@ -39,9 +40,10 @@ func NewWebServer(cfg types.Config, cwd string, skt *webskt.WebSocketClient) *We
 		}
 
 		env, _ := shared.Pack(shared.TypeMessageCall, shared.MessageCall{
-			Prefix: types.Iif(strings.HasPrefix(v[0], "8800 "), "8800", ""),
-			Phone:  phone,
-			Region: phones.FindByPhone(cwd, phone),
+			Prefix:   types.Iif(strings.HasPrefix(v[0], "8800 "), "8800", ""),
+			Phone:    phone,
+			Region:   phones.FindByPhone(cwd, phone),
+			Contacts: planner.Search(),
 		})
 		skt.Write(env)
 	})

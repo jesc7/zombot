@@ -114,6 +114,7 @@ func getParam(text string) string {
 }
 
 func IsCommand(b *bus.Bus, busName, sender, text string) bool {
+	//text = strings.Trim(text, " ")
 	if isHelp(text) {
 		text = "/help"
 	} else if isPhone(text) {
