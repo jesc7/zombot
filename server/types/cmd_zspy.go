@@ -105,7 +105,7 @@ func IsCommand(b *bus.Bus, busName, text string) bool {
 	if isHelp(text) {
 		text = "/help"
 	} else if isPhone(text) {
-		text = "/phone:" + text
+		text = "/ci:" + text
 	} else if duty, name, days := isDuty(text); duty {
 		text = fmt.Sprintf("/duty:%s#%d", name, days)
 	} else if isAbsent(text) {
