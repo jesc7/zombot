@@ -1,18 +1,26 @@
 package planner
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jesc7/zombot/cmd/zspy/client/jp/duties"
 )
 
 /*
 Ratings подготавливает различные motivation-рейтинги сотрудников за период
 */
-func Ratings(db *sql.DB, kind int, t time.Time) (res string) {
+func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) string {
+	pl, e := duties.DutiesList(ctx, db)
+	if e != nil {
+		return ""
+	}
+
 	type rt struct {
 		s string
 		i int
@@ -50,7 +58,7 @@ func Ratings(db *sql.DB, kind int, t time.Time) (res string) {
 			if e = rows.Scan(&dt, &name, &value); e != nil {
 				return
 			}
-			if _, ok := dut[time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.Local)]; !ok { //пропускаем дни с дежурствами
+			if _, ok := (*pl)[time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.Local)]; !ok { //пропускаем дни с дежурствами
 				m[name] += value
 			}
 		}
@@ -89,7 +97,7 @@ func Ratings(db *sql.DB, kind int, t time.Time) (res string) {
 			if e = rows.Scan(&dt, &name, &value); e != nil {
 				return
 			}
-			if _, ok := dut[time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.Local)]; !ok { //пропускаем дни с дежурствами
+			if _, ok := pl[time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.Local)]; !ok { //пропускаем дни с дежурствами
 				v := m[name]
 				v[0] += value
 				v[1]++
@@ -156,7 +164,7 @@ func Ratings(db *sql.DB, kind int, t time.Time) (res string) {
 			if e = rows.Scan(&dt, &name, &value); e != nil {
 				return
 			}
-			if _, ok := dut[time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.Local)]; !ok { //пропускаем дни с дежурствами
+			if _, ok := pl[time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.Local)]; !ok { //пропускаем дни с дежурствами
 				m[name] += value
 			}
 		}
@@ -211,7 +219,7 @@ func Ratings(db *sql.DB, kind int, t time.Time) (res string) {
 			if e = rows.Scan(&dt, &name, &value); e != nil {
 				return
 			}
-			if _, ok := dut[time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.Local)]; !ok { //пропускаем дни с дежурствами
+			if _, ok := pl[time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.Local)]; !ok { //пропускаем дни с дежурствами
 				m[name] += value
 			}
 		}
@@ -230,8 +238,8 @@ func Ratings(db *sql.DB, kind int, t time.Time) (res string) {
 		return
 	}
 
-	res = funcs.Iif(kind == 0, "<b>Рейтинг 'Неделька'</b>", "<b>Победители по итогам месяца</b> 🥁🥁🥁")
-	r := _continuous(t, 5, 5) //опоздания до 5 минут не считаются
+	res = funcs.Iif(weekly == 0, "<b>Рейтинг 'Неделька'</b>", "<b>Победители по итогам месяца</b> 🥁🥁🥁")
+	r := _continuous(start, 5, 5) //опоздания до 5 минут не считаются
 	if len(r) != 0 {
 		var s string
 		switch r[0].i {
@@ -249,7 +257,7 @@ func Ratings(db *sql.DB, kind int, t time.Time) (res string) {
 		}
 	}
 
-	r = _continuous(t, -5, 5) //опоздания до 5 минут не считаются
+	r = _continuous(start, -5, 5) //опоздания до 5 минут не считаются
 	if len(r) != 0 {
 		var s string
 		switch r[0].i {
@@ -267,17 +275,17 @@ func Ratings(db *sql.DB, kind int, t time.Time) (res string) {
 		}
 	}
 
-	r = _lates(t, 5) //опоздания до 5 минут не считаются
+	r = _lates(start, 5) //опоздания до 5 минут не считаются
 	if len(r) != 0 {
-		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Засоня %s'</b>\n%s (%d мин. опозданий)", funcs.Iif(kind == 0, "недели", "месяца"), r[0].s, r[0].i)
+		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Засоня %s'</b>\n%s (%d мин. опозданий)", funcs.Iif(weekly == 0, "недели", "месяца"), r[0].s, r[0].i)
 	}
 
-	r = _maxWorker(t) //величина переработки в минутах
+	r = _maxWorker(start) //величина переработки в минутах
 	if len(r) != 0 {
-		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Переработник %s'</b>\n%s (%+d мин.)", funcs.Iif(kind == 0, "недели", "месяца"), r[0].s, r[0].i)
+		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Переработник %s'</b>\n%s (%+d мин.)", funcs.Iif(weekly == 0, "недели", "месяца"), r[0].s, r[0].i)
 	}
 
-	r = _edited(t, 5) //гэп 5 минут не считается за редактирование
+	r = _edited(start, 5) //гэп 5 минут не считается за редактирование
 	if len(r) != 0 {
 		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Гений фотошопа'</b>\n%s (%d исправлений)", r[0].s, r[0].i)
 	}
