@@ -232,16 +232,14 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 					continue
 				}
 
-				text := fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(m.Prefix != "", " на "+m.Prefix, ""), m.Phone)
+				text := fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n\n", types.Iif(m.Prefix != "", " на "+m.Prefix, ""), m.Phone)
 				if len(m.Contacts) == 0 {
-					text += "\nКлиент не найден"
+					text += "Клиент не найден"
 					if m.Region != "" {
 						text += "\n" + m.Region
 					}
 				} else {
-					for _, v := range m.Contacts {
-						_ = v
-					}
+					text += _contacts(m.Contacts)
 				}
 				if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: text}); e != nil {
 					return
@@ -258,28 +256,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				if len(m.Contacts) == 0 {
 					sb.WriteString("Контакты не найдены")
 				} else {
-					id := m.Contacts[0].LastPID
-					rp := strings.NewReplacer("<", "", ">", "")
-					for _, c := range m.Contacts {
-						c.Caption = rp.Replace(c.Caption)
-						c.Phones = rp.Replace(c.Phones)
-						c.Address = rp.Replace(c.Address)
-
-						if caption := strings.Split(c.Caption, " :: "); len(caption) > 0 && len(strings.Trim(caption[0], " ")) > 0 {
-							caption[0] = "<b>" + caption[0] + "</b>"
-							c.Caption = strings.Join(caption, " :: ")
-						}
-
-						if c.PID != id {
-							id = c.PID
-							if sb.Len() != 0 {
-								sb.WriteString("__________\n\n")
-							}
-							fmt.Fprintln(&sb, strings.TrimRight(strings.ReplaceAll(fmt.Sprintf("🔶 %s\n%s%s\n%s\n", c.Caption, types.Iif(len(strings.Trim(c.Phones, " ")) > 0, "📞 ", ""), c.Phones, c.Address), "\n\n", "\n"), "\n"))
-						} else {
-							fmt.Fprintln(&sb, strings.TrimRight(strings.ReplaceAll(fmt.Sprintf("🔹 %s%s%s\n%s\n", c.Caption, types.Iif(len(strings.Trim(c.Caption, " ")) > 0, ": ", ""), c.Phones, c.Address), "\n\n", "\n"), "\n"))
-						}
-					}
+					sb.WriteString(_contacts(m.Contacts))
 					if !m.Contacts[len(m.Contacts)-1].End {
 						sb.WriteString("<b>/more</b>")
 					}

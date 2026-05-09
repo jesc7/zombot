@@ -62,7 +62,7 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 			}
 		}(ctx, sender, text)
 
-		return search{
+		s := search{
 			Until:  time.Now().Add(30 * time.Minute),
 			Sender: sender,
 			Text:   text,
@@ -70,6 +70,10 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 			N:      8,
 			Total:  0,
 		}
+		mu.Lock()
+		defer mu.Unlock()
+		searches[msg.Sender] = s
+		return s
 	}
 
 	s, ok := searches[msg.Sender]
@@ -78,9 +82,6 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 			return nil, nil
 		}
 		s = _new(msg.Sender, msg.Find)
-		mu.Lock()
-		searches[msg.Sender] = s
-		mu.Unlock()
 	} else if msg.Find != "/more" {
 		s = _new(msg.Sender, msg.Find)
 	}
