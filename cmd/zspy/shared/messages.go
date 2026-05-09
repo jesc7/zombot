@@ -174,6 +174,8 @@ type Contact struct {
 }
 
 type MessageContacts struct {
-	Find     string    `json:"find"`
-	Contacts []Contact `json:"contacts,omitempty"`
+	MT       MessengerType `json:"mt"`
+	Sender   string        `json:"sender"`
+	Find     string        `json:"find"`
+	Contacts []Contact     `json:"contacts,omitempty"`
 }

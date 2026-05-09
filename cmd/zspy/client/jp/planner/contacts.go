@@ -1,20 +1,21 @@
 package planner
 
-import "time"
+import (
+	"time"
 
-type MessengerType int
-
-const (
-	MT_MAX MessengerType = iota
-	MT_TELEGRAM
+	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
 
-type Search struct {
+type search struct {
 	Until       time.Time
-	MT          MessengerType
+	MT          shared.MessengerType
 	Sender      string
 	Text        string
 	Total, M, N int
 }
 
-var searches map[string]Search
+var searches map[string]search
+
+func Search(msg shared.MessageContacts) []shared.Contact {
+	return nil
+}

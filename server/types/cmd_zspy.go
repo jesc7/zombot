@@ -110,7 +110,7 @@ func getParam(text string) string {
 	return ""
 }
 
-func IsCommand(b *bus.Bus, busName, text string) bool {
+func IsCommand(b *bus.Bus, busName, sender, text string) bool {
 	if isHelp(text) {
 		text = "/help"
 	} else if isPhone(text) {
