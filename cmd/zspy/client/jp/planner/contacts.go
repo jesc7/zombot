@@ -69,6 +69,11 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 		mu.Lock()
 		searches[msg.Sender] = s
 		mu.Unlock()
+
+		go func(ctx context.Context, key string) {
+
+		}(ctx, msg.Sender)
+
 	} else if msg.Find != "/more" {
 		s = _new(msg.Sender, msg.Find)
 	}
