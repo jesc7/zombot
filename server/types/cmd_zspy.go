@@ -175,7 +175,11 @@ func IsCommand(b *bus.Bus, busName, text string) bool {
 		b.Write(BUS_WSSPY, env)
 
 	case "/ci": //инфо о клиентах
-		name := getParam(text)
+		env, e := shared.Pack(shared.TypeMessageContacts, shared.MessageContacts{Find: getParam(text)})
+		if e != nil {
+			break
+		}
+		b.Write(BUS_WSSPY, env)
 
 	default:
 		return false

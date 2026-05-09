@@ -162,10 +162,11 @@ type Contact struct {
 	CID     int64  `json:"cid"`
 	PID     int64  `json:"pid"`
 	Caption string `json:"caption"`
-	Phones  string `json:"phones"`
-	Address string `json:"address"`
+	Phones  string `json:"phones,omitempty"`
+	Address string `json:"address,omitempty"`
 }
 
 type MessageContacts struct {
-	Contacts []Contact `json:"contacts"`
+	Find     string    `json:"find"`
+	Contacts []Contact `json:"contacts,omitempty"`
 }
