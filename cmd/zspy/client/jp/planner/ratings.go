@@ -17,7 +17,7 @@ import (
 Ratings подготавливает различные motivation-рейтинги сотрудников за период
 */
 func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) string {
-	pl, e := duties.DutiesList(ctx, db)
+	pl, e := duties.DutiesList(ctx, db, -31)
 	if e != nil {
 		return ""
 	}

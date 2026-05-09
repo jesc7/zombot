@@ -19,7 +19,7 @@ var (
 	muDL sync.Mutex
 )
 
-func DutiesList(ctx context.Context, db *sql.DB) (*Planner, error) {
+func DutiesList(ctx context.Context, db *sql.DB, start int) (*Planner, error) {
 	muDL.Lock()
 	defer muDL.Unlock()
 
@@ -29,10 +29,10 @@ func DutiesList(ctx context.Context, db *sql.DB) (*Planner, error) {
 		from tabel t
 		left join sp$users u on u.id = t.user_id
 		where t.tabel_type = 5
-		and t.dt between current_date and dateadd(day, 365, current_date)
+		and t.dt between dateadd(day, ?, current_date) and dateadd(day, 365, current_date)
 		group by t.dt
 		order by t.dt
-	`)
+	`, start)
 	if e != nil {
 		return nil, e
 	}
@@ -49,7 +49,7 @@ func DutiesList(ctx context.Context, db *sql.DB) (*Planner, error) {
 }
 
 func Duty(ctx context.Context, db *sql.DB, q shared.DutyQuery) ([]shared.Daily, error) {
-	pl, e := DutiesList(ctx, db)
+	pl, e := DutiesList(ctx, db, 0)
 	if e != nil {
 		return nil, e
 	}
@@ -76,7 +76,7 @@ func Duty(ctx context.Context, db *sql.DB, q shared.DutyQuery) ([]shared.Daily, 
 }
 
 func MissDuties(ctx context.Context, db *sql.DB, cwd string, days int) string {
-	pl, e := DutiesList(ctx, db)
+	pl, e := DutiesList(ctx, db, 0)
 	if e != nil {
 		return ""
 	}
@@ -181,7 +181,7 @@ func TomorrowDuties(ctx context.Context, db *sql.DB) string {
 }
 
 func HolidaysCount(ctx context.Context, db *sql.DB) int {
-	pl, e := DutiesList(ctx, db)
+	pl, e := DutiesList(ctx, db, 0)
 	if e != nil {
 		return 0
 	}

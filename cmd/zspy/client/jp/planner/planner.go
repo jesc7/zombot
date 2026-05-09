@@ -14,7 +14,7 @@ import (
 
 // Absents возвращает список отсутствующих и причину отсутствия
 func Absents(ctx context.Context, db *sql.DB) ([]shared.Absent, error) {
-	pl, e := duties.DutiesList(ctx, db)
+	pl, e := duties.DutiesList(ctx, db, 0)
 	if e != nil {
 		return nil, e
 	}

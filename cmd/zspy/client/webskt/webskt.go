@@ -293,20 +293,32 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 				if time.Now().Weekday() == time.Friday {
 					//weekly ratings
 					var e error
-					log.Println("Ratings begin")
-					defer func() { log.Println("Ratings end:", e) }()
+					log.Println("Ratings weekly begin")
+					defer func() { log.Println("Ratings weekly end:", e) }()
 
 					if s := planner.Ratings(ctx, db, true, time.Now().AddDate(0, 0, -7)); s != "" {
 						var env shared.Envelope
 						if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
 							return
 						}
-						log.Println("MissDuties", env)
+						log.Println("Ratings weekly", env)
 						ws.Write(env)
 					}
 
 					if time.Now().Month() != time.Now().AddDate(0, 0, 7).Month() {
 						//monthly ratings
+						var e error
+						log.Println("Ratings monthly begin")
+						defer func() { log.Println("Ratings monthly end:", e) }()
+
+						if s := planner.Ratings(ctx, db, false, time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC)); s != "" {
+							var env shared.Envelope
+							if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
+								return
+							}
+							log.Println("Ratings monthly", env)
+							ws.Write(env)
+						}
 					}
 				}
 			}()
