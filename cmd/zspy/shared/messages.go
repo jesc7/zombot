@@ -158,6 +158,13 @@ type MessageBirthdays struct {
 	Birthdays []Birthday `json:"birthdays"`
 }
 
+type MessengerType int
+
+const (
+	MT_MAX MessengerType = iota
+	MT_TELEGRAM
+)
+
 type Contact struct {
 	CID     int64  `json:"cid"`
 	PID     int64  `json:"pid"`

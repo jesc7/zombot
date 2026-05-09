@@ -10,8 +10,11 @@ const (
 )
 
 type Search struct {
-	Until  time.Time
-	MT     MessengerType
-	Sender string
-	Text   string
+	Until       time.Time
+	MT          MessengerType
+	Sender      string
+	Text        string
+	Total, M, N int
 }
+
+var searches map[string]Search
