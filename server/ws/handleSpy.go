@@ -242,7 +242,9 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 							fmt.Fprintln(&sb, strings.TrimRight(strings.ReplaceAll(fmt.Sprintf("🔹 %s%s%s\n%s\n", c.Caption, types.Iif(len(strings.Trim(c.Caption, " ")) > 0, ": ", ""), c.Phones, c.Address), "\n\n", "\n"), "\n"))
 						}
 					}
-					sb.WriteString("<b>/more</b>")
+					if !m.Contacts[len(m.Contacts)-1].End {
+						sb.WriteString("<b>/more</b>")
+					}
 				}
 				if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: sb.String()}); e != nil {
 					return

@@ -51,12 +51,24 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 	}
 
 	_new := func(sender, text string) search {
+		go func(ctx context.Context, key, text string) {
+			var cnt int
+			if e := db.QueryRowContext(ctx, "select count(1) from pr_getclients_v3(?)", text).Scan(&cnt); e == nil {
+				mu.Lock()
+				defer mu.Unlock()
+				s := searches[key]
+				s.Total = cnt
+				searches[key] = s
+			}
+		}(ctx, msg.Sender, msg.Find)
+
 		return search{
 			Until:  time.Now().Add(30 * time.Minute),
 			Sender: sender,
 			Text:   text,
 			M:      1,
 			N:      8,
+			Total:  0,
 		}
 	}
 
@@ -69,18 +81,6 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 		mu.Lock()
 		searches[msg.Sender] = s
 		mu.Unlock()
-
-		go func(ctx context.Context, key, text string) {
-			var cnt int
-			if e := db.QueryRowContext(ctx, "select count(1) from pr_getclients_v3(?)", text).Scan(&cnt); e == nil {
-				mu.Lock()
-				defer mu.Unlock()
-				s := searches[key]
-				s.Total = cnt
-				searches[key] = s
-			}
-		}(ctx, msg.Sender, msg.Find)
-
 	} else if msg.Find != "/more" {
 		s = _new(msg.Sender, msg.Find)
 	}
@@ -116,9 +116,17 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 		s.LastPID = res[len(res)-1].PID
 	}
 
-	//end?
-
 	mu.Lock()
+	//end?
+	s2 := searches[msg.Sender]
+	if s2.Total != 0 {
+		if s.Total != s2.Total {
+			s.Total = s2.Total
+		}
+		if len(res) != 0 {
+			res[len(res)-1].End = s.N >= s.Total
+		}
+	}
 	searches[msg.Sender] = s
 	mu.Unlock()
 
