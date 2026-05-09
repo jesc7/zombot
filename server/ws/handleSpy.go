@@ -237,7 +237,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 					if c.PID != id {
 						id = c.PID
 						if sb.Len() != 0 {
-							sb.WriteString("\n__________\n")
+							sb.WriteString("__________\n")
 						}
 						fmt.Fprintln(&sb, strings.TrimRight(strings.ReplaceAll(fmt.Sprintf("🔶 %s\n%s%s\n%s\n", c.Caption, types.Iif(len(strings.Trim(c.Phones, " ")) > 0, "📞 ", ""), c.Phones, c.Address), "\n\n", "\n"), "\n"))
 					} else {
