@@ -220,8 +220,20 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				if e != nil {
 					continue
 				}
+
 				sb := strings.Builder{}
+				var id int64
+				rp := strings.NewReplacer("<", "", ">", "")
 				for _, c := range m.Contacts {
+					c.Caption = rp.Replace(c.Caption)
+					c.Phones = rp.Replace(c.Phones)
+					c.Address = rp.Replace(c.Address)
+
+					if caption := strings.Split(c.Caption, " :: "); len(caption) > 0 && len(strings.Trim(caption[0], " ")) > 0 {
+						caption[0] = "<b>" + caption[0] + "</b>"
+						c.Caption = strings.Join(caption, " :: ")
+					}
+
 					fmt.Fprintf(&sb, "%d.%d %s // %s: %s\n", c.CID, c.PID, c.Caption, c.Address, c.Phones)
 				}
 				sb.WriteString("<b>/more</b>")
