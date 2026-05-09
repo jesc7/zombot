@@ -3,6 +3,7 @@ package planner
 import (
 	"context"
 	"database/sql"
+	"sync"
 	"time"
 
 	"github.com/jesc7/zombot/cmd/zspy/shared"
@@ -16,21 +17,32 @@ type search struct {
 	Total, M, N int
 }
 
-var searches map[string]search
+var (
+	searches map[string]search
+	mu       sync.Mutex
+)
 
 func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shared.Contact, error) {
 	if searches == nil {
 		searches = make(map[string]search)
-		go func() {
+		go func(ctx context.Context) {
 			t1m := time.NewTicker(time.Minute)
 			defer t1m.Stop()
 			for {
 				select {
 				case <-ctx.Done():
 					return
+				case <-t1m.C:
+					for k, v := range searches {
+						if time.Now().After(v.Until) {
+							mu.Lock()
+							delete(searches, k)
+							mu.Unlock()
+						}
+					}
 				}
 			}
-		}()
+		}(ctx)
 	}
 
 	if msg.Sender == "" || msg.Find == "" {
@@ -53,7 +65,9 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 			return nil, nil
 		}
 		s = _new(msg.Sender, msg.Find)
+		mu.Lock()
 		searches[msg.Sender] = s
+		mu.Unlock()
 	} else if msg.Find != "/more" {
 		s = _new(msg.Sender, msg.Find)
 	}
@@ -84,7 +98,12 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 		s.M++
 	}
 	s.N = s.M + 8
+	if len(res) != 0 {
+		s.LastPID = res[len(res)-1].PID
+	}
+	mu.Lock()
 	searches[msg.Sender] = s
+	mu.Unlock()
 
 	return res, nil
 }
