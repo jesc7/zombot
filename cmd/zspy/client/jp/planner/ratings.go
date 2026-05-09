@@ -22,17 +22,17 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		return ""
 	}
 
-	type rt struct {
-		name    string
-		minutes int
-		//j       int
+	type list struct {
+		name  string
+		value int
+		j     int
 	}
 
 	/*
 		_lates возвращает список опоздавших и величину опоздания
 		minutes - период в минутах, который не считается опозданием
 	*/
-	_lates := func(t time.Time, minutes uint) (r []rt) {
+	_lates := func(t time.Time, minutes uint) []list {
 		rows, e := db.Query(`
 			select h.dt, u.username, datediff(second, sc.tfrom, h.time_in)
 			from tabel t
@@ -45,7 +45,7 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 			order by 1,2
 		`, minutes, t)
 		if e != nil {
-			return
+			return nil
 		}
 		defer rows.Close()
 
@@ -57,24 +57,25 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		)
 		for rows.Next() {
 			if e = rows.Scan(&dt, &name, &value); e != nil {
-				return
+				return nil
 			}
 			if _, ok := (*pl)[types.ClearTime(dt)]; !ok { //пропускаем дни с дежурствами
 				m[name] += value
 			}
 		}
+		var res []list
 		for k, v := range m {
-			r = append(r, rt{name: k, minutes: v / 60})
+			res = append(res, list{name: k, value: v / 60})
 		}
-		sort.SliceStable(r, func(i, j int) bool { return r[i].minutes > r[j].minutes })
-		return
+		sort.SliceStable(res, func(i, j int) bool { return res[i].value > res[j].value })
+		return res
 	}
 
 	/*
 		_continuous возвращает список сотрудников и признак опоздал/нет
 		minutes - период в минутах, который не считается опозданием
 	*/
-	_continuous := func(t time.Time, cnt int, minutes uint) (r []rt) {
+	_continuous := func(t time.Time, cnt int, minutes uint) (r []list) {
 		rows, e := db.Query(`
 			select h.dt, u.username, iif(h.time_in <= dateadd(minute, ?, sc.tfrom), 0, 1)
 			from tabel t
@@ -105,26 +106,26 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 				m[name] = v
 			}
 		}
-		var tmp []rt
+		var tmp []list
 		for k, v := range m {
 			if v[1] > 2 {
-				tmp = append(tmp, rt{name: k, minutes: v[0], j: v[1]})
+				tmp = append(tmp, list{name: k, value: v[0], j: v[1]})
 			}
 		}
 
 		if cnt < 0 {
 			for i := range tmp {
-				tmp[i].minutes = tmp[i].j - tmp[i].minutes
+				tmp[i].value = tmp[i].j - tmp[i].value
 			}
 			cnt = -cnt
 		}
 		sort.SliceStable(tmp, func(a, b int) bool {
-			return tmp[a].minutes < tmp[b].minutes || (tmp[a].minutes == tmp[b].minutes && tmp[a].j > tmp[b].j)
+			return tmp[a].value < tmp[b].value || (tmp[a].value == tmp[b].value && tmp[a].j > tmp[b].j)
 		})
 
 		for _, v := range tmp {
-			if v.minutes < cnt {
-				if len(r) == 0 || r[len(r)-1].minutes != v.minutes {
+			if v.value < cnt {
+				if len(r) == 0 || r[len(r)-1].value != v.value {
 					r = append(r, v)
 				} else {
 					r[len(r)-1].name += ", " + v.name
@@ -137,7 +138,7 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 	/*
 		_maxWorker возвращает список сотрудников и величину переработки в минутах согласно рабочего расписания сотрудника
 	*/
-	_maxWorker := func(t time.Time) (r []rt) {
+	_maxWorker := func(t time.Time) (r []list) {
 		rows, e := db.Query(`
 			select a.dt, a.username, sum(datediff(minute, a.tin, a.tout) - datediff(minute, a.tfrom, a.tto))
 			from (
@@ -180,9 +181,9 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		}
 		for k, v := range n {
 			sort.SliceStable(v, func(i, j int) bool { return v[i] < v[j] })
-			r = append(r, rt{name: strings.Join(v, ", "), minutes: k})
+			r = append(r, list{name: strings.Join(v, ", "), value: k})
 		}
-		sort.SliceStable(r, func(i, j int) bool { return r[i].minutes > r[j].minutes })
+		sort.SliceStable(r, func(i, j int) bool { return r[i].value > r[j].value })
 		return
 	}
 
@@ -190,7 +191,7 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		_edited возвращает список сотрудников и число исправлений времени начала работы в табеле
 		minutes - период в минутах, который не считается за исправление
 	*/
-	_edited := func(t time.Time, minutes uint) (r []rt) {
+	_edited := func(t time.Time, minutes uint) (r []list) {
 		rows, e := db.Query(`
 			select b.dt, b.username, sum(b.d1)
 			from (
@@ -235,9 +236,9 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		}
 		for k, v := range n {
 			sort.SliceStable(v, func(i, j int) bool { return v[i] < v[j] })
-			r = append(r, rt{name: strings.Join(v, ", "), minutes: k})
+			r = append(r, list{name: strings.Join(v, ", "), value: k})
 		}
-		sort.SliceStable(r, func(i, j int) bool { return r[i].minutes > r[j].minutes })
+		sort.SliceStable(r, func(i, j int) bool { return r[i].value > r[j].value })
 		return
 	}
 
@@ -245,13 +246,13 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 	r := _continuous(start, 5, 5) //опоздания до 5 минут не считаются
 	if len(r) != 0 {
 		var s string
-		switch r[0].minutes {
+		switch r[0].value {
 		case 0:
 			s = "без опозданий"
 		case 1:
 			s = "1 опоздание"
 		case 2, 3, 4:
-			s = strconv.Itoa(r[0].minutes) + " опоздания"
+			s = strconv.Itoa(r[0].value) + " опоздания"
 		case 5:
 			s = "5 опозданий"
 		}
@@ -263,13 +264,13 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 	r = _continuous(start, -5, 5) //опоздания до 5 минут не считаются
 	if len(r) != 0 {
 		var s string
-		switch r[0].minutes {
+		switch r[0].value {
 		case 0:
 			s = "опоздал(а) вообще везде"
 		case 1:
 			s = "1 день без опозданий"
 		case 2, 3, 4:
-			s = strconv.Itoa(r[0].minutes) + " дня без опозданий"
+			s = strconv.Itoa(r[0].value) + " дня без опозданий"
 		case 5:
 			s = "5 дней без опозданий"
 		}
@@ -280,17 +281,17 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 
 	r = _lates(start, 5) //опоздания до 5 минут не считаются
 	if len(r) != 0 {
-		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Засоня %s'</b>\n%s (%d мин. опозданий)", funcs.Iif(weekly == 0, "недели", "месяца"), r[0].name, r[0].minutes)
+		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Засоня %s'</b>\n%s (%d мин. опозданий)", funcs.Iif(weekly == 0, "недели", "месяца"), r[0].name, r[0].value)
 	}
 
 	r = _maxWorker(start) //величина переработки в минутах
 	if len(r) != 0 {
-		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Переработник %s'</b>\n%s (%+d мин.)", funcs.Iif(weekly == 0, "недели", "месяца"), r[0].name, r[0].minutes)
+		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Переработник %s'</b>\n%s (%+d мин.)", funcs.Iif(weekly == 0, "недели", "месяца"), r[0].name, r[0].value)
 	}
 
 	r = _edited(start, 5) //гэп 5 минут не считается за редактирование
 	if len(r) != 0 {
-		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Гений фотошопа'</b>\n%s (%d исправлений)", r[0].name, r[0].minutes)
+		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Гений фотошопа'</b>\n%s (%d исправлений)", r[0].name, r[0].value)
 	}
 	return
 }
