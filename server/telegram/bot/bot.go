@@ -130,7 +130,6 @@ out:
 					return
 				}
 				//отсеиваем команды
-				update.Message.From.ID
 				if types.IsCommand(b.b, types.BUS_BOTTG, strconv.FormatInt(update.Message.From.ID, 10), update.Message.Text) {
 					return
 				}

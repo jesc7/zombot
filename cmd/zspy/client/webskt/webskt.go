@@ -124,6 +124,21 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 					continue
 				}
 				ws.Write(env)
+
+			case shared.TypeMessageContacts:
+				pay, e := shared.Unpack[shared.MessageContacts](env)
+				if e != nil {
+					continue
+				}
+				pay.Contacts, e = planner.Search(ctx, db, pay)
+				if e != nil {
+					continue
+				}
+				env, e = shared.Pack(env.Type, pay)
+				if e != nil {
+					continue
+				}
+				ws.Write(env)
 			}
 		}
 	}()
