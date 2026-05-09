@@ -235,12 +235,14 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 					}
 
 					if c.PID != id {
-
+						id = c.PID
+						if sb.Len() != 0 {
+							sb.WriteString("\n__________\n")
+						}
+						fmt.Fprintln(&sb, strings.TrimRight(strings.ReplaceAll(fmt.Sprintf("🔶 %s\n%s%s\n%s\n", c.Caption, types.Iif(len(strings.Trim(c.Phones, " ")) > 0, "📞 ", ""), c.Phones, c.Address), "\n\n", "\n"), "\n"))
 					} else {
-						fmt.Fprint(&sb, strings.TrimRight(strings.ReplaceAll(fmt.Sprintf("🔹 %s%s%s\n%s\n", c.Caption, types.Iif(len(strings.Trim(c.Caption, " ")) > 0, ": ", ""), c.Phones, c.Address), "\n\n", "\n"), "\n"))
+						fmt.Fprintln(&sb, strings.TrimRight(strings.ReplaceAll(fmt.Sprintf("🔹 %s%s%s\n%s\n", c.Caption, types.Iif(len(strings.Trim(c.Caption, " ")) > 0, ": ", ""), c.Phones, c.Address), "\n\n", "\n"), "\n"))
 					}
-
-					fmt.Fprintf(&sb, "%d.%d %s // %s: %s\n", c.CID, c.PID, c.Caption, c.Address, c.Phones)
 				}
 				sb.WriteString("<b>/more</b>")
 				env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{

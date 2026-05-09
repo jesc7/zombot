@@ -12,6 +12,7 @@ type search struct {
 	Until       time.Time
 	Sender      string
 	Text        string
+	LastPID     int64
 	Total, M, N int
 }
 
