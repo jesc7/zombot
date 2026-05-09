@@ -166,8 +166,9 @@ const (
 )
 
 type Contact struct {
-	CID     int64  `json:"cid"`
+	LastPID int64  `json:"last_pid,omitempty"`
 	PID     int64  `json:"pid"`
+	CID     int64  `json:"cid"`
 	Caption string `json:"caption"`
 	Phones  string `json:"phones,omitempty"`
 	Address string `json:"address,omitempty"`

@@ -190,10 +190,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				default:
 					m.Text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", m.Caption, m.Text)
 				}
-				env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{
-					Text: m.Text,
-				})
-				if e != nil {
+				if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: m.Text}); e != nil {
 					return
 				}
 
@@ -208,13 +205,11 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				if m.Region != "" {
 					text += "\n" + m.Region
 				}
-				env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{
-					Text: text,
-				})
-				if e != nil {
+				if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: text}); e != nil {
 					return
 				}
 
+			//контакты
 			case shared.TypeMessageContacts:
 				m, e := shared.Unpack[shared.MessageContacts](env)
 				if e != nil {
@@ -222,33 +217,34 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				}
 
 				sb := strings.Builder{}
-				var id int64
-				rp := strings.NewReplacer("<", "", ">", "")
-				for _, c := range m.Contacts {
-					c.Caption = rp.Replace(c.Caption)
-					c.Phones = rp.Replace(c.Phones)
-					c.Address = rp.Replace(c.Address)
+				if len(m.Contacts) == 0 {
+					sb.WriteString("Контакты не найдены")
+				} else {
+					var id int64
+					rp := strings.NewReplacer("<", "", ">", "")
+					for _, c := range m.Contacts {
+						c.Caption = rp.Replace(c.Caption)
+						c.Phones = rp.Replace(c.Phones)
+						c.Address = rp.Replace(c.Address)
 
-					if caption := strings.Split(c.Caption, " :: "); len(caption) > 0 && len(strings.Trim(caption[0], " ")) > 0 {
-						caption[0] = "<b>" + caption[0] + "</b>"
-						c.Caption = strings.Join(caption, " :: ")
-					}
-
-					if c.PID != id {
-						id = c.PID
-						if sb.Len() != 0 {
-							sb.WriteString("__________\n")
+						if caption := strings.Split(c.Caption, " :: "); len(caption) > 0 && len(strings.Trim(caption[0], " ")) > 0 {
+							caption[0] = "<b>" + caption[0] + "</b>"
+							c.Caption = strings.Join(caption, " :: ")
 						}
-						fmt.Fprintln(&sb, strings.TrimRight(strings.ReplaceAll(fmt.Sprintf("🔶 %s\n%s%s\n%s\n", c.Caption, types.Iif(len(strings.Trim(c.Phones, " ")) > 0, "📞 ", ""), c.Phones, c.Address), "\n\n", "\n"), "\n"))
-					} else {
-						fmt.Fprintln(&sb, strings.TrimRight(strings.ReplaceAll(fmt.Sprintf("🔹 %s%s%s\n%s\n", c.Caption, types.Iif(len(strings.Trim(c.Caption, " ")) > 0, ": ", ""), c.Phones, c.Address), "\n\n", "\n"), "\n"))
+
+						if c.PID != id {
+							id = c.PID
+							if sb.Len() != 0 {
+								sb.WriteString("__________\n")
+							}
+							fmt.Fprintln(&sb, strings.TrimRight(strings.ReplaceAll(fmt.Sprintf("🔶 %s\n%s%s\n%s\n", c.Caption, types.Iif(len(strings.Trim(c.Phones, " ")) > 0, "📞 ", ""), c.Phones, c.Address), "\n\n", "\n"), "\n"))
+						} else {
+							fmt.Fprintln(&sb, strings.TrimRight(strings.ReplaceAll(fmt.Sprintf("🔹 %s%s%s\n%s\n", c.Caption, types.Iif(len(strings.Trim(c.Caption, " ")) > 0, ": ", ""), c.Phones, c.Address), "\n\n", "\n"), "\n"))
+						}
 					}
+					sb.WriteString("<b>/more</b>")
 				}
-				sb.WriteString("<b>/more</b>")
-				env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{
-					Text: sb.String(),
-				})
-				if e != nil {
+				if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: sb.String()}); e != nil {
 					return
 				}
 			}
