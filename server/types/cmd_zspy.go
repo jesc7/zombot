@@ -27,7 +27,7 @@ var (
 	reAbsent   = regexp.MustCompile(`(?i)отсутств[а-я]*`)
 	reBirthday = regexp.MustCompile(`(?i)(?:день|дни) рожд[а-я]*(?:\s+(?P<days>\d+))?`)
 	rePhone    = regexp.MustCompile(`^(?:\+?\d[\-\s]?\(?\s?\d{3,5}\s?\)?[\-\s]?)?(?:\d[\-\s]?){4,6}\d$`)
-	reClient   = regexp.MustCompile(`^клиент(?:\s+(?P<name>.+))$`)
+	reClient   = regexp.MustCompile(`^(?:клиент)|(?:\/ci)(?:\s+(?P<name>.+))$`)
 )
 
 func findCommand(re *regexp.Regexp, value string) (bool, map[string]string) {
@@ -95,7 +95,7 @@ func getCommand(text string) (string, bool) {
 		if strings.Contains(text, ":") {
 			return strings.Split(text, ":")[0], true
 		}
-		return strings.Split(text, " ")[0], true
+		return text, true
 	}
 	return "", false
 }
@@ -115,11 +115,13 @@ func IsCommand(b *bus.Bus, busName, text string) bool {
 		text = "/help"
 	} else if isPhone(text) {
 		text = "/ci:" + text
-	} else if duty, name, days := isDuty(text); duty {
+	} else if b, name := isClient(text); b {
+		text = "/ci:" + name
+	} else if b, name, days := isDuty(text); b {
 		text = fmt.Sprintf("/duty:%s#%d", name, days)
 	} else if isAbsent(text) {
 		text = "/absent"
-	} else if bd, days := isBirthday(text); bd {
+	} else if b, days := isBirthday(text); b {
 		text = fmt.Sprintf("/birthday:%d", days)
 	}
 	cmd, ok := getCommand(text)
@@ -173,6 +175,7 @@ func IsCommand(b *bus.Bus, busName, text string) bool {
 		b.Write(BUS_WSSPY, env)
 
 	case "/ci": //инфо о клиентах
+		name := getParam(text)
 
 	default:
 		return false
