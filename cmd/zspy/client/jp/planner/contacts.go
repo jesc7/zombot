@@ -17,6 +17,9 @@ type search struct {
 var searches = make(map[string]search)
 
 func Search(msg shared.MessageContacts) []shared.Contact {
-
+	s, ok := searches[msg.Sender]
+	if !ok && msg.Find == "/more" {
+		return nil
+	}
 	return nil
 }

@@ -184,6 +184,16 @@ func IsCommand(b *bus.Bus, busName, sender, text string) bool {
 		}
 		b.Write(BUS_WSSPY, env)
 
+	case "/more": //инфо о клиентах - продолжение
+		env, e := shared.Pack(shared.TypeMessageContacts, shared.MessageContacts{
+			Sender: fmt.Sprintf("%s#%s", busName, sender),
+			Find:   cmd,
+		})
+		if e != nil {
+			break
+		}
+		b.Write(BUS_WSSPY, env)
+
 	default:
 		return false
 	}
