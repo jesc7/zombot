@@ -26,6 +26,7 @@ var (
 	reDuty     = regexp.MustCompile(`(?i)^дежур[а-я]*(?:(?:\s+(?P<name>[а-я]+))?(?:\s+(?P<days>\d+))?)?$`)
 	reAbsent   = regexp.MustCompile(`(?i)отсутств[а-я]*`)
 	reBirthday = regexp.MustCompile(`(?i)(?:день|дни) рожд[а-я]*(?:\s+(?P<days>\d+))?`)
+	rePhone    = regexp.MustCompile(`(?:\+?\d[\-\s]?\(?\s?\d{3,5}\s?\)?[\-\s]?)?(?:\d[\-\s]?){4,6}\d`)
 )
 
 func findCommand(re *regexp.Regexp, value string) (bool, map[string]string) {
