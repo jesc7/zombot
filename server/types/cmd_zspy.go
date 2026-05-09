@@ -86,7 +86,7 @@ func getCommand(text string) (string, bool) {
 		if strings.Contains(text, ":") {
 			return strings.Split(text, ":")[0], true
 		}
-		return text, true
+		return strings.Split(text, " ")[0], true
 	}
 	return "", false
 }
