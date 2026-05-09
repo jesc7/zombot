@@ -72,7 +72,7 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 		}
 		mu.Lock()
 		defer mu.Unlock()
-		searches[msg.Sender] = s
+		searches[sender] = s
 		return s
 	}
 
