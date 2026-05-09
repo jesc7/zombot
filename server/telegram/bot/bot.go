@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	tg "github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
@@ -129,7 +130,8 @@ out:
 					return
 				}
 				//отсеиваем команды
-				if types.IsCommand(b.b, types.BUS_BOTTG, update.Message.Text) {
+				update.Message.From.ID
+				if types.IsCommand(b.b, types.BUS_BOTTG, strconv.FormatInt(update.Message.From.ID, 10), update.Message.Text) {
 					return
 				}
 

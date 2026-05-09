@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	max "github.com/max-messenger/max-bot-api-client-go"
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
@@ -108,7 +109,7 @@ out:
 						return
 					}
 					//отсеиваем команды
-					if types.IsCommand(b.b, types.BUS_BOTMAX, upd.Message.Body.Text) {
+					if types.IsCommand(b.b, types.BUS_BOTMAX, strconv.FormatInt(upd.Message.Sender.UserId, 10), upd.Message.Body.Text) {
 						return
 					}
 

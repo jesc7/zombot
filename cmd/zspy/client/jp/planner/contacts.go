@@ -14,8 +14,9 @@ type search struct {
 	Total, M, N int
 }
 
-var searches map[string]search
+var searches = make(map[string]search)
 
 func Search(msg shared.MessageContacts) []shared.Contact {
+
 	return nil
 }
