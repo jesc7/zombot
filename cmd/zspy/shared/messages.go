@@ -159,11 +159,11 @@ type MessageBirthdays struct {
 }
 
 type Contact struct {
-	CID     int64
-	PID     int64
-	Caption string
-	Phones  string
-	Address string
+	CID     int64  `json:"cid"`
+	PID     int64  `json:"pid"`
+	Caption string `json:"caption"`
+	Phones  string `json:"phones"`
+	Address string `json:"address"`
 }
 
 type MessageContacts struct {
