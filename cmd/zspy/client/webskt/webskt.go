@@ -42,9 +42,11 @@ func (ws *WebSocketClient) Write(env shared.Envelope) {
 	ws.ch <- env
 }
 
-func (ws *WebSocketClient) SearchContacts(text string) []shared.Contact {
-	defer recover()
-	ws.ch <- env
+func (ws *WebSocketClient) SearchContacts(ctx context.Context, text string) ([]shared.Contact, error) {
+	return planner.Search(ctx, ws.db, shared.MessageContacts{
+		Sender: "WebSocketClient",
+		Find:   text,
+	})
 }
 
 func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) (e error) {

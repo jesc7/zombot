@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jesc7/zombot/cmd/zspy/client/jp/planner"
 	"github.com/jesc7/zombot/cmd/zspy/client/phones"
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/client/webskt"
@@ -39,11 +38,12 @@ func NewWebServer(ctx context.Context, cfg types.Config, cwd string, skt *webskt
 			return
 		}
 
+		contacts, _ := skt.SearchContacts(ctx, phone)
 		env, _ := shared.Pack(shared.TypeMessageCall, shared.MessageCall{
 			Prefix:   types.Iif(strings.HasPrefix(v[0], "8800 "), "8800", ""),
 			Phone:    phone,
 			Region:   phones.FindByPhone(cwd, phone),
-			Contacts: planner.Search(),
+			Contacts: contacts,
 		})
 		skt.Write(env)
 	})

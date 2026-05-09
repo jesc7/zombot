@@ -202,6 +202,9 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				}
 
 				text := fmt.Sprintf("📞 Вам звонили%s: <b>%s</b>\n", types.Iif(m.Prefix != "", " на "+m.Prefix, ""), m.Phone)
+				if len(m.Contacts) == 0 {
+					text += "\nКлиент не найден"
+				}
 				if m.Region != "" {
 					text += "\n" + m.Region
 				}
