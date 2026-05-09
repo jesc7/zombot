@@ -237,9 +237,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 					if c.PID != id {
 
 					} else {
-						ch.Info = append(ch.Info, strings.TrimRight(strings.ReplaceAll("🔹 "+caption+funcs.Iif(len(strings.Trim(caption, " ")) > 0, ": ", "")+phones+"\n"+address+"\n", "\n\n", "\n"), "\n"))
-						s :=strings.TrimRight(strings.ReplaceAll(fmt.Sprintf(""), "\n\n", "\n"), "\n")
-						fmt.Fprintf(&sb, strings.TrimRight(strings.ReplaceAll("%d.%d %s // %s: %s\n", c.CID, c.PID, c.Caption, c.Address, c.Phones), "\n\n", "\n"), "\n"))
+						fmt.Fprint(&sb, strings.TrimRight(strings.ReplaceAll(fmt.Sprintf("🔹 %s%s%s\n%s\n", c.Caption, types.Iif(len(strings.Trim(c.Caption, " ")) > 0, ": ", ""), c.Phones, c.Address), "\n\n", "\n"), "\n"))
 					}
 
 					fmt.Fprintf(&sb, "%d.%d %s // %s: %s\n", c.CID, c.PID, c.Caption, c.Address, c.Phones)
