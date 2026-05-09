@@ -42,6 +42,11 @@ func (ws *WebSocketClient) Write(env shared.Envelope) {
 	ws.ch <- env
 }
 
+func (ws *WebSocketClient) SearchContacts(text string) []shared.Contact {
+	defer recover()
+	ws.ch <- env
+}
+
 func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) (e error) {
 	ws.db, e = sql.Open(cfg.DB.Driver, cfg.DB.ConnStr)
 	if e != nil {
