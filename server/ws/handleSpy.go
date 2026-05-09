@@ -138,7 +138,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 
 				sb := strings.Builder{}
 				if len(m.Birthdays) == 0 {
-					sb.WriteString(fmt.Sprintf("☹ В ближайшие %d дней нет ДР", m.Days))
+					fmt.Fprintf(&sb, "☹ В ближайшие %d дней нет ДР", m.Days)
 				} else {
 					today := ctypes.ClearTime(time.Now())
 					bdToday, bdAfter := []string{}, []string{}
@@ -220,7 +220,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				if len(m.Contacts) == 0 {
 					sb.WriteString("Контакты не найдены")
 				} else {
-					var id int64
+					id := m.Contacts[0].LastPID
 					rp := strings.NewReplacer("<", "", ">", "")
 					for _, c := range m.Contacts {
 						c.Caption = rp.Replace(c.Caption)
@@ -235,7 +235,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 						if c.PID != id {
 							id = c.PID
 							if sb.Len() != 0 {
-								sb.WriteString("__________\n")
+								sb.WriteString("__________\n\n")
 							}
 							fmt.Fprintln(&sb, strings.TrimRight(strings.ReplaceAll(fmt.Sprintf("🔶 %s\n%s%s\n%s\n", c.Caption, types.Iif(len(strings.Trim(c.Phones, " ")) > 0, "📞 ", ""), c.Phones, c.Address), "\n\n", "\n"), "\n"))
 						} else {

@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 )
 
@@ -89,6 +90,7 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 			continue
 		}
 		res = append(res, shared.Contact{
+			LastPID: types.Iif(len(res) == 0, s.LastPID, 0),
 			CID:     cid,
 			PID:     pid,
 			Caption: caption,
