@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/jesc7/zombot/cmd/zspy/client/jp/duties"
+	"github.com/jesc7/zombot/cmd/zspy/client/types"
 )
 
 /*
@@ -22,9 +23,9 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 	}
 
 	type rt struct {
-		s string
-		i int
-		j int
+		name    string
+		minutes int
+		//j       int
 	}
 
 	/*
@@ -58,14 +59,14 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 			if e = rows.Scan(&dt, &name, &value); e != nil {
 				return
 			}
-			if _, ok := (*pl)[time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.Local)]; !ok { //пропускаем дни с дежурствами
+			if _, ok := (*pl)[types.ClearTime(dt)]; !ok { //пропускаем дни с дежурствами
 				m[name] += value
 			}
 		}
 		for k, v := range m {
-			r = append(r, rt{s: k, i: v / 60})
+			r = append(r, rt{name: k, minutes: v / 60})
 		}
-		sort.SliceStable(r, func(i, j int) bool { return r[i].i > r[j].i })
+		sort.SliceStable(r, func(i, j int) bool { return r[i].minutes > r[j].minutes })
 		return
 	}
 
@@ -107,24 +108,26 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		var tmp []rt
 		for k, v := range m {
 			if v[1] > 2 {
-				tmp = append(tmp, rt{s: k, i: v[0], j: v[1]})
+				tmp = append(tmp, rt{name: k, minutes: v[0], j: v[1]})
 			}
 		}
 
 		if cnt < 0 {
 			for i := range tmp {
-				tmp[i].i = tmp[i].j - tmp[i].i
+				tmp[i].minutes = tmp[i].j - tmp[i].minutes
 			}
 			cnt = -cnt
 		}
-		sort.SliceStable(tmp, func(a, b int) bool { return tmp[a].i < tmp[b].i || (tmp[a].i == tmp[b].i && tmp[a].j > tmp[b].j) })
+		sort.SliceStable(tmp, func(a, b int) bool {
+			return tmp[a].minutes < tmp[b].minutes || (tmp[a].minutes == tmp[b].minutes && tmp[a].j > tmp[b].j)
+		})
 
 		for _, v := range tmp {
-			if v.i < cnt {
-				if len(r) == 0 || r[len(r)-1].i != v.i {
+			if v.minutes < cnt {
+				if len(r) == 0 || r[len(r)-1].minutes != v.minutes {
 					r = append(r, v)
 				} else {
-					r[len(r)-1].s += ", " + v.s
+					r[len(r)-1].name += ", " + v.name
 				}
 			}
 		}
@@ -177,9 +180,9 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		}
 		for k, v := range n {
 			sort.SliceStable(v, func(i, j int) bool { return v[i] < v[j] })
-			r = append(r, rt{s: strings.Join(v, ", "), i: k})
+			r = append(r, rt{name: strings.Join(v, ", "), minutes: k})
 		}
-		sort.SliceStable(r, func(i, j int) bool { return r[i].i > r[j].i })
+		sort.SliceStable(r, func(i, j int) bool { return r[i].minutes > r[j].minutes })
 		return
 	}
 
@@ -232,9 +235,9 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		}
 		for k, v := range n {
 			sort.SliceStable(v, func(i, j int) bool { return v[i] < v[j] })
-			r = append(r, rt{s: strings.Join(v, ", "), i: k})
+			r = append(r, rt{name: strings.Join(v, ", "), minutes: k})
 		}
-		sort.SliceStable(r, func(i, j int) bool { return r[i].i > r[j].i })
+		sort.SliceStable(r, func(i, j int) bool { return r[i].minutes > r[j].minutes })
 		return
 	}
 
@@ -242,52 +245,52 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 	r := _continuous(start, 5, 5) //опоздания до 5 минут не считаются
 	if len(r) != 0 {
 		var s string
-		switch r[0].i {
+		switch r[0].minutes {
 		case 0:
 			s = "без опозданий"
 		case 1:
 			s = "1 опоздание"
 		case 2, 3, 4:
-			s = strconv.Itoa(r[0].i) + " опоздания"
+			s = strconv.Itoa(r[0].minutes) + " опоздания"
 		case 5:
 			s = "5 опозданий"
 		}
 		if len(s) != 0 {
-			res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Человек-загадка'</b>\n%s (%s)", r[0].s, s)
+			res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Человек-загадка'</b>\n%s (%s)", r[0].name, s)
 		}
 	}
 
 	r = _continuous(start, -5, 5) //опоздания до 5 минут не считаются
 	if len(r) != 0 {
 		var s string
-		switch r[0].i {
+		switch r[0].minutes {
 		case 0:
 			s = "опоздал(а) вообще везде"
 		case 1:
 			s = "1 день без опозданий"
 		case 2, 3, 4:
-			s = strconv.Itoa(r[0].i) + " дня без опозданий"
+			s = strconv.Itoa(r[0].minutes) + " дня без опозданий"
 		case 5:
 			s = "5 дней без опозданий"
 		}
 		if len(s) != 0 {
-			res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Слава богу, ты пришел'</b>\n%s (%s)", r[0].s, s)
+			res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Слава богу, ты пришел'</b>\n%s (%s)", r[0].name, s)
 		}
 	}
 
 	r = _lates(start, 5) //опоздания до 5 минут не считаются
 	if len(r) != 0 {
-		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Засоня %s'</b>\n%s (%d мин. опозданий)", funcs.Iif(weekly == 0, "недели", "месяца"), r[0].s, r[0].i)
+		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Засоня %s'</b>\n%s (%d мин. опозданий)", funcs.Iif(weekly == 0, "недели", "месяца"), r[0].name, r[0].minutes)
 	}
 
 	r = _maxWorker(start) //величина переработки в минутах
 	if len(r) != 0 {
-		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Переработник %s'</b>\n%s (%+d мин.)", funcs.Iif(weekly == 0, "недели", "месяца"), r[0].s, r[0].i)
+		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Переработник %s'</b>\n%s (%+d мин.)", funcs.Iif(weekly == 0, "недели", "месяца"), r[0].name, r[0].minutes)
 	}
 
 	r = _edited(start, 5) //гэп 5 минут не считается за редактирование
 	if len(r) != 0 {
-		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Гений фотошопа'</b>\n%s (%d исправлений)", r[0].s, r[0].i)
+		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Гений фотошопа'</b>\n%s (%d исправлений)", r[0].name, r[0].minutes)
 	}
 	return
 }
