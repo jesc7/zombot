@@ -62,7 +62,7 @@ const (
 	TypeMessageCall        = "message_call"
 	TypeMessageAbsents     = "message_absents"
 	TypeMessageBirthdays   = "message_birthdays"
-	TypeMessageClients     = "message_clients"
+	TypeMessageContacts    = "message_contacts"
 )
 
 type MessageText struct {
@@ -156,4 +156,16 @@ type Birthday struct {
 type MessageBirthdays struct {
 	Days      int        `json:"days"`
 	Birthdays []Birthday `json:"birthdays"`
+}
+
+type Contact struct {
+	CID     int64
+	PID     int64
+	Caption string
+	Phones  string
+	Address string
+}
+
+type MessageContacts struct {
+	Contacts []Contact `json:"contacts"`
 }
