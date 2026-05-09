@@ -62,6 +62,7 @@ const (
 	TypeMessageCall        = "message_call"
 	TypeMessageAbsents     = "message_absents"
 	TypeMessageBirthdays   = "message_birthdays"
+	TypeMessageClients     = "message_clients"
 )
 
 type MessageText struct {
@@ -155,18 +156,4 @@ type Birthday struct {
 type MessageBirthdays struct {
 	Days      int        `json:"days"`
 	Birthdays []Birthday `json:"birthdays"`
-}
-
-type CPCore struct {
-	Source     string `json:"source"`
-	MessageUID string `json:"message_uid"`
-}
-
-type MessageCrossPosting struct {
-	CPCore
-	ChatID      int64  `json:"chat_id"`
-	ChatCaption int64  `json:"chat_caption"`
-	UserUID     string `json:"user_uid"`
-	UserName    string `json:"user_name"`
-	Text        string `json:"text"`
 }
