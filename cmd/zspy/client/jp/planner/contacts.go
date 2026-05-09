@@ -17,7 +17,7 @@ type search struct {
 
 var searches = make(map[string]search)
 
-func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) []shared.Contact {
+func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shared.Contact, error) {
 	_new := func(sender, text string) search {
 		return search{
 			Until:  time.Now().Add(30 * time.Minute),
@@ -31,7 +31,7 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) []share
 	s, ok := searches[msg.Sender]
 	if !ok {
 		if msg.Find == "/more" {
-			return nil
+			return nil, nil
 		}
 		s = _new(msg.Sender, msg.Find)
 		searches[msg.Sender] = s
@@ -45,8 +45,27 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) []share
 		rows ? to ?
 	`, s.Text, s.M, s.N)
 	if e != nil {
-		return nil
+		return nil, e
 	}
+	defer rows.Close()
 
-	return nil
+	var res []shared.Contact
+	for rows.Next() {
+		pid, cid, caption, phones, address := int64(0), int64(0), "", "", ""
+		if e = rows.Scan(&pid, &cid, &caption, &phones, &address); e != nil {
+			continue
+		}
+		res = append(res, shared.Contact{
+			CID:     cid,
+			PID:     pid,
+			Caption: caption,
+			Phones:  phones,
+			Address: address,
+		})
+		s.M++
+	}
+	s.N = s.M + 8
+	searches[msg.Sender] = s
+
+	return res, nil
 }
