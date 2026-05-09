@@ -220,8 +220,12 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				if e != nil {
 					continue
 				}
+				sb := strings.Builder{}
+				for _, c := range m.Contacts {
+					_ = c
+				}
 				env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{
-					Text: m.Find,
+					Text: sb.String(),
 				})
 				if e != nil {
 					return
