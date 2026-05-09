@@ -292,6 +292,18 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config, db *sql
 			go func() { //ratings
 				if time.Now().Weekday() == time.Friday {
 					//weekly ratings
+					var e error
+					log.Println("Ratings begin")
+					defer func() { log.Println("Ratings end:", e) }()
+
+					if s := planner.Ratings(ctx, db, true, time.Now().AddDate(0, 0, -7)); s != "" {
+						var env shared.Envelope
+						if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
+							return
+						}
+						log.Println("MissDuties", env)
+						ws.Write(env)
+					}
 
 					if time.Now().Month() != time.Now().AddDate(0, 0, 7).Month() {
 						//monthly ratings

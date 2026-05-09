@@ -33,7 +33,7 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		minutes - период в минутах, который не считается опозданием
 	*/
 	_lates := func(t time.Time, minutes uint) []list {
-		rows, e := db.Query(`
+		rows, e := db.QueryContext(ctx, `
 			select h.dt, u.username, datediff(second, sc.tfrom, h.time_in)
 			from tabel t
 			join tabel_history h on h.user_id = t.user_id and h.dt = t.dt
@@ -76,7 +76,7 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		minutes - период в минутах, который не считается опозданием
 	*/
 	_continuous := func(t time.Time, cnt int, minutes uint) []list {
-		rows, e := db.Query(`
+		rows, e := db.QueryContext(ctx, `
 			select h.dt, u.username, iif(h.time_in <= dateadd(minute, ?, sc.tfrom), 0, 1)
 			from tabel t
 			join tabel_history h on h.user_id = t.user_id and h.dt = t.dt
@@ -144,7 +144,7 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		_maxWorker возвращает список сотрудников и величину переработки в минутах согласно рабочего расписания сотрудника
 	*/
 	_maxWorker := func(t time.Time) []list {
-		rows, e := db.Query(`
+		rows, e := db.QueryContext(ctx, `
 			select a.dt, a.username, sum(datediff(minute, a.tin, a.tout) - datediff(minute, a.tfrom, a.tto))
 			from (
 				select min(h.time_in) as tin, max(h.time_out) as tout, h.dt, u.username, s.tfrom, s.tto
@@ -198,7 +198,7 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		minutes - период в минутах, который не считается за исправление
 	*/
 	_edited := func(t time.Time, minutes uint) []list {
-		rows, e := db.Query(`
+		rows, e := db.QueryContext(ctx, `
 			select b.dt, b.username, sum(b.d1)
 			from (
 				select a.dt, a.username, iif(abs(datediff(minute, t, coalesce(tin, t))) > ?,1,0) as d1, iif(abs(datediff(minute, t, coalesce(tout, t))) > 1,1,0) as d2
