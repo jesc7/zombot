@@ -92,6 +92,9 @@ func isBirthday(value string) (bool, int) {
 
 func getCommand(text string) (string, bool) {
 	if strings.Index(text, "/") == 0 {
+		if strings.Contains(text, "@") {
+			return strings.Split(text, "@")[0], true
+		}
 		if strings.Contains(text, ":") {
 			return strings.Split(text, ":")[0], true
 		}
