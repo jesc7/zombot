@@ -143,7 +143,7 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 	/*
 		_maxWorker возвращает список сотрудников и величину переработки в минутах согласно рабочего расписания сотрудника
 	*/
-	_maxWorker := func(t time.Time) (r []list) {
+	_maxWorker := func(t time.Time) []list {
 		rows, e := db.Query(`
 			select a.dt, a.username, sum(datediff(minute, a.tin, a.tout) - datediff(minute, a.tfrom, a.tto))
 			from (
@@ -159,7 +159,7 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 			order by 1 desc
 		`, t)
 		if e != nil {
-			return
+			return nil
 		}
 		defer rows.Close()
 
@@ -171,9 +171,9 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 		)
 		for rows.Next() {
 			if e = rows.Scan(&dt, &name, &value); e != nil {
-				return
+				return nil
 			}
-			if _, ok := pl[time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.Local)]; !ok { //пропускаем дни с дежурствами
+			if _, ok := (*pl)[types.ClearTime(dt)]; !ok { //пропускаем дни с дежурствами
 				m[name] += value
 			}
 		}
@@ -184,19 +184,20 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 			item = append(item, k)
 			n[v] = item
 		}
+		var res []list
 		for k, v := range n {
 			sort.SliceStable(v, func(i, j int) bool { return v[i] < v[j] })
-			r = append(r, list{name: strings.Join(v, ", "), value: k})
+			res = append(res, list{name: strings.Join(v, ", "), value: k})
 		}
-		sort.SliceStable(r, func(i, j int) bool { return r[i].value > r[j].value })
-		return
+		sort.SliceStable(res, func(i, j int) bool { return res[i].value > res[j].value })
+		return res
 	}
 
 	/*
 		_edited возвращает список сотрудников и число исправлений времени начала работы в табеле
 		minutes - период в минутах, который не считается за исправление
 	*/
-	_edited := func(t time.Time, minutes uint) (r []list) {
+	_edited := func(t time.Time, minutes uint) []list {
 		rows, e := db.Query(`
 			select b.dt, b.username, sum(b.d1)
 			from (
@@ -214,7 +215,7 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 			order by 1 desc
 		`, minutes, t)
 		if e != nil {
-			return
+			return nil
 		}
 		defer rows.Close()
 
