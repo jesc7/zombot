@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strconv"
 
-	max "github.com/max-messenger/max-bot-api-client-go"
+	maxbot "github.com/max-messenger/max-bot-api-client-go"
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
 	"golang.org/x/time/rate"
 
@@ -21,7 +21,7 @@ import (
 var otherMessengers = []string{types.BUS_BOTTG}
 
 type Bot struct {
-	bot    *max.Api
+	bot    *maxbot.Api
 	QWait  *queue.Queue
 	chatID int64
 	b      *bus.Bus
@@ -29,11 +29,11 @@ type Bot struct {
 }
 
 func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
-	var options []max.Option
+	var options []maxbot.Option
 	if cfg.Proxy.Addr != "" {
 		proxy, e := url.Parse(fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port))
 		if e == nil {
-			options = append(options, max.WithHTTPClient(
+			options = append(options, maxbot.WithHTTPClient(
 				&http.Client{
 					Transport: &http.Transport{
 						Proxy: http.ProxyURL(proxy),
@@ -43,7 +43,7 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 		}
 	}
 
-	bot, e := max.New(cfg.Max.Token, options...)
+	bot, e := maxbot.New(cfg.Max.Token, options...)
 	return &Bot{
 		bot:    bot,
 		QWait:  queue.NewQ(ctx, rate.Limit(5)),
@@ -55,7 +55,7 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 
 func (b *Bot) SendText(text string) {
 	b.QWait.Add(&queue.WaitObj{
-		O: max.NewMessage().
+		O: maxbot.NewMessage().
 			SetText(text),
 	}, queue.PRIORITY_NORMAL)
 }
@@ -88,7 +88,7 @@ out:
 				break
 			}
 			switch msg := wo.O.(type) {
-			case *max.Message:
+			case *maxbot.Message:
 				b.bot.Messages.Send(ctx, msg.
 					SetChat(b.chatID).
 					SetFormat(schemes.HTML),
