@@ -95,8 +95,7 @@ out:
 			case shared.Envelope: //пакеты zspy
 
 				switch mt.Type {
-				//просто текст
-				case shared.TypeMessageText:
+				case shared.TypeMessageText: //просто текст
 					m, e := shared.Unpack[shared.MessageText](mt)
 					if e != nil {
 						continue
@@ -104,8 +103,11 @@ out:
 					b.SendText(m.Text)
 				}
 
-			default:
-				ut, ok := mt.(types.UniMessage)
+			case types.UniMessage: // пакеты других мессенджеров или внутренние
+				switch ut := mt.(type) {
+				case *types.UniMessageText:
+					b.SendText(ut.Text)
+				}
 			}
 
 		case msg := <-b.QWait.Q: //разгребаем локальную очередь сообщений
