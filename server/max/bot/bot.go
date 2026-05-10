@@ -108,6 +108,10 @@ out:
 					if upd.Message.Recipient.ChatType != schemes.CHAT || upd.GetChatID() != b.chatID {
 						return
 					}
+
+					if len(upd.Message.Body.Attachments) == 0 {
+					}
+
 					//отсеиваем команды
 					if types.IsCommand(b.b, types.BUS_BOTMAX, strconv.FormatInt(upd.GetUserID(), 10), upd.GetText()) {
 						return
