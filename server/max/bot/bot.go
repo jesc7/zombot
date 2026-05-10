@@ -109,14 +109,14 @@ out:
 						return
 					}
 					//отсеиваем команды
-					if types.IsCommand(b.b, types.BUS_BOTMAX, strconv.FormatInt(upd.Message.Sender.UserId, 10), upd.Message.Body.Text) {
+					if types.IsCommand(b.b, types.BUS_BOTMAX, strconv.FormatInt(upd.GetUserID(), 10), upd.GetText()) {
 						return
 					}
 
 					//сообщения-не-команды
 					for _, v := range otherMessengers {
 						env, _ := shared.Pack(shared.TypeMessageText, shared.MessageText{
-							Text: "<b><u>Max</u> | " + upd.Message.Sender.Name + "</b>\n" + upd.Message.Body.Text,
+							Text: "<b><u>Max</u> | " + upd.Message.Sender.Name + "</b>\n" + upd.GetText(),
 						})
 						b.b.Write(v, env)
 					}
