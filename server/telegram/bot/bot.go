@@ -90,7 +90,7 @@ out:
 		case <-ctx.Done():
 			break out
 
-		case msg := <-b.ch: //разгребаем пакеты, пришедшие боту
+		case msg := <-b.ch: //разгребаем пакеты, пришедшие боту по шине данных
 			switch mt := msg.(type) {
 			case shared.Envelope: //пакеты zspy
 
@@ -103,6 +103,9 @@ out:
 					}
 					b.SendText(m.Text)
 				}
+
+			default:
+				ut, ok := mt.(types.UniMessage)
 			}
 
 		case msg := <-b.QWait.Q: //разгребаем локальную очередь сообщений
