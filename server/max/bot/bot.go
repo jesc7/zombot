@@ -61,6 +61,8 @@ func (b *Bot) SendText(text string) {
 }
 
 func (b *Bot) Run(ctx context.Context) {
+
+	b.Bot.uploadMediaFromFile
 out:
 	for {
 		select {
