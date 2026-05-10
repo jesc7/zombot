@@ -13,7 +13,7 @@ type UniCore struct {
 	ID string
 }
 
-func (m *UniCore) UniID() string {
+func (m UniCore) UniID() string {
 	return m.ID
 }
 

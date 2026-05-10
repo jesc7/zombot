@@ -117,9 +117,9 @@ out:
 
 					//остальные сообщения
 					for _, v := range otherMessengers {
-						b.b.Write(v, types.UniMessage(&types.UniMessageText{
+						b.b.Write(v, types.UniMessageText{
 							Text: "<b><u>Max</u> | " + upd.Message.Sender.Name + "</b>\n" + upd.GetText(),
-						}))
+						})
 					}
 				}()
 			}
