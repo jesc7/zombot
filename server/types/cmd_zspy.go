@@ -24,7 +24,7 @@ const (
 var (
 	reHelp     = regexp.MustCompile(`(?i)^помощь$`)
 	reDuty     = regexp.MustCompile(`(?i)^дежур[а-я]*(?:(?:\s+(?P<name>[а-я]+))?(?:\s+(?P<days>\d+))?)?$`)
-	reAbsent   = regexp.MustCompile(`(?i)отсутств[а-я]*`)
+	reAbsent   = regexp.MustCompile(`(?i)^(?:кто\s)?отсутств[а-я]*$`)
 	reBirthday = regexp.MustCompile(`(?i)(?:день|дни) рожд[а-я]*(?:\s+(?P<days>\d+))?`)
 	rePhone    = regexp.MustCompile(`^(?:\+?\d[\-\s]?\(?\s?\d{3,5}\s?\)?[\-\s]?)?(?:\d[\-\s]?){4,6}\d$`)
 	reClient   = regexp.MustCompile(`^(?i)(?:клиент|\/ci)(?:\s+(?P<name>.+))$`)

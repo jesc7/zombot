@@ -115,10 +115,13 @@ out:
 
 					//сообщения-не-команды
 					for _, v := range otherMessengers {
-						env, _ := shared.Pack(shared.TypeMessageText, shared.MessageText{
+						b.b.Write(v, types.UniMessageText{
 							Text: "<b><u>Max</u> | " + upd.Message.Sender.Name + "</b>\n" + upd.GetText(),
 						})
-						b.b.Write(v, env)
+						/*env, _ := shared.Pack(shared.TypeMessageText, shared.MessageText{
+							Text: "<b><u>Max</u> | " + upd.Message.Sender.Name + "</b>\n" + upd.GetText(),
+						})
+						b.b.Write(v, env)*/
 					}
 				}()
 			}
