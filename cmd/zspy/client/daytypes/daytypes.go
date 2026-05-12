@@ -83,7 +83,7 @@ func GetDayType(cwd, country string, t time.Time) (dt DayType, e error) {
 	}
 	for _, v := range calendar[country].Months {
 		if int(t.Month()) == v.Month {
-			for _, d := range strings.Split(v.Days, ",") {
+			for d := range strings.SplitSeq(v.Days, ",") {
 				if len(d) > 0 {
 					sign := d[len(d)-1:]
 					if sign == "+" || sign == "*" {
