@@ -5,7 +5,7 @@ package types
 	way to send a messages in any supported messengers
 */
 
-type UniMessage interface {
+type IUniMessage interface {
 	UniID() string
 }
 
@@ -22,68 +22,72 @@ type UniMessageText struct {
 	Text string
 }
 
-type UniMedia interface {
+type IUniMedia interface {
 	UniData() []byte
 }
 
-type UniFile struct {
+type UniMedia struct {
 	Name    string
 	Caption string
-	File    []byte
+	Data    []byte
+}
+
+func (m UniMedia) UniData() []byte {
+	return m.Data
 }
 
 type UniImage struct {
-	UniFile
+	UniMedia
 }
 
 type UniVoice struct {
-	UniFile
+	UniMedia
 }
 
 type UniAudio struct {
-	UniFile
+	UniMedia
 }
 
 type UniVideo struct {
-	UniFile
+	UniMedia
 }
 
 type UniVideoNote struct {
-	UniFile
+	UniMedia
 }
 
 type UniDocument struct {
-	UniFile
+	UniMedia
 }
 
 type UniMessageImage struct {
 	UniCore
-	Files []UniFile
+	Files []UniMedia
 }
 
 type UniMessageVoice struct {
 	UniCore
-	Files []UniFile
+	Files []UniMedia
 }
 
 type UniMessageAudio struct {
 	UniCore
-	Files []UniFile
+	Files []UniMedia
 }
 
 type UniMessageVideo struct {
 	UniCore
-	Files []UniFile
+	Files []UniMedia
 }
 
 type UniMessageVideoNote struct {
 	UniCore
-	Files []UniFile
+	Files []UniMedia
 }
 
 type UniMessageDocument struct {
 	UniCore
-	Files []UniFile
+	Files []UniMedia
 }
 
 type UniContact struct {
@@ -101,12 +105,12 @@ type UniMessageContacts struct {
 
 type UniMessageQuoted struct {
 	UniCore
-	Quoted *UniMessage
+	Quoted *IUniMessage
 	Text   string
 }
 
 type UniMessageReaction struct {
 	UniCore
-	Reacted  *UniMessage
+	Reacted  *IUniMessage
 	Reaction string
 }

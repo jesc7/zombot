@@ -103,7 +103,7 @@ out:
 					b.SendText(m.Text)
 				}
 
-			case types.UniMessage: // пакеты других мессенджеров или внутренние
+			case types.IUniMessage: // пакеты других мессенджеров или внутренние
 				switch ut := mt.(type) {
 				case types.UniMessageText:
 					b.SendText(ut.Text)
