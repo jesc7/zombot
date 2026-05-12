@@ -22,48 +22,53 @@ type UniMessageText struct {
 	Text string
 }
 
-type UniMessageFile struct {
-	UniCore
+type UniFile struct {
 	Name    string
 	Caption string
 	File    []byte
 }
 
 type UniMessageImage struct {
-	UniMessageFile
+	UniCore
+	Files []UniFile
 }
 
 type UniMessageVoice struct {
-	UniMessageFile
+	UniCore
+	Files []UniFile
 }
 
 type UniMessageAudio struct {
-	UniMessageFile
+	UniCore
+	Files []UniFile
 }
 
 type UniMessageVideo struct {
-	UniMessageFile
+	UniCore
+	Files []UniFile
 }
 
 type UniMessageVideoNote struct {
-	UniMessageFile
+	UniCore
+	Files []UniFile
 }
 
 type UniMessageDocument struct {
-	UniMessageFile
+	UniCore
+	Files []UniFile
 }
 
-type Contact struct {
+type UniContact struct {
 }
 
 type UniMessageContact struct {
 	UniCore
-	Contact
+	UniContact
 }
 
 type UniMessageContacts struct {
 	UniCore
-	Contacts []Contact
+	Contacts []UniContact
 }
 
 type UniMessageQuoted struct {
