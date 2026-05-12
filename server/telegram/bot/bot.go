@@ -90,21 +90,25 @@ out:
 		case <-ctx.Done():
 			break out
 
-		case msg := <-b.ch: //разгребаем пакеты, пришедшие боту по шине данных
-			switch mt := msg.(type) {
-			case shared.Envelope: //пакеты zspy
+		case o := <-b.ch: //разгребаем пакеты, пришедшие боту по шине данных
+			switch env := o.(type) {
 
-				switch mt.Type {
-				case shared.TypeMessageText: //просто текст
-					m, e := shared.Unpack[shared.MessageText](mt)
+			//пакеты zspy
+			case shared.Envelope:
+
+				switch env.Type {
+				//просто текст
+				case shared.TypeMessageText:
+					m, e := shared.Unpack[shared.MessageText](env)
 					if e != nil {
 						continue
 					}
 					b.SendText(m.Text)
 				}
 
-			case types.IUniMessage: // пакеты других мессенджеров или внутренние
-				switch ut := mt.(type) {
+			// пакеты других мессенджеров или внутренние
+			case types.IUniMessage:
+				switch ut := env.(type) {
 				case types.UniMessageText:
 					b.SendText(ut.Text)
 				}
