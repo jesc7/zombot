@@ -60,47 +60,17 @@ type UniDocument struct {
 	UniMedia
 }
 
-type UniMessageImage struct {
+type UniMessageMedia struct {
 	UniCore
-	Files []UniMedia
+	Media []IUniMedia
 }
 
-type UniMessageVoice struct {
-	UniCore
-	Files []UniMedia
-}
-
-type UniMessageAudio struct {
-	UniCore
-	Files []UniMedia
-}
-
-type UniMessageVideo struct {
-	UniCore
-	Files []UniMedia
-}
-
-type UniMessageVideoNote struct {
-	UniCore
-	Files []UniMedia
-}
-
-type UniMessageDocument struct {
-	UniCore
-	Files []UniMedia
-}
-
-type UniContact struct {
-}
-
-type UniMessageContact struct {
-	UniCore
-	UniContact
+type Contact struct {
 }
 
 type UniMessageContacts struct {
 	UniCore
-	Contacts []UniContact
+	Contacts []Contact
 }
 
 type UniMessageQuoted struct {
