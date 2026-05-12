@@ -74,6 +74,7 @@ out:
 			case shared.Envelope:
 
 				switch env.Type {
+
 				//просто текст
 				case shared.TypeMessageText:
 					m, e := shared.Unpack[shared.MessageText](env)
@@ -85,9 +86,9 @@ out:
 
 			// пакеты других мессенджеров или внутренние
 			case types.IUniMessage:
-				switch ut := env.(type) {
+				switch um := env.(type) {
 				case types.UniMessageText:
-					b.SendText(ut.Text)
+					b.SendText(um.Text)
 				}
 			}
 
