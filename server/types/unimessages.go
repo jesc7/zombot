@@ -66,6 +66,8 @@ type UniMessageMedia struct {
 }
 
 type Contact struct {
+	Caption string
+	Phone   string
 }
 
 type UniMessageContacts struct {

@@ -139,12 +139,11 @@ out:
 					return
 				}
 
-				//сообщения-не-команды
+				//остальные сообщения
 				for _, v := range otherMessengers {
-					env, _ := shared.Pack(shared.TypeMessageText, shared.MessageText{
+					b.b.Write(v, types.UniMessageText{
 						Text: "<b><u>Telegram</u> | " + update.Message.From.FirstName + "</b>\n" + update.Message.Text,
 					})
-					b.b.Write(v, env)
 				}
 			}()
 		}
