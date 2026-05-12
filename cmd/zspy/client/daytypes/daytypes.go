@@ -30,13 +30,13 @@ type jobCal struct {
 	} `json:"months"`
 }
 
-var cal = make(map[string]jobCal)
+var calendar = make(map[string]jobCal)
 
 func GetDayType(cwd, country string, t time.Time) (dt DayType, e error) {
-	if cal[country].Year != t.Year() {
-		cal[country] = jobCal{}
+	if calendar[country].Year != t.Year() {
+		calendar[country] = jobCal{}
 	}
-	if len(cal[country].Months) == 0 {
+	if len(calendar[country].Months) == 0 {
 		buf := new(bytes.Buffer)
 		var (
 			resp  *http.Response
@@ -75,15 +75,13 @@ func GetDayType(cwd, country string, t time.Time) (dt DayType, e error) {
 			}
 		}
 
-		//dec := json.NewDecoder(buf)
 		c := jobCal{}
 		if e = json.Unmarshal(buf.Bytes(), &c); e != nil {
-			//if e = dec.Decode(&c); e != nil {
 			return
 		}
-		cal[country] = c
+		calendar[country] = c
 	}
-	for _, v := range cal[country].Months {
+	for _, v := range calendar[country].Months {
 		if int(t.Month()) == v.Month {
 			for _, d := range strings.Split(v.Days, ",") {
 				if len(d) > 0 {
