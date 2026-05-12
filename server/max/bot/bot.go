@@ -125,7 +125,7 @@ out:
 						return
 					}
 
-					//остальные сообщения
+					//остальные сообщения пересылаем в связные мессенджеры
 					for _, v := range otherMessengers {
 						b.b.Write(v, types.UniMessageText{
 							Text: "<b><u>Max</u> | " + upd.Message.Sender.Name + "</b>\n" + upd.GetText(),

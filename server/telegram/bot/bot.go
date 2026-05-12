@@ -144,7 +144,7 @@ out:
 					return
 				}
 
-				//остальные сообщения
+				//остальные сообщения пересылаем в связные мессенджеры
 				for _, v := range otherMessengers {
 					b.b.Write(v, types.UniMessageText{
 						Text: "<b><u>Telegram</u> | " + update.Message.From.FirstName + "</b>\n" + update.Message.Text,
