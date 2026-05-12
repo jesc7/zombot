@@ -22,10 +22,38 @@ type UniMessageText struct {
 	Text string
 }
 
+type UniMedia interface {
+	UniData() []byte
+}
+
 type UniFile struct {
 	Name    string
 	Caption string
 	File    []byte
+}
+
+type UniImage struct {
+	UniFile
+}
+
+type UniVoice struct {
+	UniFile
+}
+
+type UniAudio struct {
+	UniFile
+}
+
+type UniVideo struct {
+	UniFile
+}
+
+type UniVideoNote struct {
+	UniFile
+}
+
+type UniDocument struct {
+	UniFile
 }
 
 type UniMessageImage struct {
