@@ -13,9 +13,7 @@ import (
 	"github.com/jesc7/zombot/cmd/zspy/client/types"
 )
 
-/*
-Ratings подготавливает различные motivation-рейтинги сотрудников за период
-*/
+// Ratings подготавливает различные motivation-рейтинги сотрудников за период
 func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) string {
 	pl, e := duties.DutiesList(ctx, db, -31)
 	if e != nil {
