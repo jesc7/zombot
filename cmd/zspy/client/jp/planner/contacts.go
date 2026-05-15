@@ -25,7 +25,7 @@ var (
 )
 
 func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shared.Contact, error) {
-	if searches == nil {
+	once.Do(func() {
 		searches = make(map[string]search)
 		go func(ctx context.Context) {
 			t1m := time.NewTicker(time.Minute)
@@ -45,7 +45,7 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 				}
 			}
 		}(ctx)
-	}
+	})
 
 	if msg.Sender == "" || msg.Find == "" {
 		return nil, nil
