@@ -28,13 +28,13 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 	once.Do(func() {
 		searches = make(map[string]search)
 		go func(ctx context.Context) {
-			t1m := time.NewTicker(time.Minute)
-			defer t1m.Stop()
+			t5m := time.NewTicker(5 * time.Minute)
+			defer t5m.Stop()
 			for {
 				select {
 				case <-ctx.Done():
 					return
-				case <-t1m.C:
+				case <-t5m.C:
 					for k, v := range searches {
 						if time.Now().After(v.Until) {
 							mu.Lock()
