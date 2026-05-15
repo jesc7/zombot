@@ -21,6 +21,7 @@ type search struct {
 var (
 	searches map[string]search
 	mu       sync.Mutex
+	once     sync.Once
 )
 
 func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shared.Contact, error) {
