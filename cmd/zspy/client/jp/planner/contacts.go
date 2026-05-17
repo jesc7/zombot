@@ -19,13 +19,13 @@ type search struct {
 }
 
 var (
-	searches map[string]search
-	mu       sync.Mutex
-	once     sync.Once
+	searches     map[string]search
+	muContacts   sync.Mutex
+	onceContacts sync.Once
 )
 
 func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shared.Contact, error) {
-	once.Do(func() {
+	onceContacts.Do(func() {
 		searches = make(map[string]search)
 		go func(ctx context.Context) {
 			t5m := time.NewTicker(5 * time.Minute)
@@ -37,9 +37,9 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 				case <-t5m.C:
 					for k, v := range searches {
 						if time.Now().After(v.Until) {
-							mu.Lock()
+							muContacts.Lock()
 							delete(searches, k)
-							mu.Unlock()
+							muContacts.Unlock()
 						}
 					}
 				}
@@ -55,8 +55,8 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 		go func(ctx context.Context, sender, text string) {
 			var cnt int
 			if e := db.QueryRowContext(ctx, "select count(1) from pr_getclients_v3(?)", text).Scan(&cnt); e == nil {
-				mu.Lock()
-				defer mu.Unlock()
+				muContacts.Lock()
+				defer muContacts.Unlock()
 				s := searches[sender]
 				s.Total = cnt
 				searches[sender] = s
@@ -71,8 +71,8 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 			N:      8,
 			Total:  0,
 		}
-		mu.Lock()
-		defer mu.Unlock()
+		muContacts.Lock()
+		defer muContacts.Unlock()
 		searches[sender] = s
 		return s
 	}
@@ -114,7 +114,7 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 		s.M++
 	}
 
-	mu.Lock()
+	muContacts.Lock()
 	//end?
 	s2 := searches[msg.Sender]
 	if s2.Total != 0 {
@@ -132,7 +132,7 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 		s.LastPID = res[len(res)-1].PID
 	}
 	searches[msg.Sender] = s
-	mu.Unlock()
+	muContacts.Unlock()
 
 	return res, nil
 }
