@@ -3,7 +3,8 @@ package planner
 import "sync"
 
 type status struct {
-	id       int
+	agentID  int64
+	id       int64
 	caption  string
 	name     string
 	stateOld string
