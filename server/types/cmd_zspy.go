@@ -17,7 +17,7 @@ const (
 дежур[...] [кто] [дней] - дежурства
 отсутств[...] - кто отсутствует
 день|дни рожд[...] [дней] - ДР в ближайшие дни
-[телефон] - поиск клиента по номеру
+[номер] - поиск клиента по номеру телефона
 клиент|/ci [кто] - поиск клиента по имени
 `
 	CT_ZSPY ClientType = "zspy"
@@ -29,7 +29,7 @@ var (
 	reAbsent   = regexp.MustCompile(`(?i)^(?:кто\s)?отсутств[а-я]*$`)
 	reBirthday = regexp.MustCompile(`(?i)(?:день|дни) рожд[а-я]*(?:\s+(?P<days>\d+))?`)
 	rePhone    = regexp.MustCompile(`^(?:\+?\d[\-\s]?\(?\s?\d{3,5}\s?\)?[\-\s]?)?(?:\d[\-\s]?){4,6}\d$`)
-	reClient   = regexp.MustCompile(`^(?i)(?:клиент|\/ci)(?:\s+(?P<name>.+))$`)
+	reClient   = regexp.MustCompile(`(?i)^(?:клиент|\/ci)(?:\s+(?P<name>.+))$`)
 )
 
 func findCommand(re *regexp.Regexp, value string) (bool, map[string]string) {
