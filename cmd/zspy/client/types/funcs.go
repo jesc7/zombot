@@ -283,3 +283,29 @@ func NowBetween(time1, time2 string) bool {
 	t := time.Date(0, 1, 1, time.Now().Hour(), time.Now().Minute(), time.Now().Second(), 0, time.UTC)
 	return errors.Join(e1, e2) == nil && t.After(t1) && t.Before(t2)
 }
+
+func Map[T, U any](slice []T, fn func(T) U) []U {
+	result := make([]U, len(slice))
+	for i, v := range slice {
+		result[i] = fn(v)
+	}
+	return result
+}
+
+func Filter[T any](slice []T, predicate func(T) bool) []T {
+	var result []T
+	for _, v := range slice {
+		if predicate(v) {
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
+func Reduce[T, U any](slice []T, initial U, fn func(U, T) U) U {
+	result := initial
+	for _, v := range slice {
+		result = fn(result, v)
+	}
+	return result
+}
