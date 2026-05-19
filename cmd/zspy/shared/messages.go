@@ -80,7 +80,7 @@ type Daily struct {
 }
 
 type MessageDuties struct {
-	Q DutyQuery `json:"q,omitempty"`
+	Q DutyQuery `json:"q"`
 	A []Daily   `json:"a,omitempty"`
 }
 

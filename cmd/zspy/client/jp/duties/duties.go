@@ -71,10 +71,10 @@ func DutiesDelta(d1, d2 *Planner) string {
 			res += fmt.Sprintf("🔄 %s%s: %s\n", t.Format("02.01"), daytip, name2)
 		}
 	}
-	if len(res) != 0 {
-		res = "👷 <b>Изменения дежурств</b>\n" + types.Iif(strings.Count(res, "\n") > 1, "\n", "") + res
+	if len(res) == 0 {
+		return ""
 	}
-	return res
+	return "👷 <b>Изменения дежурств</b>\n\n" + res
 }
 
 func Duty(ctx context.Context, db *sql.DB, q shared.DutyQuery) ([]shared.Daily, error) {
