@@ -183,7 +183,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 	t20_00 := time.NewTimer(types.NextTime("20:00"))
 	defer t20_00.Stop()
 
-	var delta duties.Planner
+	var delta *duties.Planner
 	for {
 		select {
 		case <-ctx.Done(): //контекст отменен - выходим
@@ -202,21 +202,13 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			t08_00.Reset(24 * time.Hour)
 
 			go func() { //update phone base
-				var e error
-				log.Println("PbUpdate begin")
-				defer func() { log.Println("PbUpdate end:", e) }()
-
-				e = phones.PbUpdate(ws.cwd, []string{})
+				phones.PbUpdate(ws.cwd, []string{})
 			}()
 
 			go func() { //checks EC
-				var e error
-				log.Println("CheckEC begin")
-				defer func() { log.Println("CheckEC end:", e) }()
-
 				if s := checks.CheckEC(cfg.EC); s != "" {
-					var env shared.Envelope
-					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
+					if e != nil {
 						return
 					}
 					log.Println("CheckEC", env)
@@ -246,16 +238,11 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 			go func() { //another countries holiday
-				var e error
-				log.Println("ForeignHoliday begin")
-				defer func() { log.Println("ForeignHoliday end:", e) }()
-
 				if s := planner.ForeignHoliday(ws.cwd); s != "" {
-					var env shared.Envelope
-					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
+					if e != nil {
 						return
 					}
-					log.Println("ForeignHoliday", env)
 					ws.Write(env)
 				}
 			}()
@@ -279,10 +266,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			t09_00.Reset(24 * time.Hour)
 
 			go func() { //who's absent today
-				var e error
-				log.Println("Absents begin")
-				defer func() { log.Println("Absents end:", e) }()
-
 				pay, e := planner.Absents(ctx, ws.db)
 				if e != nil || len(pay) == 0 {
 					return
@@ -291,7 +274,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 				if e != nil {
 					return
 				}
-				log.Println("Absents", env)
 				ws.Write(env)
 			}()
 
@@ -442,13 +424,18 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 			go func() { //duties delta
-				if s := duties.DutiesDelta(); s != "" {
+				d, e := duties.DutiesList(ctx, ws.db, 0)
+				if e != nil {
+					return
+				}
+				if s := duties.DutiesDelta(delta, d); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
 						return
 					}
 					ws.Write(env)
 				}
+				delta = d
 			}()
 
 		case <-t9m.C: //every 9 minutes
