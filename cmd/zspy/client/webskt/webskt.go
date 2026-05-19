@@ -211,7 +211,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 					if e != nil {
 						return
 					}
-					log.Println("CheckEC", env)
 					ws.Write(env)
 				}
 			}()
@@ -220,11 +219,10 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			t08_10.Reset(24 * time.Hour)
 
 			go func() { //birthdays today
-				var e error
-				log.Println("Birthdays begin")
-				defer func() { log.Println("Birthdays end:", e) }()
-
-				var pay shared.MessageBirthdays
+				var (
+					pay shared.MessageBirthdays
+					e   error
+				)
 				pay.Birthdays, e = planner.Birthdays(ctx, ws.db, 1)
 				if e != nil || len(pay.Birthdays) == 0 {
 					return
@@ -233,7 +231,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 				if e != nil {
 					return
 				}
-				log.Println("Birthdays", env)
 				ws.Write(env)
 			}()
 
@@ -248,16 +245,11 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 			go func() { //check domains registration
-				var e error
-				log.Println("CheckWhois begin")
-				defer func() { log.Println("CheckWhois end:", e) }()
-
 				if s := checks.CheckWhois(cfg.CheckDomains, 10); s != "" {
-					var env shared.Envelope
-					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
+					if e != nil {
 						return
 					}
-					log.Println("CheckWhois", env)
 					ws.Write(env)
 				}
 			}()
@@ -278,16 +270,11 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 			go func() { //missing duties
-				var e error
-				log.Println("MissDuties begin")
-				defer func() { log.Println("MissDuties end:", e) }()
-
 				if s := duties.MissDuties(ctx, ws.db, ws.cwd, 20); s != "" {
-					var env shared.Envelope
-					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
+					if e != nil {
 						return
 					}
-					log.Println("MissDuties", env)
 					ws.Write(env)
 				}
 			}()
@@ -298,31 +285,21 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			go func() { //ratings
 				if time.Now().Weekday() == time.Friday {
 					//weekly ratings
-					var e error
-					log.Println("Ratings weekly begin")
-					defer func() { log.Println("Ratings weekly end:", e) }()
-
 					if s := planner.Ratings(ctx, ws.db, true, time.Now().AddDate(0, 0, -7)); s != "" {
-						var env shared.Envelope
-						if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
+						env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
+						if e != nil {
 							return
 						}
-						log.Println("Ratings weekly", env)
 						ws.Write(env)
 					}
 
 					if time.Now().Month() != time.Now().AddDate(0, 0, 7).Month() {
 						//monthly ratings
-						var e error
-						log.Println("Ratings monthly begin")
-						defer func() { log.Println("Ratings monthly end:", e) }()
-
 						if s := planner.Ratings(ctx, ws.db, false, time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC)); s != "" {
-							var env shared.Envelope
-							if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
+							env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
+							if e != nil {
 								return
 							}
-							log.Println("Ratings monthly", env)
 							ws.Write(env)
 						}
 					}
@@ -333,18 +310,13 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			t18_00.Reset(24 * time.Hour)
 
 			go func() { //holidays detector
-				var e error
-				log.Println("HolidaysCount begin")
-				defer func() { log.Println("HolidaysCount end:", e) }()
-
 				if i := duties.HolidaysCount(ctx, ws.db); i > 0 {
-					var env shared.Envelope
-					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: fmt.Sprintf("🤖 Уважаемые гуманоиды!\nВпереди %d выходных, желаю всем хорошо отдохнуть!", i),
-					}); e != nil {
+					})
+					if e != nil {
 						return
 					}
-					log.Println("HolidaysCount", env)
 					ws.Write(env)
 				}
 			}()
@@ -353,36 +325,28 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			t20_00.Reset(24 * time.Hour)
 
 			go func() { //tomorrow duties
-				var e error
-				log.Println("TomorrowDuties begin")
-				defer func() { log.Println("TomorrowDuties end:", e) }()
-
 				if s := duties.TomorrowDuties(ctx, ws.db); s != "" {
-					var env shared.Envelope
-					if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s}); e != nil {
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
+					if e != nil {
 						return
 					}
-					log.Println("TomorrowDuties", env)
 					ws.Write(env)
 				}
 			}()
 
 			go func() { //find duties for next 2 days
-				var e error
-				log.Println("Duty begin")
-				defer func() { log.Println("Duty end:", e) }()
-
-				var pay shared.MessageDuties
+				var (
+					pay shared.MessageDuties
+					e   error
+				)
 				pay.Q.Days = 2
-				pay.A, e = duties.Duty(ctx, ws.db, pay.Q)
-				if e != nil || len(pay.A) == 0 {
+				if pay.A, e = duties.Duty(ctx, ws.db, pay.Q); e != nil || len(pay.A) == 0 {
 					return
 				}
 				env, e := shared.Pack(shared.TypeMessageDuties, pay)
 				if e != nil {
 					return
 				}
-				log.Println("Duty", env)
 				ws.Write(env)
 			}()
 
