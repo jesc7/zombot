@@ -392,6 +392,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 				if e != nil {
 					return
 				}
+				defer func() { delta = d }()
+
 				if s := duties.DutiesDelta(delta, d); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
@@ -399,7 +401,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 					}
 					ws.Write(env)
 				}
-				delta = d
 			}()
 
 		case <-t9m.C: //every 9 minutes
