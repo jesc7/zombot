@@ -48,6 +48,33 @@ func DutiesList(ctx context.Context, db *sql.DB, start int) (*Planner, error) {
 	return &pl, nil
 }
 
+func DutiesDelta(d1, d2 *Planner) string {
+	if d1 == nil || d2 == nil {
+		return ""
+	}
+
+	for i := 1; i <= 200; i++ {
+		daytip := ""
+		if i < 4 {
+			daytip = []string{" (сегодня)", " (завтра)", " (послезавтра)", " (через 2 дня)"}[i]
+		}
+		t := types.ClearTime(time.Now())
+		e1, ok1 := lastDuties[t]
+		e2, ok2 := CurDuties[t]
+		switch {
+		case !ok1 && ok2: //новое дежурство
+			delta += fmt.Sprintf("⭐ %s%s: %s\n", t.Format("02.01"), daytip, e2)
+		case ok1 && !ok2: //отмена
+			delta += fmt.Sprintf("🚫 %s%s: %s\n", t.Format("02.01"), daytip, e1)
+		case ok1 && ok2 && (e1 != e2): //замена
+			delta += fmt.Sprintf("🔄 %s%s: %s\n", t.Format("02.01"), daytip, e2)
+		}
+	}
+	if len(delta) != 0 {
+		delta = "👷 <b>Изменения дежурств</b>\n" + funcs.Iif(strings.Count(delta, "\n") > 1, "\n", "") + delta
+	}
+}
+
 func Duty(ctx context.Context, db *sql.DB, q shared.DutyQuery) ([]shared.Daily, error) {
 	pl, e := DutiesList(ctx, db, 0)
 	if e != nil {
