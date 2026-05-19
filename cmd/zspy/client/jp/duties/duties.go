@@ -53,26 +53,28 @@ func DutiesDelta(d1, d2 *Planner) string {
 		return ""
 	}
 
+	var res string
 	for i := 1; i <= 200; i++ {
 		daytip := ""
 		if i < 4 {
 			daytip = []string{" (сегодня)", " (завтра)", " (послезавтра)", " (через 2 дня)"}[i]
 		}
-		t := types.ClearTime(time.Now())
-		e1, ok1 := lastDuties[t]
-		e2, ok2 := CurDuties[t]
+		t := types.ClearTime(time.Now().AddDate(0, 0, i))
+		name1, ok1 := (*d1)[t]
+		name2, ok2 := (*d2)[t]
 		switch {
 		case !ok1 && ok2: //новое дежурство
-			delta += fmt.Sprintf("⭐ %s%s: %s\n", t.Format("02.01"), daytip, e2)
+			res += fmt.Sprintf("⭐ %s%s: %s\n", t.Format("02.01"), daytip, name2)
 		case ok1 && !ok2: //отмена
-			delta += fmt.Sprintf("🚫 %s%s: %s\n", t.Format("02.01"), daytip, e1)
-		case ok1 && ok2 && (e1 != e2): //замена
-			delta += fmt.Sprintf("🔄 %s%s: %s\n", t.Format("02.01"), daytip, e2)
+			res += fmt.Sprintf("🚫 %s%s: %s\n", t.Format("02.01"), daytip, name1)
+		case ok1 && ok2 && (name1 != name2): //замена
+			res += fmt.Sprintf("🔄 %s%s: %s\n", t.Format("02.01"), daytip, name2)
 		}
 	}
-	if len(delta) != 0 {
-		delta = "👷 <b>Изменения дежурств</b>\n" + funcs.Iif(strings.Count(delta, "\n") > 1, "\n", "") + delta
+	if len(res) != 0 {
+		res = "👷 <b>Изменения дежурств</b>\n" + types.Iif(strings.Count(res, "\n") > 1, "\n", "") + res
 	}
+	return res
 }
 
 func Duty(ctx context.Context, db *sql.DB, q shared.DutyQuery) ([]shared.Daily, error) {
