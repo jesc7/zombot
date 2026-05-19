@@ -30,8 +30,8 @@ func DutiesList(ctx context.Context, db *sql.DB, start int) (*Planner, error) {
 		left join sp$users u on u.id = t.user_id
 		where t.tabel_type = 5
 		and t.dt between dateadd(day, ?, current_date) and dateadd(day, 365, current_date)
-		group by t.dt
-		order by t.dt
+		group by 1
+		order by 1
 	`, start)
 	if e != nil {
 		return nil, e
