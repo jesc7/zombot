@@ -183,6 +183,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 	t20_00 := time.NewTimer(types.NextTime("20:00"))
 	defer t20_00.Stop()
 
+	var delta duties.Planner
 	for {
 		select {
 		case <-ctx.Done(): //контекст отменен - выходим
@@ -410,9 +411,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 					return
 				}
 				if s := planner.EowList(ctx, ws.db); s != "" {
-					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
-						Text: s,
-					})
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
 						return
 					}
@@ -424,9 +423,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 			go func() { //start-of-work for duties
 				if s := planner.SowList(ctx, ws.db, ws.cwd); s != "" {
-					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
-						Text: s,
-					})
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
 						return
 					}
@@ -436,9 +433,17 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 			go func() { //zsrv watcher
 				if s := checks.WatchZsrv(cfg.ZSrv); s != "" {
-					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
-						Text: s,
-					})
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
+					if e != nil {
+						return
+					}
+					ws.Write(env)
+				}
+			}()
+
+			go func() { //duties delta
+				if s := duties.DutiesDelta(); s != "" {
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
 						return
 					}
@@ -450,9 +455,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 			go func() { //cf tasks
 				if s := checks.CheckCFResources(cfg.CFChecks); s != "" {
-					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
-						Text: s,
-					})
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
 						return
 					}
@@ -464,9 +467,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 			go func() { //critical tasks
 				if s := planner.CriticalTasks(ctx, ws.db, 30); s != "" {
-					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
-						Text: s,
-					})
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
 						return
 					}
@@ -476,9 +477,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 			go func() { //check resources
 				if s := checks.CheckResources(cfg.Checks); s != "" {
-					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
-						Text: s,
-					})
+					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
 						return
 					}
