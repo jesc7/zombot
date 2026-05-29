@@ -14,10 +14,10 @@ import (
 )
 
 // Ratings подготавливает различные motivation-рейтинги сотрудников за период
-func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) string {
+func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) (string, error) {
 	pl, e := duties.DutiesList(ctx, db, -31)
 	if e != nil {
-		return ""
+		return "", e
 	}
 
 	type list struct {
@@ -300,5 +300,5 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) stri
 	if len(r) != 0 {
 		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Мастер фотошопа'</b>\n%s (%d исправлений)", r[0].name, r[0].value)
 	}
-	return res
+	return res, nil
 }

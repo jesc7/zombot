@@ -203,12 +203,16 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			log.Println("Timer t08_00")
 
 			go func() { //update phone base
+				log.Println("phones.PbUpdate")
+
 				if e := phones.PbUpdate(ws.cwd, []string{}); e != nil {
 					log.Println("phones.PbUpdate error:", e)
 				}
 			}()
 
 			go func() { //checks EC
+				log.Println("checks.CheckEC")
+
 				if s := checks.CheckEC(cfg.EC); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
@@ -223,6 +227,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			log.Println("Timer t08_10")
 
 			go func() { //birthdays today
+				log.Println("planner.Birthdays")
+
 				var (
 					pay shared.MessageBirthdays
 					e   error
@@ -239,6 +245,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 			go func() { //another countries holiday
+				log.Println("planner.ForeignHoliday")
+
 				if s := planner.ForeignHoliday(ws.cwd); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
@@ -249,6 +257,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 			go func() { //check domains registration
+				log.Println("planner.CheckWhois")
+
 				if s := checks.CheckWhois(cfg.CheckDomains, 10); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
@@ -263,6 +273,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			log.Println("Timer t09_00")
 
 			go func() { //who's absent today
+				log.Println("planner.Absents")
+
 				pay, e := planner.Absents(ctx, ws.db)
 				if e != nil || len(pay) == 0 {
 					return
@@ -275,6 +287,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 			go func() { //missing duties
+				log.Println("duties.MissDuties")
+
 				if s := duties.MissDuties(ctx, ws.db, ws.cwd, 20); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
@@ -290,8 +304,11 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 			go func() { //ratings
 				if time.Now().Weekday() == time.Friday {
+					log.Println("planner.Ratings")
+
 					//weekly ratings
-					if s := planner.Ratings(ctx, ws.db, true, time.Now().AddDate(0, 0, -7)); s != "" {
+					s, e := planner.Ratings(ctx, ws.db, true, time.Now().AddDate(0, 0, -7))
+					if s != "" {
 						env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 						if e != nil {
 							return
@@ -300,6 +317,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 					}
 
 					if time.Now().Month() != time.Now().AddDate(0, 0, 7).Month() {
+						log.Println("planner.Ratings (month)")
+
 						//monthly ratings
 						if s := planner.Ratings(ctx, ws.db, false, time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC)); s != "" {
 							env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
@@ -317,6 +336,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			log.Println("Timer t18_00")
 
 			go func() { //holidays detector
+				log.Println("duties.HolidaysCount")
+
 				if i := duties.HolidaysCount(ctx, ws.db); i > 0 {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: fmt.Sprintf("🤖 Уважаемые гуманоиды!\nВпереди %d выходных, желаю всем хорошо отдохнуть!", i),
@@ -333,6 +354,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			log.Println("Timer t20_00")
 
 			go func() { //tomorrow duties
+				log.Println("duties.TomorrowDuties")
+
 				if s := duties.TomorrowDuties(ctx, ws.db); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
@@ -343,6 +366,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 			go func() { //find duties for next 2 days
+				log.Println("duties.Duty")
+
 				var (
 					pay shared.MessageDuties
 					e   error
