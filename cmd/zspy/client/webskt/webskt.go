@@ -207,13 +207,20 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 				if e := phones.PbUpdate(ws.cwd, []string{}); e != nil {
 					log.Println("phones.PbUpdate error:", e)
+					return
 				}
 			}()
 
 			go func() { //checks EC
 				log.Println("checks.CheckEC")
 
-				if s := checks.CheckEC(cfg.EC); s != "" {
+				s, e := checks.CheckEC(cfg.EC)
+				if e != nil {
+					log.Println("checks.CheckEC error:", e)
+					return
+				}
+
+				if s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
 						return

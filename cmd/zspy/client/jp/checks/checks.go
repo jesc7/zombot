@@ -262,12 +262,11 @@ func CheckWhois(sl []string, days int) string {
 	return "⚠️ <b>Срок регистрации домена заканчивается</b>\n" + sb.String()
 }
 
-func CheckEC(ec types.EC) string {
+func CheckEC(ec types.EC) (string, error) {
 	b, _ := base64.StdEncoding.DecodeString(ec.Pwd)
 	db, e := sql.Open(ec.Driver, fmt.Sprintf(ec.ConnStr, string(b)))
 	if e != nil {
-		log.Printf("CheckEC error: %v", e)
-		return ""
+		return "", e
 	}
 	defer db.Close()
 
@@ -284,12 +283,11 @@ func CheckEC(ec types.EC) string {
 				select id from sp$group_detail g where g.group_id = 25 and g.grouptable_id = pcid
 			)
 	`).Scan(&cnt); e != nil {
-		log.Printf("CheckEC error: %v", e)
-		return ""
+		return "", e
 	}
 
-	if cnt != 0 {
-		return "⚠️ <b>Место на диске заканчивается</b>\nПроблемных точек: " + strconv.Itoa(cnt)
+	if cnt == 0 {
+		return "", nil
 	}
-	return ""
+	return "⚠️ <b>Место на диске заканчивается</b>\nПроблемных точек: " + strconv.Itoa(cnt), nil
 }
