@@ -104,10 +104,10 @@ func Duty(ctx context.Context, db *sql.DB, q shared.DutyQuery) ([]shared.Daily, 
 	return res, nil
 }
 
-func MissDuties(ctx context.Context, db *sql.DB, cwd string, days int) string {
+func MissDuties(ctx context.Context, db *sql.DB, cwd string, days int) (string, error) {
 	pl, e := DutiesList(ctx, db, 0)
 	if e != nil {
-		return ""
+		return "", e
 	}
 
 	type needs struct {
@@ -156,7 +156,7 @@ func MissDuties(ctx context.Context, db *sql.DB, cwd string, days int) string {
 	}
 
 	if len(ds) == 0 {
-		return ""
+		return "", nil
 	}
 
 	repl := strings.NewReplacer(
@@ -169,7 +169,7 @@ func MissDuties(ctx context.Context, db *sql.DB, cwd string, days int) string {
 	for _, v := range ds {
 		res += repl.Replace(v.t.Format("\n_2 Jan (Mon)")) + v.s
 	}
-	return res
+	return res, nil
 }
 
 func TomorrowDuties(ctx context.Context, db *sql.DB) (string, error) {

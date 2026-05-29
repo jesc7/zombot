@@ -235,6 +235,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 				)
 				pay.Birthdays, e = planner.Birthdays(ctx, ws.db, 1)
 				if e != nil || len(pay.Birthdays) == 0 {
+					if e != nil {
+						log.Println("planner.Birthdays error:", e)
+					}
 					return
 				}
 				env, e := shared.Pack(shared.TypeMessageBirthdays, pay)
@@ -277,6 +280,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 				pay, e := planner.Absents(ctx, ws.db)
 				if e != nil || len(pay) == 0 {
+					if e != nil {
+						log.Println("planner.Absents error:", e)
+					}
 					return
 				}
 				env, e := shared.Pack(shared.TypeMessageAbsents, shared.MessageAbsents{Absents: pay})
@@ -289,7 +295,13 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			go func() { //missing duties
 				log.Println("duties.MissDuties")
 
-				if s := duties.MissDuties(ctx, ws.db, ws.cwd, 20); s != "" {
+				s, e := duties.MissDuties(ctx, ws.db, ws.cwd, 20)
+				if e != nil {
+					log.Println("duties.MissDuties error:", e)
+					return
+				}
+
+				if s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
 						return
@@ -310,7 +322,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 					s, e := planner.Ratings(ctx, ws.db, true, time.Now().AddDate(0, 0, -7))
 					if e != nil {
 						log.Println("planner.Ratings error:", e)
+						return
 					}
+
 					if s != "" {
 						env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 						if e != nil {
@@ -326,7 +340,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 						s, e := planner.Ratings(ctx, ws.db, false, time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC))
 						if e != nil {
 							log.Println("planner.Ratings (month) error:", e)
+							return
 						}
+
 						if s != "" {
 							env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 							if e != nil {
@@ -348,7 +364,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 				i, e := duties.HolidaysCount(ctx, ws.db)
 				if e != nil {
 					log.Println("duties.HolidaysCount error:", e)
+					return
 				}
+
 				if i > 0 {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: fmt.Sprintf("🤖 Уважаемые гуманоиды!\nВпереди %d выходных, желаю всем хорошо отдохнуть!", i),
@@ -370,7 +388,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 				s, e := duties.TomorrowDuties(ctx, ws.db)
 				if e != nil {
 					log.Println("duties.TomorrowDuties error:", e)
+					return
 				}
+
 				if s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
@@ -389,6 +409,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 				)
 				pay.Q.Days = 2
 				if pay.A, e = duties.Duty(ctx, ws.db, pay.Q); e != nil || len(pay.A) == 0 {
+					if e != nil {
+						log.Println("duties.Duty error:", e)
+					}
 					return
 				}
 				env, e := shared.Pack(shared.TypeMessageDuties, pay)
