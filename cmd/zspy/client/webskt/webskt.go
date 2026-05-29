@@ -247,6 +247,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 					}
 					return
 				}
+
 				env, e := shared.Pack(shared.TypeMessageBirthdays, pay)
 				if e != nil {
 					return
@@ -292,6 +293,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 					}
 					return
 				}
+
 				env, e := shared.Pack(shared.TypeMessageAbsents, shared.MessageAbsents{Absents: pay})
 				if e != nil {
 					return
@@ -445,6 +447,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 		case <-t5m.C: //every 5 minutes
+			log.Println("Ticker t5m")
 
 			go func() { //start-of-work for duties
 				if s := planner.SowList(ctx, ws.db, ws.cwd); s != "" {
