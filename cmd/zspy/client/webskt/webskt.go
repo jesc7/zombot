@@ -308,6 +308,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 					//weekly ratings
 					s, e := planner.Ratings(ctx, ws.db, true, time.Now().AddDate(0, 0, -7))
+					if e != nil {
+						log.Println("planner.Ratings error:", e)
+					}
 					if s != "" {
 						env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 						if e != nil {
@@ -320,7 +323,11 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 						log.Println("planner.Ratings (month)")
 
 						//monthly ratings
-						if s := planner.Ratings(ctx, ws.db, false, time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC)); s != "" {
+						s, e := planner.Ratings(ctx, ws.db, false, time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC))
+						if e != nil {
+							log.Println("planner.Ratings (month) error:", e)
+						}
+						if s != "" {
 							env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 							if e != nil {
 								return
@@ -338,7 +345,11 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			go func() { //holidays detector
 				log.Println("duties.HolidaysCount")
 
-				if i := duties.HolidaysCount(ctx, ws.db); i > 0 {
+				i, e := duties.HolidaysCount(ctx, ws.db)
+				if e != nil {
+					log.Println("duties.HolidaysCount error:", e)
+				}
+				if i > 0 {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{
 						Text: fmt.Sprintf("🤖 Уважаемые гуманоиды!\nВпереди %d выходных, желаю всем хорошо отдохнуть!", i),
 					})
@@ -356,7 +367,11 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			go func() { //tomorrow duties
 				log.Println("duties.TomorrowDuties")
 
-				if s := duties.TomorrowDuties(ctx, ws.db); s != "" {
+				s, e := duties.TomorrowDuties(ctx, ws.db)
+				if e != nil {
+					log.Println("duties.TomorrowDuties error:", e)
+				}
+				if s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
 						return

@@ -172,7 +172,7 @@ func MissDuties(ctx context.Context, db *sql.DB, cwd string, days int) string {
 	return res
 }
 
-func TomorrowDuties(ctx context.Context, db *sql.DB) string {
+func TomorrowDuties(ctx context.Context, db *sql.DB) (string, error) {
 	rows, e := db.QueryContext(ctx, `
 		select t.dt, t.tabel_type, u.username, coalesce(p.gender, 0), coalesce(p.tg_id, 0), coalesce(p.sched_id, 0)
 		from tabel t
@@ -184,7 +184,7 @@ func TomorrowDuties(ctx context.Context, db *sql.DB) string {
 		order by t.tabel_type
 	`)
 	if e != nil {
-		return ""
+		return "", e
 	}
 	defer rows.Close()
 
@@ -204,20 +204,20 @@ func TomorrowDuties(ctx context.Context, db *sql.DB) string {
 		}
 	}
 	if res == "" {
-		return ""
+		return "", nil
 	}
-	return "<b>👷 Дежурные на завтра</b>\n" + types.Iif(strings.Count(res, "\n") > 1, "\n", "") + res
+	return "<b>👷 Дежурные на завтра</b>\n" + types.Iif(strings.Count(res, "\n") > 1, "\n", "") + res, nil
 }
 
-func HolidaysCount(ctx context.Context, db *sql.DB) int {
+func HolidaysCount(ctx context.Context, db *sql.DB) (int, error) {
 	pl, e := DutiesList(ctx, db, 0)
 	if e != nil {
-		return 0
+		return 0, e
 	}
 
 	t := types.ClearTime(time.Now())
 	if _, ok := (*pl)[t]; ok { //если мы уже внутри выходных, то не реагируем
-		return 0
+		return 0, nil
 	}
 
 	var res int
@@ -228,7 +228,7 @@ func HolidaysCount(ctx context.Context, db *sql.DB) int {
 		res++
 	}
 	if res == 2 && t.AddDate(0, 0, 1).Weekday() == time.Saturday { //если впереди 2 выходных и завтра суббота, то не реагируем
-		return 0
+		return 0, nil
 	}
-	return res
+	return res, nil
 }
