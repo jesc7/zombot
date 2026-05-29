@@ -414,6 +414,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 					}
 					return
 				}
+
 				env, e := shared.Pack(shared.TypeMessageDuties, pay)
 				if e != nil {
 					return
@@ -461,6 +462,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			go func() { //duties delta
 				d, e := duties.DutiesList(ctx, ws.db, 0)
 				if e != nil {
+					log.Println("duties.DutiesList error:", e)
 					return
 				}
 				defer func() { delta = d }()
@@ -475,8 +477,11 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 		case <-t9m.C: //every 9 minutes
+			log.Println("Ticker t9m")
 
 			go func() { //cf tasks
+				log.Println("checks.CheckCFResources")
+
 				if s := checks.CheckCFResources(cfg.CFChecks); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
@@ -487,9 +492,18 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 		case <-t30m.C: //every 30 minutes
+			log.Println("Ticker t30m")
 
 			go func() { //critical tasks
-				if s := planner.CriticalTasks(ctx, ws.db, 30); s != "" {
+				log.Println("planner.CriticalTasks")
+
+				s, e := planner.CriticalTasks(ctx, ws.db, 30)
+				if e != nil {
+					log.Println("planner.CriticalTasks error:", e)
+					return
+				}
+
+				if s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
 						return
@@ -499,6 +513,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 			go func() { //check resources
+				log.Println("checks.CheckResources")
+
 				if s := checks.CheckResources(cfg.Checks); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {

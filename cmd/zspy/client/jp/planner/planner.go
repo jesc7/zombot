@@ -143,7 +143,7 @@ func Birthdays(ctx context.Context, db *sql.DB, days int) ([]shared.Birthday, er
 	return res, nil
 }
 
-func CriticalTasks(ctx context.Context, db *sql.DB, minutes int) string {
+func CriticalTasks(ctx context.Context, db *sql.DB, minutes int) (string, error) {
 	rows, e := db.QueryContext(ctx, `
 		select r.id, r.insertdt, r.point_id, p.caption, r.atext, datediff(minute, r.insertdt, current_timestamp), r.clientinfo
 		from srq$requests r
@@ -157,7 +157,7 @@ func CriticalTasks(ctx context.Context, db *sql.DB, minutes int) string {
 			order by r.insertdt desc
 	`, minutes, minutes*2)
 	if e != nil {
-		return ""
+		return "", e
 	}
 	defer rows.Close()
 
@@ -176,9 +176,9 @@ func CriticalTasks(ctx context.Context, db *sql.DB, minutes int) string {
 		res = fmt.Sprintf("%s\n\n#<b>%d</b> (%d мин.) %s%s\n%s", res, id, dur, caption, clientInfo, text)
 	}
 	if res == "" {
-		return ""
+		return "", nil
 	}
-	return "⚡ <b>Срочные заявки</b>" + res
+	return "⚡ <b>Срочные заявки</b>" + res, nil
 }
 
 var sowTime time.Time
