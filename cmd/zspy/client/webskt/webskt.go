@@ -200,9 +200,12 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 		case <-t08_00.C: //everyday 8:00
 			t08_00.Reset(24 * time.Hour)
+			log.Println("Timer t08_00")
 
 			go func() { //update phone base
-				phones.PbUpdate(ws.cwd, []string{})
+				if e := phones.PbUpdate(ws.cwd, []string{}); e != nil {
+					log.Println("phones.PbUpdate error:", e)
+				}
 			}()
 
 			go func() { //checks EC
@@ -217,6 +220,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 		case <-t08_10.C: //everyday 8:10
 			t08_10.Reset(24 * time.Hour)
+			log.Println("Timer t08_10")
 
 			go func() { //birthdays today
 				var (
@@ -256,6 +260,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 		case <-t09_00.C: //everyday 9:00
 			t09_00.Reset(24 * time.Hour)
+			log.Println("Timer t09_00")
 
 			go func() { //who's absent today
 				pay, e := planner.Absents(ctx, ws.db)
@@ -281,6 +286,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 		case <-t11_00.C: //everyday 11:00
 			t11_00.Reset(24 * time.Hour)
+			log.Println("Timer t11_00")
 
 			go func() { //ratings
 				if time.Now().Weekday() == time.Friday {
@@ -308,6 +314,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 		case <-t18_00.C: //everyday 18:00
 			t18_00.Reset(24 * time.Hour)
+			log.Println("Timer t18_00")
 
 			go func() { //holidays detector
 				if i := duties.HolidaysCount(ctx, ws.db); i > 0 {
@@ -323,6 +330,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 		case <-t20_00.C: //everyday 20:00
 			t20_00.Reset(24 * time.Hour)
+			log.Println("Timer t20_00")
 
 			go func() { //tomorrow duties
 				if s := duties.TomorrowDuties(ctx, ws.db); s != "" {
