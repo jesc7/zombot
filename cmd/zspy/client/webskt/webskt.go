@@ -438,7 +438,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 					log.Println("db.PingContext error:", e)
 					return
 				}
-
 			}()
 
 			go func() { //End-of-work list
