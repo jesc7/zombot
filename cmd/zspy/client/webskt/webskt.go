@@ -21,12 +21,13 @@ import (
 )
 
 type WebSocketClient struct {
-	host   url.URL
-	header http.Header
-	ch     chan shared.Envelope
-	conn   *websocket.Conn
-	db     *sql.DB
-	cwd    string
+	host        url.URL
+	header      http.Header
+	ch          chan shared.Envelope
+	conn        *websocket.Conn
+	db          *sql.DB
+	dbConnected bool
+	cwd         string
 }
 
 func NewWebSocketClient(cfg types.Config, cwd string) *WebSocketClient {
@@ -54,6 +55,7 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) (e error) 
 	if e != nil {
 		return e
 	}
+	ws.dbConnected = true
 	defer ws.db.Close()
 
 	go func() {
@@ -66,11 +68,9 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) (e error) 
 				return
 
 			case <-t.C:
-				if e := ws.db.PingContext(ctx); e != nil {
-					//log.Println("db.PingContext error:", e)
-					for e := ws.db.PingContext(ctx); e != nil; {
-
-					}
+				for e := ws.db.PingContext(ctx); e != nil; {
+					log.Println("db.PingContext error:", e)
+					time.Sleep(5 * time.Minute)
 				}
 			}
 		}
