@@ -57,10 +57,13 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) (e error) 
 	defer ws.db.Close()
 
 	go func() {
+		t1m := time.NewTicker(1 * time.Minute)
+		defer t1m.Stop()
 		for {
 			select {
 			case <-ctx.Done():
 				return
+			case <-t1m.C:
 			}
 		}
 	}()
