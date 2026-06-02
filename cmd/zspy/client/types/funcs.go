@@ -1,6 +1,7 @@
 package types
 
 import (
+	"context"
 	"errors"
 	"io"
 	"math/rand/v2"
@@ -331,4 +332,13 @@ func (c *Cache[K, V]) Set(key K, value V) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.items[key] = value
+}
+
+func SleepContext(ctx context.Context, d time.Duration) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-time.After(d):
+		return nil
+	}
 }
