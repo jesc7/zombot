@@ -56,6 +56,15 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) (e error) 
 	}
 	defer ws.db.Close()
 
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
 	ws.ch = make(chan shared.Envelope)
 	defer close(ws.ch)
 
