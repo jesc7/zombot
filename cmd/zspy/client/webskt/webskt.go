@@ -21,13 +21,12 @@ import (
 )
 
 type WebSocketClient struct {
-	host        url.URL
-	header      http.Header
-	ch          chan shared.Envelope
-	conn        *websocket.Conn
-	db          *sql.DB
-	dbConnected bool
-	cwd         string
+	host   url.URL
+	header http.Header
+	ch     chan shared.Envelope
+	conn   *websocket.Conn
+	db     *sql.DB
+	cwd    string
 }
 
 func NewWebSocketClient(cfg types.Config, cwd string) *WebSocketClient {
@@ -55,7 +54,6 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) (e error) 
 	if e != nil {
 		return e
 	}
-	ws.dbConnected = true
 	defer ws.db.Close()
 
 	go func() {
