@@ -57,8 +57,9 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) (e error) 
 	defer ws.db.Close()
 
 	go func() {
-		const d = 1 * time.Minute
-		t := time.NewTicker(d)
+		var mult time.Duration = 1
+		dur := mult * time.Minute
+		t := time.NewTicker(dur)
 		defer t.Stop()
 
 		for {
@@ -69,13 +70,16 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) (e error) 
 			case <-t.C:
 				switch e := ws.db.PingContext(ctx); e {
 				case nil:
-					t.Reset(d)
+					mult = 1
 				case context.Canceled:
 					return
 				default:
 					log.Println("db.PingContext error:", e)
-					t.Reset(d * 3)
+					if mult < 5 {
+						mult++
+					}
 				}
+				t.Reset(mult * dur)
 			}
 		}
 	}()
