@@ -67,6 +67,10 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) (e error) 
 				return
 
 			case <-t.C:
+				switch e := ws.db.PingContext(ctx); e {
+				case nil:
+				}
+
 				for e := ws.db.PingContext(ctx); e != nil && !errors.Is(e, context.Canceled); {
 					log.Println("db.PingContext error:", e)
 					types.SleepContext(ctx, 5*time.Minute)
