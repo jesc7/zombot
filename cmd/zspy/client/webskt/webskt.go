@@ -57,13 +57,15 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) (e error) 
 	defer ws.db.Close()
 
 	go func() {
-		t1m := time.NewTicker(1 * time.Minute)
-		defer t1m.Stop()
+		t := time.NewTicker(1 * time.Minute)
+		defer t.Stop()
+
 		for {
 			select {
 			case <-ctx.Done():
 				return
-			case <-t1m.C:
+
+			case <-t.C:
 				if e := ws.db.PingContext(ctx); e != nil {
 					log.Println("db.PingContext error:", e)
 					return
@@ -448,13 +450,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 		case <-t1m.C: //every 1 minutes
-
-			go func() { //check db connect
-				if e := ws.db.PingContext(ctx); e != nil {
-					log.Println("db.PingContext error:", e)
-					return
-				}
-			}()
 
 			go func() { //End-of-work list
 				if t := time.Now().Hour(); t < 14 || t > 18 {
