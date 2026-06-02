@@ -3,7 +3,6 @@ package webskt
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -58,7 +57,8 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) (e error) 
 	defer ws.db.Close()
 
 	go func() {
-		t := time.NewTicker(1 * time.Minute)
+		const d = 1 * time.Minute
+		t := time.NewTicker(d)
 		defer t.Stop()
 
 		for {
@@ -69,11 +69,12 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) (e error) 
 			case <-t.C:
 				switch e := ws.db.PingContext(ctx); e {
 				case nil:
-				}
-
-				for e := ws.db.PingContext(ctx); e != nil && !errors.Is(e, context.Canceled); {
+					t.Reset(d)
+				case context.Canceled:
+					return
+				default:
 					log.Println("db.PingContext error:", e)
-					types.SleepContext(ctx, 5*time.Minute)
+					t.Reset(d * 3)
 				}
 			}
 		}
