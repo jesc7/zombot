@@ -64,6 +64,10 @@ func (ws *WebSocketClient) Run(ctx context.Context, cfg types.Config) (e error) 
 			case <-ctx.Done():
 				return
 			case <-t1m.C:
+				if e := ws.db.PingContext(ctx); e != nil {
+					log.Println("db.PingContext error:", e)
+					return
+				}
 			}
 		}
 	}()
