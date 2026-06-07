@@ -55,6 +55,8 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 							defer q.mu.Unlock()
 
 							select {
+							case <-ctx.Done():
+								return
 							case q.Q <- q.q[0]:
 							}
 							q.q = q.q[1:]
