@@ -59,6 +59,7 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 	}
 	return &Bot{
 		bot:    bot,
+		token:  cfg.TG.Token,
 		me:     me,
 		Q:      queue.NewQ(ctx, rate.Limit(5)),
 		chatID: cfg.TG.ChatID,
@@ -109,7 +110,7 @@ func (bot *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, err
 		return []byte{}, "", e
 	}
 
-	resp, e := ctypes.GetWithContext(ctx, nil, "https://api.telegram.org/file/bot"+bot.cfg.TG.Token+"/"+f.FilePath)
+	resp, e := ctypes.GetWithContext(ctx, nil, "https://api.telegram.org/file/bot"+bot.token+"/"+f.FilePath)
 	if e != nil {
 		return []byte{}, "", e
 	}
@@ -188,6 +189,13 @@ out:
 				b.bot.SendMessage(ctx, mt.
 					WithParseMode(tg.ModeHTML),
 				)
+
+			case *tg.GetFileParams:
+				var r *tg.File
+				if r, e = b.bot.GetFile(ctx, mt); e == nil && o.evt != nil {
+					o.evt(r, e)
+				}
+
 			}
 
 			if wo != nil {
