@@ -53,7 +53,10 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 							q.lim.Wait(ctx)
 							q.mu.Lock()
 							defer q.mu.Unlock()
-							q.Q <- q.q[0]
+
+							select {
+							case q.Q <- q.q[0]:
+							}
 							q.q = q.q[1:]
 						}()
 						if i%10 == 0 || ctx.Err() != nil {
