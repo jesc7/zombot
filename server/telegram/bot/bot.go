@@ -1,10 +1,13 @@
 package bot
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"mime"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strconv"
 
 	tg "github.com/mymmrac/telego"
@@ -23,6 +26,7 @@ var otherMessengers = ctypes.Filter(types.ALL_MESSENGERS, func(v string) bool { 
 
 type Bot struct {
 	bot    *tg.Bot
+	token  string
 	me     *tg.User
 	Q      *queue.Queue
 	chatID int64
@@ -69,22 +73,43 @@ func (b *Bot) SendText(ctx context.Context, text string) {
 	}, queue.PRIORITY_NORMAL)
 }
 
+func R[T *tg.ForumTopic | *tg.Message | *tg.File](a []any, i int) (res T) {
+	if len(a) > i && a[i] != nil {
+		switch v := a[i].(type) {
+		case *tg.ForumTopic:
+			res = any(v).(T)
+		case *tg.Message:
+			res = any(v).(T)
+		case *tg.File:
+			res = any(v).(T)
+		}
+	}
+	return
+}
+
+func E(a []any, i int) error {
+	if len(a) > i && a[i] != nil {
+		return a[i].(error)
+	}
+	return nil
+}
+
 func (bot *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, error) {
 	var (
 		e error
 		f *tg.File
 	)
-	bot.Queue.Wait(Obj{
-		obj: &tg.GetFileParams{
+	bot.Q.Wait(ctx, &queue.WaitObj{
+		O: &tg.GetFileParams{
 			FileID: fileID,
 		},
-		evt: func(a ...any) { f, e = R[*tg.File](a, 0), E(a, 1) },
+		OnOk: func(a ...any) { f, e = R[*tg.File](a, 0), E(a, 1) },
 	}, queue.PRIORITY_NORMAL)
 	if e != nil {
 		return []byte{}, "", e
 	}
 
-	resp, e := util.GetWithContext(ctx, nil, "https://api.telegram.org/file/bot"+bot.cfg.TG.Token+"/"+f.FilePath)
+	resp, e := ctypes.GetWithContext(ctx, nil, "https://api.telegram.org/file/bot"+bot.cfg.TG.Token+"/"+f.FilePath)
 	if e != nil {
 		return []byte{}, "", e
 	}
@@ -192,7 +217,7 @@ out:
 					caption := "<b><u>Telegram</u> | " + msg.From.FirstName + "</b>\n"
 
 					if msg.Photo != nil {
-						mm := types.UniMessageMedia{}
+						/*mm := types.UniMessageMedia{}
 						mm.Media = append(mm.Media, types.UniMedia{
 							Caption: msg.Caption,
 							Data:
@@ -202,7 +227,7 @@ out:
 						b.b.Write(v, types.UniMessageMedia{
 							Media: []types.UniImage{},
 							Text:  caption + update.Message.Text,
-						})
+						})*/
 					} else if msg.Audio != nil {
 
 					} else if msg.Voice != nil {

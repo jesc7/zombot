@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"math/rand/v2"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -341,4 +342,15 @@ func SleepContext(ctx context.Context, d time.Duration) error {
 	case <-time.After(d):
 		return nil
 	}
+}
+
+func GetWithContext(ctx context.Context, c *http.Client, url string) (*http.Response, error) {
+	if c == nil {
+		c = &http.Client{Timeout: 30 * time.Second}
+	}
+	req, e := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if e != nil {
+		return nil, e
+	}
+	return c.Do(req)
 }
