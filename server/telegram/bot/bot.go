@@ -70,9 +70,14 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 	}, nil
 }
 
-func (b *Bot) SendText(ctx context.Context, text string) {
+func (b *Bot) SendText(ctx context.Context, core types.UniCore) {
+	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
+		tu.Entity(core.Caption),
+		tu.Entity(core.Text),
+	})...)
 	b.Q.Add(&queue.WaitObj{
-		O: tu.Message(tu.ID(b.chatID), text),
+		O: tu.Message(tu.ID(b.chatID), text).
+			WithEntities(entities...),
 	}, queue.PRIORITY_NORMAL)
 }
 
@@ -181,7 +186,7 @@ out:
 			case types.IUniMessage:
 				switch um := env.(type) {
 				case types.UniMessageText:
-					b.SendText(ctx, um.Text)
+					b.SendText(ctx, um.UniCore)
 
 				case types.UniMessageMedia:
 					switch media := um.Media[0].(type) {
