@@ -13,8 +13,6 @@ import (
 	"github.com/jesc7/zombot/server/types"
 )
 
-var BUS_MESSENGERS = []string{types.BUS_BOTMAX, types.BUS_BOTTG}
-
 func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, ch chan any) {
 	ws.zspy = conn
 	defer func() {
@@ -266,7 +264,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 				}
 			}
 
-			for _, v := range BUS_MESSENGERS {
+			for _, v := range types.ALL_MESSENGERS {
 				ws.b.Write(v, env)
 			}
 		}

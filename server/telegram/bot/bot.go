@@ -18,7 +18,8 @@ import (
 	"github.com/jesc7/zombot/server/types"
 )
 
-var otherMessengers = ctypes.Filter[string](types.ALL_MESSENGERS, func(v string) bool { return v != types.BUS_BOTTG })
+var myName = types.BUS_BOTTG
+var otherMessengers = ctypes.Filter(types.ALL_MESSENGERS, func(v string) bool { return v != myName })
 
 type Bot struct {
 	bot    *tg.Bot
@@ -58,7 +59,7 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 		Q:      queue.NewQ(ctx, rate.Limit(5)),
 		chatID: cfg.TG.ChatID,
 		b:      b,
-		ch:     b.Register(types.BUS_BOTTG),
+		ch:     b.Register(myName),
 	}, nil
 }
 
@@ -153,7 +154,7 @@ out:
 					return
 				}
 				//отсеиваем команды
-				if types.IsCommand(b.b, types.BUS_BOTTG, strconv.FormatInt(update.Message.From.ID, 10), update.Message.Text) {
+				if types.IsCommand(b.b, myName, strconv.FormatInt(update.Message.From.ID, 10), update.Message.Text) {
 					return
 				}
 

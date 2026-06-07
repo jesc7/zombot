@@ -12,13 +12,15 @@ import (
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
 	"golang.org/x/time/rate"
 
+	ctypes "github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
 	"github.com/jesc7/zombot/server/queue"
 	"github.com/jesc7/zombot/server/types"
 )
 
-var otherMessengers = []string{types.BUS_BOTTG}
+var myName = types.BUS_BOTMAX
+var otherMessengers = ctypes.Filter(types.ALL_MESSENGERS, func(v string) bool { return v != myName })
 
 type Bot struct {
 	bot    *maxbot.Api
@@ -49,7 +51,7 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 		Q:      queue.NewQ(ctx, rate.Limit(5)),
 		chatID: cfg.Max.ChatID,
 		b:      b,
-		ch:     b.Register(types.BUS_BOTMAX),
+		ch:     b.Register(myName),
 	}, e
 }
 
@@ -133,7 +135,7 @@ out:
 
 					//отсеиваем команды
 					if len(upd.Message.Body.Attachments) == 0 &&
-						types.IsCommand(b.b, types.BUS_BOTMAX, strconv.FormatInt(upd.GetUserID(), 10), upd.GetText()) {
+						types.IsCommand(b.b, myName, strconv.FormatInt(upd.GetUserID(), 10), upd.GetText()) {
 						return
 					}
 
