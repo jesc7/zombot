@@ -93,27 +93,6 @@ func (b *Bot) SendImage(ctx context.Context, core types.UniCore, media types.Uni
 	}, queue.PRIORITY_NORMAL)
 }
 
-func R[T *tg.ForumTopic | *tg.Message | *tg.File](a []any, i int) (res T) {
-	if len(a) > i && a[i] != nil {
-		switch v := a[i].(type) {
-		case *tg.ForumTopic:
-			res = any(v).(T)
-		case *tg.Message:
-			res = any(v).(T)
-		case *tg.File:
-			res = any(v).(T)
-		}
-	}
-	return
-}
-
-func E(a []any, i int) error {
-	if len(a) > i && a[i] != nil {
-		return a[i].(error)
-	}
-	return nil
-}
-
 func (b *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, error) {
 	var (
 		e error
@@ -123,7 +102,10 @@ func (b *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, error
 		O: &tg.GetFileParams{
 			FileID: fileID,
 		},
-		OnOk: func(a ...any) { f, e = R[*tg.File](a, 0), E(a, 1) },
+		OnOk: func(a ...any) {
+			defer recover()
+			f, e = a[0].(*tg.File), a[1].(error)
+		},
 	}, queue.PRIORITY_NORMAL)
 	if e != nil {
 		return []byte{}, "", e
