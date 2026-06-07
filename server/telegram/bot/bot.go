@@ -164,7 +164,11 @@ out:
 					caption := "<b><u>Telegram</u> | " + msg.From.FirstName + "</b>\n"
 
 					if msg.Photo != nil {
-						b.b.Write(v, types.UniMessageText{
+						mm := types.UniMessageMedia{}
+						mm.
+						media := append( ) types.
+						b.b.Write(v, types.UniMessageMedia{
+							Media: []types.UniImage{},
 							Text: caption + update.Message.Text,
 						})
 					} else if msg.Audio != nil {
