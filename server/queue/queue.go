@@ -105,6 +105,25 @@ func (q *Queue) Add(o any, priority Priority) {
 	q.cond.Signal()
 }
 
+func (q *Queue) Wait(ctx context.Context, wo *WaitObj, priority Priority) error {
+	wo.wg = &sync.WaitGroup{}
+	wo.wg.Add(1)
+	q.Add(wo, priority)
+
+	done := make(chan struct{})
+	go func() {
+		wo.wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
 type WaitObj struct {
 	O    any
 	OnOk func(args ...any)
@@ -113,11 +132,4 @@ type WaitObj struct {
 
 func (wo *WaitObj) Done() {
 	wo.wg.Done()
-}
-
-func (q *Queue) Wait(wo *WaitObj, priority Priority) {
-	wo.wg = &sync.WaitGroup{}
-	wo.wg.Add(1)
-	q.Add(wo, priority)
-	wo.wg.Wait()
 }
