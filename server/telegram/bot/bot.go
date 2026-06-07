@@ -71,8 +71,11 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 }
 
 func (b *Bot) SendText(ctx context.Context, core types.UniCore) {
+	if len(core.Caption) != 0 {
+		core.Caption += "\n"
+	}
 	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
-		tu.Entity(core.Caption),
+		tu.Entity(core.Caption + "\n"),
 		tu.Entity(core.Text),
 	})...)
 	b.Q.Add(&queue.WaitObj{
@@ -83,7 +86,7 @@ func (b *Bot) SendText(ctx context.Context, core types.UniCore) {
 
 func (b *Bot) SendImage(ctx context.Context, core types.UniCore, media types.UniImage) {
 	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
-		tu.Entity(core.Caption),
+		tu.Entity(core.Caption + "\n"),
 		tu.Entity(core.Text),
 	})...)
 	b.Q.Add(&queue.WaitObj{
@@ -179,7 +182,9 @@ out:
 					if e != nil {
 						continue
 					}
-					b.SendText(ctx, m.Text)
+					b.SendText(ctx, types.UniCore{
+						Text: m.Text,
+					})
 				}
 
 			// пакеты других мессенджеров или внутренние
@@ -249,7 +254,7 @@ out:
 
 				//остальные сообщения пересылаем в связные мессенджеры
 				for _, v := range otherMessengers {
-					caption := "<b><u>Telegram</u> | " + msg.From.FirstName + "</b>\n"
+					caption := "<b><u>Telegram</u> | " + msg.From.FirstName + "</b>"
 					core := types.UniCore{
 						Caption: caption,
 					}

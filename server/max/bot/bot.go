@@ -141,8 +141,14 @@ out:
 
 					//остальные сообщения пересылаем в связные мессенджеры
 					for _, v := range otherMessengers {
+						caption := "<b><u>Max</u> | " + upd.Message.Sender.Name + "</b>"
+						core := types.UniCore{
+							Caption: caption,
+						}
+
+						core.Text = upd.GetText()
 						b.b.Write(v, types.UniMessageText{
-							Text: "<b><u>Max</u> | " + upd.Message.Sender.Name + "</b>\n" + upd.GetText(),
+							UniCore: core,
 						})
 					}
 				}()
