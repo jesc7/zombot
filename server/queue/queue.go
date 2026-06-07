@@ -3,7 +3,6 @@ package queue
 import (
 	"context"
 	"sync"
-	"time"
 
 	"golang.org/x/time/rate"
 )
@@ -31,45 +30,45 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 		lim: rate.NewLimiter(limit, int(limit)),
 		Q:   make(chan any, 1),
 	}
+	q.cond = sync.NewCond(q.mu)
 
 	go func() {
 		defer func() {
 			if recover() == nil {
+				q.mu.Lock()
 				q.stop = true
 				close(q.Q)
+				q.mu.Unlock()
 			}
 		}()
 
 		for {
+			if ctx.Err() != nil {
+				return
+			}
+
+			q.mu.Lock()
+			for len(q.q) == 0 && ctx.Err() == nil {
+				q.cond.Wait()
+			}
+
+			if ctx.Err() != nil {
+				q.mu.Unlock()
+				return
+			}
+
+			item := q.q[0]
+			q.q = q.q[1:]
+			q.mu.Unlock()
+
+			if err := q.lim.Wait(ctx); err != nil {
+				return
+			}
+
 			select {
 			case <-ctx.Done():
 				return
-
-			default:
-			out:
-				switch len(q.q) != 0 {
-				case true:
-					for i := 1; len(q.q) != 0; i++ {
-						func() {
-							q.lim.Wait(ctx)
-							q.mu.Lock()
-							defer q.mu.Unlock()
-
-							select {
-							case <-ctx.Done():
-								return
-							case q.Q <- q.q[0]:
-							}
-							q.q = q.q[1:]
-						}()
-						if i%10 == 0 || ctx.Err() != nil {
-							break out
-						}
-					}
-
-				default:
-					time.Sleep(500 * time.Millisecond)
-				}
+			case q.Q <- item:
 			}
 		}
 	}()
@@ -79,8 +78,8 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 
 func (q *Queue) Add(o any, priority Priority) {
 	q.mu.Lock()
-	defer q.mu.Unlock()
 	if q.stop {
+		q.mu.Unlock()
 		return
 	}
 
@@ -96,6 +95,9 @@ func (q *Queue) Add(o any, priority Priority) {
 	default:
 		q.q = append(q.q, o)
 	}
+
+	q.mu.Unlock()
+	q.cond.Signal()
 }
 
 type WaitObj struct {
