@@ -221,20 +221,25 @@ out:
 					caption := "<b><u>Telegram</u> | " + msg.From.FirstName + "</b>\n"
 
 					if msg.Photo != nil {
-						file, ext, e := b.GetFile(ctx, msg.Photo[len(msg.Photo)-1].FileID)
+						file, _, e := b.GetFile(ctx, msg.Photo[len(msg.Photo)-1].FileID)
 						if e != nil {
 							return
 						}
 
-						mm := types.UniMessageMedia{}
-						media := append(mm.Media, types.UniMedia{
-							Caption: msg.Caption,
-							Data:    file,
-						})
+						media := []types.UniMedia{
+							{
+								Caption: msg.Caption,
+								Data:    file,
+							},
+						}
 
 						b.b.Write(v, types.UniMessageMedia{
-							Media: []types.UniImage{},
-							Text:  caption + update.Message.Text,
+							Media: []types.UniMedia{
+							{
+								Caption: msg.Caption,
+								Data:    file,
+							},
+							//Text:  caption + update.Message.Text,
 						})
 					} else if msg.Audio != nil {
 
