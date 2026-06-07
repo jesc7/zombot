@@ -192,16 +192,12 @@ out:
 
 			case *tg.GetFileParams:
 				var r *tg.File
-				if r, e = b.bot.GetFile(ctx, mt); e == nil && o.evt != nil {
-					o.evt(r, e)
+				if r, e = b.bot.GetFile(ctx, mt); wo != nil && wo.OnOk != nil {
+					wo.OnOk(r, e)
 				}
-
 			}
 
 			if wo != nil {
-				if wo.OnOk != nil {
-					wo.OnOk()
-				}
 				wo.Done()
 			}
 
@@ -225,17 +221,21 @@ out:
 					caption := "<b><u>Telegram</u> | " + msg.From.FirstName + "</b>\n"
 
 					if msg.Photo != nil {
-						/*mm := types.UniMessageMedia{}
-						mm.Media = append(mm.Media, types.UniMedia{
-							Caption: msg.Caption,
-							Data:
+						file, ext, e := b.GetFile(ctx, msg.Photo[len(msg.Photo)-1].FileID)
+						if e != nil {
+							return
+						}
 
+						mm := types.UniMessageMedia{}
+						media := append(mm.Media, types.UniMedia{
+							Caption: msg.Caption,
+							Data:    file,
 						})
 
 						b.b.Write(v, types.UniMessageMedia{
 							Media: []types.UniImage{},
 							Text:  caption + update.Message.Text,
-						})*/
+						})
 					} else if msg.Audio != nil {
 
 					} else if msg.Voice != nil {
