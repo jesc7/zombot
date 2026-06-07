@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"path/filepath"
 	"strconv"
+	"strings"
+	"time"
 
 	tg "github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
@@ -74,23 +76,16 @@ func (b *Bot) SendText(ctx context.Context, text string) {
 	}, queue.PRIORITY_NORMAL)
 }
 
-func (b *Bot) SendImage(ctx context.Context, media types.UniImage) (m *tg.Message, e error) {
-	/*text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
-		tu.Entity(caption + "\n").Bold().Italic(),
-		tu.Entity(x.GetCaption()),
+func (b *Bot) SendImage(ctx context.Context, core types.UniCore, media types.UniImage) {
+	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
+		tu.Entity(core.Caption),
+		tu.Entity(core.Text),
 	})...)
 	b.Q.Add(&queue.WaitObj{
 		O: tu.Photo(tu.ID(b.chatID), tu.FileFromBytes(media.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1))).
 			WithCaption(text).
-			WithCaptionEntities(entities...).
-			WithReplyParameters(&tg.ReplyParameters{
-				ChatID:                   tu.ID(gr.ID),
-				MessageID:                t.Start,
-				AllowSendingWithoutReply: true,
-			}),
-		evt: func(a ...any) { m, e = R[*tg.Message](a, 0), E(a, 1) },
-	}, queue.PRIORITY_NORMAL)*/
-	return
+			WithCaptionEntities(entities...),
+	}, queue.PRIORITY_NORMAL)
 }
 
 func R[T *tg.ForumTopic | *tg.Message | *tg.File](a []any, i int) (res T) {
@@ -189,10 +184,9 @@ out:
 					b.SendText(ctx, um.Text)
 
 				case types.UniMessageMedia:
-					core := um.UniCore
 					switch media := um.Media[0].(type) {
 					case types.UniImage:
-						tu.Photo(tu.ID(b.chatID))
+						b.SendImage(ctx, um.UniCore, media)
 					}
 				}
 			}
