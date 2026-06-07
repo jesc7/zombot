@@ -23,6 +23,8 @@ const (
 	BUS_BOTMAX = "bot_max"
 	BUS_BOTTG  = "bot_tg"
 	BUS_WSSPY  = "ws_spy"
+
+	ALL_MESSENGERS = []string{BUS_BOTMAX, BUS_BOTTG}
 )
 
 type ClientType string

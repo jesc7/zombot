@@ -53,7 +53,7 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 	}, e
 }
 
-func (b *Bot) SendText(text string) {
+func (b *Bot) SendText(ctx context.Context, text string) {
 	b.Q.Add(&queue.WaitObj{
 		O: maxbot.NewMessage().
 			SetText(text),
@@ -81,33 +81,44 @@ out:
 					if e != nil {
 						continue
 					}
-					b.SendText(m.Text)
+					b.SendText(ctx, m.Text)
 				}
 
 			// пакеты других мессенджеров или внутренние
 			case types.IUniMessage:
 				switch um := env.(type) {
 				case types.UniMessageText:
-					b.SendText(um.Text)
+					b.SendText(ctx, um.Text)
 				}
 			}
 
 		case msg := <-b.Q.C: //разгребаем локальную очередь сообщений
-			wo, ok := msg.(*queue.WaitObj)
-			if !ok {
-				break
+			var (
+				wo  *queue.WaitObj
+				obj any
+			)
+			switch o := msg.(type) {
+			case *queue.WaitObj:
+				wo = o
+				obj = wo.O
+			case any:
+				obj = o
 			}
-			switch mt := wo.O.(type) {
+
+			switch mt := obj.(type) {
 			case *maxbot.Message:
 				b.bot.Messages.Send(ctx, mt.
 					SetChat(b.chatID).
 					SetFormat(schemes.HTML),
 				)
 			}
-			if wo.OnOk != nil {
-				wo.OnOk()
+
+			if wo != nil {
+				if wo.OnOk != nil {
+					wo.OnOk()
+				}
+				wo.Done()
 			}
-			wo.Done()
 
 		case update := <-b.bot.GetUpdates(ctx): //приехали апдейты с сервера
 			switch upd := update.(type) {
