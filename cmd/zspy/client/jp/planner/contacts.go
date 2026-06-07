@@ -34,6 +34,7 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 				select {
 				case <-ctx.Done():
 					return
+
 				case <-t5m.C:
 					for k, v := range searches {
 						if time.Now().After(v.Until) {

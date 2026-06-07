@@ -17,12 +17,14 @@ const (
 
 // Queue очередь с ограничителем частоты выборки
 type Queue struct {
-	Q    chan any
-	q    []any
-	stop bool
-	mu   *sync.Mutex
-	cond *sync.Cond
-	lim  *rate.Limiter
+	Q     chan any
+	qCrit []any
+	qHigh []any
+	qNorm []any
+	stop  bool
+	mu    sync.Mutex
+	cond  *sync.Cond
+	lim   *rate.Limiter
 }
 
 func NewQ(ctx context.Context, limit rate.Limit) *Queue {
@@ -30,16 +32,14 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 		lim: rate.NewLimiter(limit, int(limit)),
 		Q:   make(chan any, 1),
 	}
-	q.cond = sync.NewCond(q.mu)
+	q.cond = sync.NewCond(&q.mu)
 
 	go func() {
 		defer func() {
-			if recover() == nil {
-				q.mu.Lock()
-				q.stop = true
-				close(q.Q)
-				q.mu.Unlock()
-			}
+			q.mu.Lock()
+			q.stop = true
+			close(q.Q)
+			q.mu.Unlock()
 		}()
 
 		for {
@@ -48,7 +48,7 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 			}
 
 			q.mu.Lock()
-			for len(q.q) == 0 && ctx.Err() == nil {
+			for (len(q.qCrit)+len(q.qHigh)+len(q.qNorm)) == 0 && ctx.Err() == nil {
 				q.cond.Wait()
 			}
 
@@ -57,8 +57,17 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 				return
 			}
 
-			item := q.q[0]
-			q.q = q.q[1:]
+			var item any
+			if len(q.qCrit) > 0 {
+				item = q.qCrit[0]
+				q.qCrit = q.qCrit[1:]
+			} else if len(q.qHigh) > 0 {
+				item = q.qHigh[0]
+				q.qHigh = q.qHigh[1:]
+			} else if len(q.qNorm) > 0 {
+				item = q.qNorm[0]
+				q.qNorm = q.qNorm[1:]
+			}
 			q.mu.Unlock()
 
 			if err := q.lim.Wait(ctx); err != nil {
@@ -85,15 +94,11 @@ func (q *Queue) Add(o any, priority Priority) {
 
 	switch priority {
 	case PRIORITY_CRITICAL:
-		q.q = append([]any{o}, q.q...)
+		q.qCrit = append(q.qCrit, o)
 	case PRIORITY_HIGH:
-		if half := len(q.q) / 2; half == 0 {
-			q.q = append(q.q, o)
-		} else {
-			q.q = append(q.q[0:half], append([]any{o}, q.q[half:]...)...)
-		}
+		q.qHigh = append(q.qHigh, o)
 	default:
-		q.q = append(q.q, o)
+		q.qNorm = append(q.qNorm, o)
 	}
 
 	q.mu.Unlock()
@@ -106,8 +111,8 @@ type WaitObj struct {
 	wg   *sync.WaitGroup
 }
 
-func (o *WaitObj) Done() {
-	o.wg.Done()
+func (wo *WaitObj) Done() {
+	wo.wg.Done()
 }
 
 func (q *Queue) Wait(wo *WaitObj, priority Priority) {
