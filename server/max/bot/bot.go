@@ -146,10 +146,17 @@ out:
 							Caption: caption,
 						}
 
-						core.Text = upd.GetText()
-						b.b.Write(v, types.UniMessageText{
-							UniCore: core,
-						})
+						if len(upd.Message.Body.Attachments) != 0 {
+							for _, att := range upd.Message.Body.Attachments {
+
+							}
+
+						} else {
+							core.Text = upd.GetText()
+							b.b.Write(v, types.UniMessageText{
+								UniCore: core,
+							})
+						}
 					}
 				}()
 			}
