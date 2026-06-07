@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"path/filepath"
 	"strconv"
+	"strings"
+	"time"
 
 	tg "github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
@@ -72,6 +74,25 @@ func (b *Bot) SendText(ctx context.Context, text string) {
 	b.Q.Add(&queue.WaitObj{
 		O: tu.Message(tu.ID(b.chatID), text),
 	}, queue.PRIORITY_NORMAL)
+}
+
+func (bot *Bot) SendImage(ctx context.Context) (m *tg.Message, e error) {
+	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
+		tu.Entity(caption + "\n").Bold().Italic(),
+		tu.Entity(x.GetCaption()),
+	})...)
+	bot.Queue.Wait(Obj{
+		obj: tu.Photo(tu.ID(gr.ID), tu.FileFromBytes(*b, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1))).
+			WithCaption(text).
+			WithCaptionEntities(entities...).
+			WithReplyParameters(&tg.ReplyParameters{
+				ChatID:                   tu.ID(gr.ID),
+				MessageID:                t.Start,
+				AllowSendingWithoutReply: true,
+			}),
+		evt: func(a ...any) { m, e = R[*tg.Message](a, 0), E(a, 1) },
+	}, queue.PRIORITY_NORMAL)
+	return
 }
 
 func R[T *tg.ForumTopic | *tg.Message | *tg.File](a []any, i int) (res T) {
@@ -172,7 +193,7 @@ out:
 				case types.IUniMedia:
 					switch media := um.(type) {
 					case types.UniImage:
-						b.pho
+						tu.Photo(tu.ID())
 					}
 				}
 			}
@@ -199,6 +220,12 @@ out:
 			case *tg.GetFileParams:
 				var r *tg.File
 				if r, e = b.bot.GetFile(ctx, mt); wo != nil && wo.OnOk != nil {
+					wo.OnOk(r, e)
+				}
+
+			case *tg.SendPhotoParams:
+				var r *tg.Message
+				if r, e = b.bot.SendPhoto(ctx, mt); wo != nil && wo.OnOk != nil {
 					wo.OnOk(r, e)
 				}
 			}
