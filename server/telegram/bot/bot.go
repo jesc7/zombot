@@ -168,6 +168,12 @@ out:
 				switch um := env.(type) {
 				case types.UniMessageText:
 					b.SendText(ctx, um.Text)
+
+				case types.IUniMedia:
+					switch media := um.(type) {
+					case types.UniImage:
+						b.pho
+					}
 				}
 			}
 
@@ -236,8 +242,8 @@ out:
 
 						b.b.Write(v, types.UniMessageMedia{
 							Media: media,
-							Text:  caption + update.Message.Text,
 						})
+
 					} else if msg.Audio != nil {
 
 					} else if msg.Voice != nil {
