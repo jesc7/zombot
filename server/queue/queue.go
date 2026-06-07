@@ -17,7 +17,7 @@ const (
 
 // Queue очередь с ограничителем частоты выборки
 type Queue struct {
-	Q     chan any
+	C     chan any
 	qCrit []any
 	qHigh []any
 	qNorm []any
@@ -30,7 +30,7 @@ type Queue struct {
 func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 	q := &Queue{
 		lim: rate.NewLimiter(limit, int(limit)),
-		Q:   make(chan any, 1),
+		C:   make(chan any, 1),
 	}
 	q.cond = sync.NewCond(&q.mu)
 
@@ -38,7 +38,7 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 		defer func() {
 			q.mu.Lock()
 			q.stop = true
-			close(q.Q)
+			close(q.C)
 			q.mu.Unlock()
 		}()
 
@@ -77,7 +77,7 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 			select {
 			case <-ctx.Done():
 				return
-			case q.Q <- item:
+			case q.C <- item:
 			}
 		}
 	}()
@@ -131,5 +131,7 @@ type WaitObj struct {
 }
 
 func (wo *WaitObj) Done() {
-	wo.wg.Done()
+	if wo.wg != nil {
+		wo.wg.Done()
+	}
 }

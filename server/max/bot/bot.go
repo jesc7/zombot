@@ -22,7 +22,7 @@ var otherMessengers = []string{types.BUS_BOTTG}
 
 type Bot struct {
 	bot    *maxbot.Api
-	QWait  *queue.Queue
+	Q      *queue.Queue
 	chatID int64
 	b      *bus.Bus
 	ch     chan any
@@ -46,7 +46,7 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 	bot, e := maxbot.New(cfg.Max.Token, options...)
 	return &Bot{
 		bot:    bot,
-		QWait:  queue.NewQ(ctx, rate.Limit(5)),
+		Q:      queue.NewQ(ctx, rate.Limit(5)),
 		chatID: cfg.Max.ChatID,
 		b:      b,
 		ch:     b.Register(types.BUS_BOTMAX),
@@ -54,7 +54,7 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 }
 
 func (b *Bot) SendText(text string) {
-	b.QWait.Add(&queue.WaitObj{
+	b.Q.Add(&queue.WaitObj{
 		O: maxbot.NewMessage().
 			SetText(text),
 	}, queue.PRIORITY_NORMAL)
@@ -92,7 +92,7 @@ out:
 				}
 			}
 
-		case msg := <-b.QWait.Q: //разгребаем локальную очередь сообщений
+		case msg := <-b.Q.C: //разгребаем локальную очередь сообщений
 			wo, ok := msg.(*queue.WaitObj)
 			if !ok {
 				break
