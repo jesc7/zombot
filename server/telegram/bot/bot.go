@@ -188,10 +188,11 @@ out:
 				case types.UniMessageText:
 					b.SendText(ctx, um.Text)
 
-				case types.IUniMedia:
-					switch media := um.(type) {
+				case types.UniMessageMedia:
+					core := um.UniCore
+					switch media := um.Media[0].(type) {
 					case types.UniImage:
-						tu.Photo(tu.ID())
+						tu.Photo(tu.ID(b.chatID))
 					}
 				}
 			}
@@ -250,6 +251,9 @@ out:
 				//остальные сообщения пересылаем в связные мессенджеры
 				for _, v := range otherMessengers {
 					caption := "<b><u>Telegram</u> | " + msg.From.FirstName + "</b>\n"
+					core := types.UniCore{
+						Caption: caption,
+					}
 
 					if msg.Photo != nil {
 						file, ext, e := b.GetFile(ctx, msg.Photo[len(msg.Photo)-1].FileID)
@@ -260,13 +264,11 @@ out:
 						var media types.UniImage
 						media.Data = file
 						media.Ext = ext
+						core.Text = msg.Caption
 
 						b.b.Write(v, types.UniMessageMedia{
-							UniCore: types.UniCore{
-								Caption: caption,
-								Text:    msg.Caption,
-							},
-							Media: append([]types.IUniMedia{}, media),
+							UniCore: core,
+							Media:   append([]types.IUniMedia{}, media),
 						})
 
 					} else if msg.Audio != nil {
@@ -280,10 +282,9 @@ out:
 					} else if msg.Document != nil {
 
 					} else {
+						core.Text = update.Message.Text
 						b.b.Write(v, types.UniMessageText{
-							UniCore: types.UniCore{
-								Text: caption + update.Message.Text,
-							},
+							UniCore: core,
 						})
 					}
 				}
