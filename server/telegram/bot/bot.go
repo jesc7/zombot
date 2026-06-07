@@ -11,13 +11,14 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 	"golang.org/x/time/rate"
 
+	ctypes "github.com/jesc7/zombot/cmd/zspy/client/types"
 	"github.com/jesc7/zombot/cmd/zspy/shared"
 	"github.com/jesc7/zombot/cmd/zspy/shared/bus"
 	"github.com/jesc7/zombot/server/queue"
 	"github.com/jesc7/zombot/server/types"
 )
 
-var otherMessengers = []string{types.BUS_BOTMAX}
+var otherMessengers = ctypes.Filter[string](types.ALL_MESSENGERS, func(v string) bool { return v != types.BUS_BOTTG })
 
 type Bot struct {
 	bot    *tg.Bot
