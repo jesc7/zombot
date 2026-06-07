@@ -69,6 +69,34 @@ func (b *Bot) SendText(ctx context.Context, text string) {
 	}, queue.PRIORITY_NORMAL)
 }
 
+func (bot *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, error) {
+	var (
+		e error
+		f *tg.File
+	)
+	bot.Queue.Wait(Obj{
+		obj: &tg.GetFileParams{
+			FileID: fileID,
+		},
+		evt: func(a ...any) { f, e = R[*tg.File](a, 0), E(a, 1) },
+	}, queue.PRIORITY_NORMAL)
+	if e != nil {
+		return []byte{}, "", e
+	}
+
+	resp, e := util.GetWithContext(ctx, nil, "https://api.telegram.org/file/bot"+bot.cfg.TG.Token+"/"+f.FilePath)
+	if e != nil {
+		return []byte{}, "", e
+	}
+	defer resp.Body.Close()
+
+	b := new(bytes.Buffer)
+	if _, e = b.ReadFrom(resp.Body); e != nil {
+		return []byte{}, "", e
+	}
+	return b.Bytes(), mime.TypeByExtension(filepath.Ext(f.FilePath)), nil
+}
+
 func (b *Bot) Run(ctx context.Context) error {
 	updates, e := b.bot.UpdatesViaLongPolling(ctx, &tg.GetUpdatesParams{
 		Offset:  -1,
@@ -165,11 +193,15 @@ out:
 
 					if msg.Photo != nil {
 						mm := types.UniMessageMedia{}
-						mm.
-						media := append( ) types.
+						mm.Media = append(mm.Media, types.UniMedia{
+							Caption: msg.Caption,
+							Data:
+
+						})
+
 						b.b.Write(v, types.UniMessageMedia{
 							Media: []types.UniImage{},
-							Text: caption + update.Message.Text,
+							Text:  caption + update.Message.Text,
 						})
 					} else if msg.Audio != nil {
 
