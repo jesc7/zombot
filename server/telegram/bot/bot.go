@@ -71,9 +71,6 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 }
 
 func (b *Bot) SendText(ctx context.Context, core types.UniCore) {
-	if len(core.Caption) != 0 {
-		core.Caption += "\n"
-	}
 	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
 		tu.Entity(core.Caption + "\n"),
 		tu.Entity(core.Text),
