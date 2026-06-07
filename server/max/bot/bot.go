@@ -148,7 +148,10 @@ out:
 
 						if len(upd.Message.Body.Attachments) != 0 {
 							for _, att := range upd.Message.Body.Attachments {
-
+								switch mt := att.(type) {
+								case *maxbot.AttachmentImage:
+									_ = mt
+								}
 							}
 
 						} else {
