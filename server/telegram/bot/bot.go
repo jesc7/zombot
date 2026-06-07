@@ -146,23 +146,42 @@ out:
 
 		case update := <-updates: //приехали апдейты с сервера
 			func() {
-				if update.Message == nil {
+				msg := update.Message
+				if msg == nil {
 					return
 				}
 				//только групповой чат из настроек
-				if update.Message.Chat.ID != b.chatID {
+				if msg.Chat.ID != b.chatID {
 					return
 				}
 				//отсеиваем команды
-				if types.IsCommand(b.b, myName, strconv.FormatInt(update.Message.From.ID, 10), update.Message.Text) {
+				if types.IsCommand(b.b, myName, strconv.FormatInt(msg.From.ID, 10), update.Message.Text) {
 					return
 				}
 
 				//остальные сообщения пересылаем в связные мессенджеры
 				for _, v := range otherMessengers {
-					b.b.Write(v, types.UniMessageText{
-						Text: "<b><u>Telegram</u> | " + update.Message.From.FirstName + "</b>\n" + update.Message.Text,
-					})
+					caption := "<b><u>Telegram</u> | " + msg.From.FirstName + "</b>\n"
+
+					if msg.Photo != nil {
+						b.b.Write(v, types.UniMessageText{
+							Text: caption + update.Message.Text,
+						})
+					} else if msg.Audio != nil {
+
+					} else if msg.Voice != nil {
+
+					} else if msg.Video != nil {
+
+					} else if msg.VideoNote != nil {
+
+					} else if msg.Document != nil {
+
+					} else {
+						b.b.Write(v, types.UniMessageText{
+							Text: caption + update.Message.Text,
+						})
+					}
 				}
 			}()
 		}
