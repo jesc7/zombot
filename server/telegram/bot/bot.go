@@ -257,16 +257,16 @@ out:
 							return
 						}
 
-						media := append([]types.IUniMedia{}, types.UniImage{
-							UniMedia: types.UniMedia{
-								Caption: msg.Caption,
-								Data:    file,
-							},
-							Ext: ext,
-						})
+						var media types.UniImage
+						media.Data = file
+						media.Ext = ext
 
 						b.b.Write(v, types.UniMessageMedia{
-							Media: media,
+							UniCore: types.UniCore{
+								Caption: caption,
+								Text:    msg.Caption,
+							},
+							Media: append([]types.IUniMedia{}, media),
 						})
 
 					} else if msg.Audio != nil {
@@ -281,7 +281,9 @@ out:
 
 					} else {
 						b.b.Write(v, types.UniMessageText{
-							Text: caption + update.Message.Text,
+							UniCore: types.UniCore{
+								Text: caption + update.Message.Text,
+							},
 						})
 					}
 				}
