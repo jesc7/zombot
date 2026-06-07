@@ -226,18 +226,21 @@ out:
 							return
 						}
 
-						media := []types.UniMedia{
-							{
+						var media []types.IUniMedia
+						media = append(media, types.UniImage{
+							UniMedia: types.UniMedia{
 								Caption: msg.Caption,
 								Data:    file,
 							},
-						}
+						},
+						)
 
 						b.b.Write(v, types.UniMessageMedia{
-							Media: []types.UniMedia{
-							{
-								Caption: msg.Caption,
-								Data:    file,
+							Media: []types.UniImage{
+								{
+									Caption: msg.Caption,
+									Data:    file,
+								},
 							},
 							//Text:  caption + update.Message.Text,
 						})
