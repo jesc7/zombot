@@ -76,13 +76,13 @@ func (b *Bot) SendText(ctx context.Context, text string) {
 	}, queue.PRIORITY_NORMAL)
 }
 
-func (bot *Bot) SendImage(ctx context.Context) (m *tg.Message, e error) {
+func (b *Bot) SendImage(ctx context.Context, media types.UniImage) (m *tg.Message, e error) {
 	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
 		tu.Entity(caption + "\n").Bold().Italic(),
 		tu.Entity(x.GetCaption()),
 	})...)
-	bot.Queue.Wait(Obj{
-		obj: tu.Photo(tu.ID(gr.ID), tu.FileFromBytes(*b, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1))).
+	b.Q.Add(&queue.WaitObj{
+		O: tu.Photo(tu.ID(bot.chatID), tu.FileFromBytes(media.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1))).
 			WithCaption(text).
 			WithCaptionEntities(entities...).
 			WithReplyParameters(&tg.ReplyParameters{
@@ -116,12 +116,12 @@ func E(a []any, i int) error {
 	return nil
 }
 
-func (bot *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, error) {
+func (b *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, error) {
 	var (
 		e error
 		f *tg.File
 	)
-	bot.Q.Wait(ctx, &queue.WaitObj{
+	b.Q.Wait(ctx, &queue.WaitObj{
 		O: &tg.GetFileParams{
 			FileID: fileID,
 		},
@@ -131,17 +131,17 @@ func (bot *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, err
 		return []byte{}, "", e
 	}
 
-	resp, e := ctypes.GetWithContext(ctx, nil, "https://api.telegram.org/file/bot"+bot.token+"/"+f.FilePath)
+	resp, e := ctypes.GetWithContext(ctx, nil, "https://api.telegram.org/file/bot"+b.token+"/"+f.FilePath)
 	if e != nil {
 		return []byte{}, "", e
 	}
 	defer resp.Body.Close()
 
-	b := new(bytes.Buffer)
-	if _, e = b.ReadFrom(resp.Body); e != nil {
+	buf := new(bytes.Buffer)
+	if _, e = buf.ReadFrom(resp.Body); e != nil {
 		return []byte{}, "", e
 	}
-	return b.Bytes(), mime.TypeByExtension(filepath.Ext(f.FilePath)), nil
+	return buf.Bytes(), mime.TypeByExtension(filepath.Ext(f.FilePath)), nil
 }
 
 func (b *Bot) Run(ctx context.Context) error {
