@@ -22,6 +22,7 @@ type Queue struct {
 	q    []any
 	stop bool
 	mu   sync.Mutex
+	cond *sync.Cond
 	lim  *rate.Limiter
 }
 
