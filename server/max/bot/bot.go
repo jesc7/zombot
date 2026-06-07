@@ -107,6 +107,7 @@ out:
 			if wo.OnOk != nil {
 				wo.OnOk()
 			}
+			wo.Done()
 
 		case update := <-b.bot.GetUpdates(ctx): //приехали апдейты с сервера
 			switch upd := update.(type) {
