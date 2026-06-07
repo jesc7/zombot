@@ -38,6 +38,7 @@ func (m UniMedia) UniData() []byte {
 
 type UniImage struct {
 	UniMedia
+	Ext string
 }
 
 type UniVoice struct {
