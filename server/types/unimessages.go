@@ -10,7 +10,9 @@ type IUniMessage interface {
 }
 
 type UniCore struct {
-	ID string
+	ID      string
+	Caption string
+	Text    string
 }
 
 func (m UniCore) UniID() string {
@@ -19,7 +21,6 @@ func (m UniCore) UniID() string {
 
 type UniMessageText struct {
 	UniCore
-	Text string
 }
 
 type IUniMedia interface {
@@ -27,9 +28,8 @@ type IUniMedia interface {
 }
 
 type UniMedia struct {
-	Name    string
-	Caption string
-	Data    []byte
+	Name string
+	Data []byte
 }
 
 func (m UniMedia) UniData() []byte {
@@ -79,7 +79,6 @@ type UniMessageContacts struct {
 type UniMessageQuoted struct {
 	UniCore
 	Quoted *IUniMessage
-	Text   string
 }
 
 type UniMessageReaction struct {

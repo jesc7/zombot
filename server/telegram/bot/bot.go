@@ -9,8 +9,6 @@ import (
 	"net/url"
 	"path/filepath"
 	"strconv"
-	"strings"
-	"time"
 
 	tg "github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
@@ -77,12 +75,12 @@ func (b *Bot) SendText(ctx context.Context, text string) {
 }
 
 func (b *Bot) SendImage(ctx context.Context, media types.UniImage) (m *tg.Message, e error) {
-	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
+	/*text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
 		tu.Entity(caption + "\n").Bold().Italic(),
 		tu.Entity(x.GetCaption()),
 	})...)
 	b.Q.Add(&queue.WaitObj{
-		O: tu.Photo(tu.ID(bot.chatID), tu.FileFromBytes(media.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1))).
+		O: tu.Photo(tu.ID(b.chatID), tu.FileFromBytes(media.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1))).
 			WithCaption(text).
 			WithCaptionEntities(entities...).
 			WithReplyParameters(&tg.ReplyParameters{
@@ -91,7 +89,7 @@ func (b *Bot) SendImage(ctx context.Context, media types.UniImage) (m *tg.Messag
 				AllowSendingWithoutReply: true,
 			}),
 		evt: func(a ...any) { m, e = R[*tg.Message](a, 0), E(a, 1) },
-	}, queue.PRIORITY_NORMAL)
+	}, queue.PRIORITY_NORMAL)*/
 	return
 }
 
