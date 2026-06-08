@@ -46,74 +46,31 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 				return
 
 			default:
-				func() {
-					q.mu.Lock()
-					defer q.mu.Unlock()
-
-					var pri Priority
-					switch {
-					case len(q.q[PRIORITY_CRITICAL]) > 0:
-						pri = PRIORITY_CRITICAL
-					case len(q.q[PRIORITY_HIGH]) > 0:
-						pri = PRIORITY_HIGH
-					case len(q.q[PRIORITY_NORMAL]) > 0:
-						pri = PRIORITY_NORMAL
-					default:
-						time.Sleep(200 * time.Millisecond)
-						return
-					}
-
-					item := q.q[pri][0]
-					q.q[pri] = q.q[pri][1:]
+				q.mu.Lock()
+				var pri Priority
+				switch {
+				case len(q.q[PRIORITY_CRITICAL]) > 0:
+					pri = PRIORITY_CRITICAL
+				case len(q.q[PRIORITY_HIGH]) > 0:
+					pri = PRIORITY_HIGH
+				case len(q.q[PRIORITY_NORMAL]) > 0:
+					pri = PRIORITY_NORMAL
+				default:
 					q.mu.Unlock()
+					time.Sleep(200 * time.Millisecond)
+					continue
+				}
 
-					select {
-					case <-ctx.Done():
-						return
-					case q.C <- item:
-					}
-				}()
-			}
-		}
-
-		for {
-			if ctx.Err() != nil {
-				return
-			}
-
-			q.mu.Lock()
-			for (len(q.q[PRIORITY_NORMAL])+len(q.q[PRIORITY_HIGH])+len(q.q[PRIORITY_CRITICAL])) == 0 && ctx.Err() == nil {
-				q.cond.Wait()
-			}
-
-			if ctx.Err() != nil {
+				item := q.q[pri][0]
+				q.q[pri] = q.q[pri][1:]
 				q.mu.Unlock()
-				return
-			}
 
-			var pri Priority
-			switch {
-			case len(q.q[PRIORITY_CRITICAL]) > 0:
-				pri = PRIORITY_CRITICAL
-			case len(q.q[PRIORITY_HIGH]) > 0:
-				pri = PRIORITY_HIGH
-			default:
-				pri = PRIORITY_NORMAL
+				select {
+				case <-ctx.Done():
+					return
+				case q.C <- item:
+				}
 			}
-			item := q.q[pri][0]
-			q.q[pri] = q.q[pri][1:]
-			q.mu.Unlock()
-
-			if err := q.lim.Wait(ctx); err != nil {
-				return
-			}
-
-			q.C <- item
-			/*select {
-			case <-ctx.Done():
-				return
-			case q.C <- item:
-			}*/
 		}
 	}()
 
