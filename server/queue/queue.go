@@ -17,14 +17,15 @@ const (
 
 // Queue очередь с ограничителем частоты выборки
 type Queue struct {
-	C     chan any
-	qCrit []any
-	qHigh []any
-	qNorm []any
-	stop  bool
-	mu    sync.Mutex
-	cond  *sync.Cond
-	lim   *rate.Limiter
+	C chan any
+	q [3][]any
+	//qCrit []any
+	//qHigh []any
+	//qNorm []any
+	stop bool
+	mu   sync.Mutex
+	cond *sync.Cond
+	lim  *rate.Limiter
 }
 
 func NewQ(ctx context.Context, limit rate.Limit) *Queue {
@@ -48,7 +49,8 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 			}
 
 			q.mu.Lock()
-			for (len(q.qCrit)+len(q.qHigh)+len(q.qNorm)) == 0 && ctx.Err() == nil {
+			//for (len(q.qCrit)+len(q.qHigh)+len(q.qNorm)) == 0 && ctx.Err() == nil {
+			for (len(q.q[0])+len(q.q[1])+len(q.q[2])) == 0 && ctx.Err() == nil {
 				q.cond.Wait()
 			}
 
