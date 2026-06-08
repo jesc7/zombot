@@ -25,6 +25,8 @@ var otherMessengers = ctypes.Filter(types.ALL_MESSENGERS, func(v string) bool { 
 
 type Bot struct {
 	bot    *maxbot.Api
+	token  string
+	proxy  string
 	Q      *queue.Queue
 	chatID int64
 	b      *bus.Bus
@@ -32,9 +34,11 @@ type Bot struct {
 }
 
 func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
+	var proxyAddr string
 	var options []maxbot.Option
 	if cfg.Proxy.Addr != "" {
-		proxy, e := url.Parse(fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port))
+		proxyAddr = fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port)
+		proxy, e := url.Parse(proxyAddr)
 		if e == nil {
 			options = append(options, maxbot.WithHTTPClient(
 				&http.Client{
@@ -49,6 +53,8 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 	bot, e := maxbot.New(cfg.Max.Token, options...)
 	return &Bot{
 		bot:    bot,
+		token:  cfg.Max.Token,
+		proxy:  proxyAddr,
 		Q:      queue.NewQ(ctx, rate.Limit(5)),
 		chatID: cfg.Max.ChatID,
 		b:      b,
@@ -188,12 +194,21 @@ out:
 							for _, attach := range upd.Message.Body.Attachments {
 								switch at := attach.(type) {
 								case *schemes.PhotoAttachment:
-									log.Println(at.Payload.Url)
+									file, _, e := b.GetFile(ctx, at.Payload.Url)
+									if e != nil {
+										return
+									}
+
+									var media types.UniImage
+									media.Data = file
+									core.Text = upd.GetText()
+
+									b.b.Write(v, types.UniMessageMedia{
+										UniCore: core,
+										Media:   append([]types.IUniMedia{}, media),
+									})
 								}
 							}
-							/*for _, att := range upd.Message.Body.Attachments {
-								log.Println(att)
-							}*/
 
 						} else {
 							core.Text = upd.GetText()
