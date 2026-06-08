@@ -186,11 +186,10 @@ func (b *Bot) Run(ctx context.Context) error {
 		}
 	}()
 
-out:
 	for {
 		select {
 		case <-ctx.Done():
-			break out
+			return ctx.Err()
 
 		case o := <-b.ch: //разгребаем пакеты, пришедшие боту по шине данных
 			switch env := o.(type) {
@@ -282,5 +281,5 @@ out:
 			}()
 		}
 	}
-	return nil
+	//return nil
 }
