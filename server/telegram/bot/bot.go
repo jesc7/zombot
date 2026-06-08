@@ -38,11 +38,11 @@ type Bot struct {
 }
 
 func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
-	var proxy string
+	var proxyAddr string
 	options := append([]tg.BotOption{}, tg.WithDefaultLogger(false, true))
 	if cfg.Proxy.Addr != "" {
-		proxy = fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port)
-		proxy, e := url.Parse(proxy)
+		proxyAddr = fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port)
+		proxy, e := url.Parse(proxyAddr)
 		if e == nil {
 			options = append(options, tg.WithHTTPClient(
 				&http.Client{
@@ -65,6 +65,7 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 	return &Bot{
 		bot:    bot,
 		token:  cfg.TG.Token,
+		proxy:  proxyAddr,
 		me:     me,
 		Q:      queue.NewQ(ctx, rate.Limit(5)),
 		chatID: cfg.TG.ChatID,
@@ -132,7 +133,16 @@ func (b *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, error
 		}
 	}*/
 
-	resp, e := ctypes.GetWithContext(ctx, nil, "https://api.telegram.org/file/bot"+b.token+"/"+f.FilePath)
+	var c *http.Client
+	if b.proxy != "" {
+		proxy, _ := url.Parse(b.proxy)
+		c = &http.Client{
+			Transport: &http.Transport{
+				Proxy: http.ProxyURL(proxy),
+			},
+		}
+	}
+	resp, e := ctypes.GetWithContext(ctx, c, "https://api.telegram.org/file/bot"+b.token+"/"+f.FilePath)
 	if e != nil {
 		return []byte{}, "", e
 	}
