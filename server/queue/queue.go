@@ -111,6 +111,7 @@ func (q *Queue) Wait(ctx context.Context, wo *WaitObj, priority Priority) error 
 	case <-done:
 		return nil
 	case <-ctx.Done():
+		wo.wg.Done()
 		return ctx.Err()
 	}
 }
