@@ -133,6 +133,8 @@ func (b *Bot) SendImage(ctx context.Context, core types.UniCore, media types.Uni
 		tu.Entity(core.Caption + "\n"),
 		tu.Entity(core.Text),
 	})...)
+
+	//tu.MediaGroup()
 	b.Q.Add(&queue.WaitObj{
 		O: tu.Photo(tu.ID(b.chatID), tu.FileFromBytes(media.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1))).
 			WithCaption(text).

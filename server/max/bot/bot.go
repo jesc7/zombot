@@ -205,6 +205,9 @@ out:
 						}
 
 						if len(upd.Message.Body.Attachments) != 0 {
+							core.Text = upd.GetText()
+							media := types.UniMessageMedia{UniCore: core}
+
 							for _, attach := range upd.Message.Body.Attachments {
 								switch at := attach.(type) {
 								case *schemes.PhotoAttachment:
@@ -212,6 +215,12 @@ out:
 									if e != nil {
 										return
 									}
+
+									media.Media = append(media.Media, types.UniImage{
+										UniMedia: types.UniMedia{
+											Data: file,
+										},
+									})
 
 									var media types.UniImage
 									media.Data = file
