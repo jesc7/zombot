@@ -72,11 +72,12 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 				return
 			}
 
-			select {
+			q.C <- item
+			/*select {
 			case <-ctx.Done():
 				return
 			case q.C <- item:
-			}
+			}*/
 		}
 	}()
 
