@@ -55,10 +55,17 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 	}, e
 }
 
-func (b *Bot) SendText(ctx context.Context, text string) {
+func (b *Bot) SendText(ctx context.Context, core types.UniCore) {
 	b.Q.Add(&queue.WaitObj{
 		O: maxbot.NewMessage().
-			SetText(text),
+			SetText(fmt.Sprintf("%s\n%s", core.Caption, core.Text)),
+	}, queue.PRIORITY_NORMAL)
+}
+
+func (b *Bot) SendImage(ctx context.Context, core types.UniCore, media types.UniImage) {
+	b.Q.Add(&queue.WaitObj{
+		O: maxbot.NewMessage().
+			SetText(fmt.Sprintf("%s\n%s\n(картинка %s (%s), размер %d)", core.Caption, core.Text, media.Name, media.Ext, len(media.Data))),
 	}, queue.PRIORITY_NORMAL)
 }
 
@@ -120,19 +127,21 @@ out:
 					if e != nil {
 						continue
 					}
-					b.SendText(ctx, m.Text)
+					b.SendText(ctx, types.UniCore{
+						Text: m.Text,
+					})
 				}
 
 			// пакеты других мессенджеров или внутренние
 			case types.IUniMessage:
 				switch um := env.(type) {
 				case types.UniMessageText:
-					b.SendText(ctx, um.Text)
+					b.SendText(ctx, um.UniCore)
 
 				case types.UniMessageMedia:
 					switch media := um.Media[0].(type) {
 					case types.UniImage:
-						b.SendImage(ctx, um.UniCore, media)
+						b.SendText(ctx, um.UniCore, media)
 					}
 				}
 			}
