@@ -59,10 +59,14 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 			}
 
 			//var item any
-			item,pri := any(nil), 0
+			item, pri := any(nil), 0
 			switch {
-				case 
-
+			case len(q.q[PRIORITY_CRITICAL]) > 0:
+				pri = int(PRIORITY_CRITICAL)
+			case len(q.q[PRIORITY_HIGH]) > 0:
+				pri = int(PRIORITY_HIGH)
+			default:
+				pri = int(PRIORITY_CRITICAL)
 			}
 
 			if len(q.q[PRIORITY_CRITICAL]) > 0 {
