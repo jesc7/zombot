@@ -63,6 +63,43 @@ func (b *Bot) SendText(ctx context.Context, text string) {
 }
 
 func (b *Bot) Run(ctx context.Context) {
+	go func() { //запросы в Max обрабатываем в отдельной горутине
+		for {
+			select {
+			case <-ctx.Done():
+				return
+
+			case msg := <-b.Q.C: //разгребаем локальную очередь сообщений
+				var (
+					wo  *queue.WaitObj
+					obj any
+				)
+				switch o := msg.(type) {
+				case *queue.WaitObj:
+					wo = o
+					obj = wo.O
+				case any:
+					obj = o
+				}
+
+				switch mt := obj.(type) {
+				case *maxbot.Message:
+					b.bot.Messages.Send(ctx, mt.
+						SetChat(b.chatID).
+						SetFormat(schemes.HTML),
+					)
+				}
+
+				if wo != nil {
+					if wo.OnOk != nil {
+						wo.OnOk()
+					}
+					wo.Done()
+				}
+			}
+		}
+	}()
+
 out:
 	for {
 		select {
@@ -92,34 +129,6 @@ out:
 				case types.UniMessageText:
 					b.SendText(ctx, um.Text)
 				}
-			}
-
-		case msg := <-b.Q.C: //разгребаем локальную очередь сообщений
-			var (
-				wo  *queue.WaitObj
-				obj any
-			)
-			switch o := msg.(type) {
-			case *queue.WaitObj:
-				wo = o
-				obj = wo.O
-			case any:
-				obj = o
-			}
-
-			switch mt := obj.(type) {
-			case *maxbot.Message:
-				b.bot.Messages.Send(ctx, mt.
-					SetChat(b.chatID).
-					SetFormat(schemes.HTML),
-				)
-			}
-
-			if wo != nil {
-				if wo.OnOk != nil {
-					wo.OnOk()
-				}
-				wo.Done()
 			}
 
 		case update := <-b.bot.GetUpdates(ctx): //приехали апдейты с сервера

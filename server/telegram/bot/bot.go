@@ -120,27 +120,15 @@ func (b *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, error
 		return []byte{}, "", e
 	}
 
-	/*if cfg.Proxy.Addr != "" {
-		proxy, e := url.Parse(fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port))
-		if e == nil {
-			options = append(options, tg.WithHTTPClient(
-				&http.Client{
-					Transport: &http.Transport{
-						Proxy: http.ProxyURL(proxy),
-					},
-				},
-			))
-		}
-	}*/
-
-	var c *http.Client
+	c := &http.Client{
+		Timeout: 10 * time.Second,
+		Transport: &http.Transport{
+			Proxy: http.ProxyURL(proxy),
+		},
+	}
 	if b.proxy != "" {
 		proxy, _ := url.Parse(b.proxy)
-		c = &http.Client{
-			Transport: &http.Transport{
-				Proxy: http.ProxyURL(proxy),
-			},
-		}
+		c.Transport.P
 	}
 	resp, e := ctypes.GetWithContext(ctx, c, "https://api.telegram.org/file/bot"+b.token+"/"+f.FilePath)
 	if e != nil {
