@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mymmrac/telego"
 	tg "github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
 	"golang.org/x/time/rate"
@@ -236,6 +237,15 @@ func (b *Bot) Run(ctx context.Context) error {
 
 				case types.UniMessageMedia:
 					if msg.IsCollage() && len(msg.Media) < 11 {
+						var mediaGroup []telego.InputMedia
+						for i, media := range msg.Media {
+							if i == 0 {
+								mediaGroup = append(mediaGroup, tu.InputMedia())
+
+							} else {
+
+							}
+						}
 
 					} else {
 						var core types.UniCore
