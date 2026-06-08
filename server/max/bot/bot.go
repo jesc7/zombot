@@ -233,6 +233,19 @@ out:
 											Data: file,
 										},
 									})
+
+								case *schemes.FileAttachment:
+									file, _, e := b.GetFile(ctx, at.Payload.Url)
+									if e != nil {
+										return
+									}
+
+									media.Media = append(media.Media, types.UniDocument{
+										UniMedia: types.UniMedia{
+											Data: file,
+											Name: at.Filename,
+										},
+									})
 								}
 							}
 							b.b.Write(v, media)
