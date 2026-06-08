@@ -86,34 +86,49 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 
 func (q *Queue) Add(o any, priority Priority) {
 	q.mu.Lock()
+	defer q.mu.Unlock()
 	if q.stop {
-		q.mu.Unlock()
 		return
 	}
 
 	q.q[priority] = append(q.q[priority], o)
-	q.mu.Unlock()
-	q.cond.Signal()
 }
 
-func (q *Queue) Wait(ctx context.Context, wo *WaitObj, priority Priority) error {
-	wo.wg = &sync.WaitGroup{}
-	wo.wg.Add(1)
-	q.Add(wo, priority)
+func (q *Queue) Add__(o any, priority Priority) {
+	/*
+		q.mu.Lock()
+		if q.stop {
+			q.mu.Unlock()
+			return
+		}
 
-	done := make(chan struct{})
-	go func() {
-		wo.wg.Wait()
-		close(done)
-	}()
+		q.q[priority] = append(q.q[priority], o)
+		q.mu.Unlock()
+		q.cond.Signal()
+	*/
+}
 
-	select {
-	case <-done:
-		return nil
-	case <-ctx.Done():
-		wo.wg.Done()
-		return ctx.Err()
-	}
+func (q *Queue) Wait__(ctx context.Context, wo *WaitObj, priority Priority) error {
+	/*
+		wo.wg = &sync.WaitGroup{}
+		wo.wg.Add(1)
+		q.Add(wo, priority)
+
+		done := make(chan struct{})
+		go func() {
+			wo.wg.Wait()
+			close(done)
+		}()
+
+		select {
+		case <-done:
+			return nil
+		case <-ctx.Done():
+			wo.wg.Done()
+			return ctx.Err()
+		}
+	*/
+	return nil
 }
 
 type WaitObj struct {
