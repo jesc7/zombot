@@ -104,7 +104,12 @@ func (b *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, error
 		},
 		OnOk: func(a ...any) {
 			defer recover()
-			f, e = a[0].(*tg.File), a[1].(error)
+			if a[0] != nil {
+				f = a[0].(*tg.File)
+			}
+			if a[1] != nil {
+				e = a[1].(error)
+			}
 		},
 	}, queue.PRIORITY_NORMAL)
 	if e != nil {
