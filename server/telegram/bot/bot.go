@@ -134,9 +134,34 @@ func (b *Bot) SendImage(ctx context.Context, core types.UniCore, media types.Uni
 		tu.Entity(core.Text),
 	})...)
 
-	//tu.MediaGroup()
 	b.Q.Add(&queue.WaitObj{
 		O: tu.Photo(tu.ID(b.chatID), tu.FileFromBytes(media.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1))).
+			WithCaption(text).
+			WithCaptionEntities(entities...),
+	}, queue.PRIORITY_NORMAL)
+}
+
+func (b *Bot) SendVideo(ctx context.Context, core types.UniCore, media types.UniVideo) {
+	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
+		tu.Entity(core.Caption + "\n"),
+		tu.Entity(core.Text),
+	})...)
+
+	b.Q.Add(&queue.WaitObj{
+		O: tu.Video(tu.ID(b.chatID), tu.FileFromBytes(media.Data, strings.Replace(time.Now().Format("Video_150405.000000"), ".", "", 1))).
+			WithCaption(text).
+			WithCaptionEntities(entities...),
+	}, queue.PRIORITY_NORMAL)
+}
+
+func (b *Bot) SendDocument(ctx context.Context, core types.UniCore, media types.UniDocument) {
+	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
+		tu.Entity(core.Caption + "\n"),
+		tu.Entity(core.Text),
+	})...)
+
+	b.Q.Add(&queue.WaitObj{
+		O: tu.Document(tu.ID(b.chatID), tu.FileFromBytes(media.Data, media.Name)).
 			WithCaption(text).
 			WithCaptionEntities(entities...),
 	}, queue.PRIORITY_NORMAL)
@@ -199,6 +224,18 @@ func (b *Bot) Run(ctx context.Context) error {
 				case *tg.SendPhotoParams:
 					var r *tg.Message
 					if r, e = b.bot.SendPhoto(ctx, mt.WithParseMode(tg.ModeHTML)); wo != nil && wo.OnOk != nil {
+						wo.OnOk(r, e)
+					}
+
+				case *tg.SendVideoParams:
+					var r *tg.Message
+					if r, e = b.bot.SendVideo(ctx, mt.WithParseMode(tg.ModeHTML)); wo != nil && wo.OnOk != nil {
+						wo.OnOk(r, e)
+					}
+
+				case *tg.SendDocumentParams:
+					var r *tg.Message
+					if r, e = b.bot.SendDocument(ctx, mt.WithParseMode(tg.ModeHTML)); wo != nil && wo.OnOk != nil {
 						wo.OnOk(r, e)
 					}
 
@@ -282,6 +319,20 @@ func (b *Bot) Run(ctx context.Context) error {
 									video.CaptionEntities = []tg.MessageEntity{}
 								}
 								mediaGroup = append(mediaGroup, video)
+
+							case types.UniVideoNote:
+								video := &tg.InputMediaVideo{
+									Type:            tg.MediaTypeVideo,
+									Media:           tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Video_150405.000000"), ".", "", 1)),
+									Caption:         text,
+									CaptionEntities: entities,
+									ParseMode:       tg.ModeHTML,
+								}
+								if i != 0 {
+									video.Caption = ""
+									video.CaptionEntities = []tg.MessageEntity{}
+								}
+								mediaGroup = append(mediaGroup, video)
 							}
 						}
 						b.SendMediaGroup(ctx, msg.UniCore, mediaGroup)
@@ -295,6 +346,12 @@ func (b *Bot) Run(ctx context.Context) error {
 							switch mt := media.(type) {
 							case types.UniImage:
 								b.SendImage(ctx, core, mt)
+
+							case types.UniVideo:
+								b.SendVideo(ctx, core, mt)
+
+							case types.UniDocument:
+								b.SendDocument(ctx, core, mt)
 							}
 							core.Text = "" //текст сообщения только у первого файла
 						}

@@ -221,6 +221,18 @@ out:
 											Data: file,
 										},
 									})
+
+								case *schemes.VideoAttachment:
+									file, _, e := b.GetFile(ctx, at.Payload.Url)
+									if e != nil {
+										return
+									}
+
+									media.Media = append(media.Media, types.UniVideo{
+										UniMedia: types.UniMedia{
+											Data: file,
+										},
+									})
 								}
 							}
 							b.b.Write(v, media)
