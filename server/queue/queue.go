@@ -50,7 +50,7 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 
 			q.mu.Lock()
 			//for (len(q.qCrit)+len(q.qHigh)+len(q.qNorm)) == 0 && ctx.Err() == nil {
-			for (len(q.q[0])+len(q.q[1])+len(q.q[2])) == 0 && ctx.Err() == nil {
+			for (len(q.q[PRIORITY_NORMAL])+len(q.q[PRIORITY_HIGH])+len(q.q[PRIORITY_CRITICAL])) == 0 && ctx.Err() == nil {
 				q.cond.Wait()
 			}
 
@@ -60,16 +60,17 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 			}
 
 			var item any
-			if len(q.qCrit) > 0 {
-				item = q.qCrit[0]
-				q.qCrit = q.qCrit[1:]
-			} else if len(q.qHigh) > 0 {
-				item = q.qHigh[0]
-				q.qHigh = q.qHigh[1:]
-			} else if len(q.qNorm) > 0 {
-				item = q.qNorm[0]
-				q.qNorm = q.qNorm[1:]
+			if len(q.q[PRIORITY_CRITICAL]) > 0 {
+				item = q.q[PRIORITY_CRITICAL][0]
+				q.q[PRIORITY_CRITICAL] = q.q[PRIORITY_CRITICAL][1:]
+			} else if len(q.q[PRIORITY_HIGH]) > 0 {
+				item = q.q[PRIORITY_HIGH][0]
+				q.q[PRIORITY_HIGH] = q.q[PRIORITY_HIGH][1:]
+			} else if len(q.q[PRIORITY_NORMAL]) > 0 {
+				item = q.q[PRIORITY_NORMAL][0]
+				q.q[PRIORITY_NORMAL] = q.q[PRIORITY_NORMAL][1:]
 			}
+
 			q.mu.Unlock()
 
 			if err := q.lim.Wait(ctx); err != nil {
@@ -94,15 +95,7 @@ func (q *Queue) Add(o any, priority Priority) {
 		return
 	}
 
-	switch priority {
-	case PRIORITY_CRITICAL:
-		q.qCrit = append(q.qCrit, o)
-	case PRIORITY_HIGH:
-		q.qHigh = append(q.qHigh, o)
-	default:
-		q.qNorm = append(q.qNorm, o)
-	}
-
+	q.q[priority] = append(q.q[priority], o)
 	q.mu.Unlock()
 	q.cond.Signal()
 }
