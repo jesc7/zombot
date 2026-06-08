@@ -203,7 +203,9 @@ func (b *Bot) Run(ctx context.Context) error {
 					}
 
 				case *tg.SendMediaGroupParams:
-					b.bot.SendMediaGroup(ctx, mt)
+					if _, e := b.bot.SendMediaGroup(ctx, mt); wo != nil && wo.OnOk != nil {
+						wo.OnOk(e)
+					}
 				}
 
 				if wo != nil {
@@ -251,12 +253,12 @@ func (b *Bot) Run(ctx context.Context) error {
 								photo := &tg.InputMediaPhoto{
 									Type:      tg.MediaTypePhoto,
 									Media:     tu.FileFromBytes(media.(types.UniImage).Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1)),
-									Caption:   msg.Caption,
+									Caption:   msg.Caption + "\n" + msg.Text,
 									ParseMode: tg.ModeHTML,
 								}
 								if i != 0 {
-									photo.Caption = ""
-									photo.ParseMode = ""
+									//photo.Caption = ""
+									//photo.ParseMode = ""
 								}
 								mediaGroup = append(mediaGroup, photo)
 							}
