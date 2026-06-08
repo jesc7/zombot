@@ -56,6 +56,13 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 	}, e
 }
 
+func (b *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, error) {
+	fileInfo, e := b.bot.Uploads.GetFile(ctx, fileID)
+	if err != nil {
+		return nil, err
+	}
+}
+
 func (b *Bot) SendText(ctx context.Context, core types.UniCore) {
 	b.Q.Add(&queue.WaitObj{
 		O: maxbot.NewMessage().
