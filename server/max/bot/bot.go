@@ -141,7 +141,7 @@ out:
 				case types.UniMessageMedia:
 					switch media := um.Media[0].(type) {
 					case types.UniImage:
-						b.SendText(ctx, um.UniCore, media)
+						b.SendImage(ctx, um.UniCore, media)
 					}
 				}
 			}
