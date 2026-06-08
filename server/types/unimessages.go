@@ -79,6 +79,26 @@ func (msg UniMessageMedia) IsCollage() bool {
 	return image == len(msg.Media) || video == len(msg.Media)
 }
 
+func (msg UniMessageMedia) IsPhotoCollage() bool {
+	if len(msg.Media) == 0 {
+		return false
+	}
+	_, ok := msg.Media[0].(UniImage)
+	return ok
+}
+
+func (msg UniMessageMedia) IsVideoCollage() bool {
+	if len(msg.Media) == 0 {
+		return false
+	}
+	switch msg.Media[0].(type) {
+	case UniVideo, UniVideoNote:
+		return true
+	default:
+		return false
+	}
+}
+
 type Contact struct {
 	Caption string
 	Phone   string
