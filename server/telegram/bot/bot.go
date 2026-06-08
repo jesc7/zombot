@@ -233,9 +233,8 @@ out:
 
 				//остальные сообщения пересылаем в связные мессенджеры
 				for _, v := range otherMessengers {
-					caption := "<b><u>Telegram</u> | " + msg.From.FirstName + "</b>"
 					core := types.UniCore{
-						Caption: caption,
+						Caption: "<b><u>Telegram</u> | " + msg.From.FirstName + "</b>",
 					}
 
 					if msg.Photo != nil {
