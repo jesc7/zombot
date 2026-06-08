@@ -29,7 +29,7 @@ type Queue struct {
 func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 	q := &Queue{
 		lim: rate.NewLimiter(limit, int(limit)),
-		C:   make(chan any, 1),
+		C:   make(chan any), //, 1),
 	}
 
 	go func() {
