@@ -230,19 +230,24 @@ func (b *Bot) Run(ctx context.Context) error {
 
 			// пакеты других мессенджеров или внутренние
 			case types.IUniMessage:
-				switch um := env.(type) {
+				switch msg := env.(type) {
 				case types.UniMessageText:
-					b.SendText(ctx, um.UniCore)
+					b.SendText(ctx, msg.UniCore)
 
 				case types.UniMessageMedia:
-					if um.IsCollage() && len(um.Media) < 11 {
+					if msg.IsCollage() && len(msg.Media) < 11 {
 
 					} else {
-						for _, media := range um.Media {
+						var core types.UniCore
+						for i, media := range msg.Media {
+							if i == 0 {
+								core = msg.UniCore
+							}
 							switch mt := media.(type) {
 							case types.UniImage:
-								b.SendImage(ctx, um.UniCore, mt)
+								b.SendImage(ctx, core, mt)
 							}
+							core.Text = "" //текст сообщения только у первого файла
 						}
 					}
 				}
