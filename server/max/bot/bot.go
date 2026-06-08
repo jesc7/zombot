@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"log"
@@ -63,9 +64,15 @@ func (b *Bot) SendText(ctx context.Context, core types.UniCore) {
 }
 
 func (b *Bot) SendImage(ctx context.Context, core types.UniCore, media types.UniImage) {
+	photo, e := b.bot.Uploads.UploadPhotoFromReader(ctx, bytes.NewReader(media.Data))
+	if e != nil {
+		return
+	}
+
 	b.Q.Add(&queue.WaitObj{
 		O: maxbot.NewMessage().
-			SetText(fmt.Sprintf("%s\n%s\n(картинка %s (%s), размер %d)", core.Caption, core.Text, media.Name, media.Ext, len(media.Data))),
+			SetText(fmt.Sprintf("%s\n%s", core.Caption, core.Text)).
+			AddPhoto(photo),
 	}, queue.PRIORITY_NORMAL)
 }
 
