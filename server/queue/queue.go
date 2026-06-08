@@ -46,42 +46,33 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 				return
 
 			default:
-			out:
-				q.mu.Lock()
-				var pri Priority
-				switch {
-				case len(q.q[PRIORITY_CRITICAL]) > 0:
-					pri = PRIORITY_CRITICAL
-				case len(q.q[PRIORITY_HIGH]) > 0:
-					pri = PRIORITY_HIGH
-				default:
-					pri = PRIORITY_NORMAL
-				}
-				item := q.q[pri][0]
-				q.q[pri] = q.q[pri][1:]
-				q.mu.Unlock()
+				func() {
+					q.mu.Lock()
+					defer q.mu.Unlock()
 
-				switch len(q.q) != 0 {
-				case true:
-					for i := 1; len(q.q) != 0; i++ {
-						func() {
-							q.lim.Wait(ctx)
-							q.mu.Lock()
-							defer q.mu.Unlock()
-
-							select {
-							case q.Q <- q.q[0]:
-							}
-							q.q = q.q[1:]
-						}()
-						if i%10 == 0 || ctx.Err() != nil {
-							break out
-						}
+					var pri Priority
+					switch {
+					case len(q.q[PRIORITY_CRITICAL]) > 0:
+						pri = PRIORITY_CRITICAL
+					case len(q.q[PRIORITY_HIGH]) > 0:
+						pri = PRIORITY_HIGH
+					case len(q.q[PRIORITY_NORMAL]) > 0:
+						pri = PRIORITY_NORMAL
+					default:
+						time.Sleep(200 * time.Millisecond)
+						return
 					}
 
-				default:
-					time.Sleep(500 * time.Millisecond)
-				}
+					item := q.q[pri][0]
+					q.q[pri] = q.q[pri][1:]
+					q.mu.Unlock()
+
+					select {
+					case <-ctx.Done():
+						return
+					case q.C <- item:
+					}
+				}()
 			}
 		}
 
