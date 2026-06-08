@@ -141,6 +141,51 @@ func (b *Bot) Run(ctx context.Context) error {
 	}
 	defer b.bot.StopPoll(ctx, nil)
 
+	go func() { //запросы в Telegram обрабатываем в отдельной горутине
+		for {
+			select {
+			case <-ctx.Done():
+				return
+
+			case msg := <-b.Q.C: //разгребаем локальную очередь сообщений
+				var (
+					wo  *queue.WaitObj
+					obj any
+				)
+				switch o := msg.(type) {
+				case *queue.WaitObj:
+					wo = o
+					obj = wo.O
+				case any:
+					obj = o
+				}
+
+				switch mt := obj.(type) {
+				case *tg.SendMessageParams:
+					b.bot.SendMessage(ctx, mt.
+						WithParseMode(tg.ModeHTML),
+					)
+
+				case *tg.GetFileParams:
+					var r *tg.File
+					if r, e = b.bot.GetFile(ctx, mt); wo != nil && wo.OnOk != nil {
+						wo.OnOk(r, e)
+					}
+
+				case *tg.SendPhotoParams:
+					var r *tg.Message
+					if r, e = b.bot.SendPhoto(ctx, mt); wo != nil && wo.OnOk != nil {
+						wo.OnOk(r, e)
+					}
+				}
+
+				if wo != nil {
+					wo.Done()
+				}
+			}
+		}
+	}()
+
 out:
 	for {
 		select {
@@ -178,42 +223,6 @@ out:
 						b.SendImage(ctx, um.UniCore, media)
 					}
 				}
-			}
-
-		case msg := <-b.Q.C: //разгребаем локальную очередь сообщений
-			var (
-				wo  *queue.WaitObj
-				obj any
-			)
-			switch o := msg.(type) {
-			case *queue.WaitObj:
-				wo = o
-				obj = wo.O
-			case any:
-				obj = o
-			}
-
-			switch mt := obj.(type) {
-			case *tg.SendMessageParams:
-				b.bot.SendMessage(ctx, mt.
-					WithParseMode(tg.ModeHTML),
-				)
-
-			case *tg.GetFileParams:
-				var r *tg.File
-				if r, e = b.bot.GetFile(ctx, mt); wo != nil && wo.OnOk != nil {
-					wo.OnOk(r, e)
-				}
-
-			case *tg.SendPhotoParams:
-				var r *tg.Message
-				if r, e = b.bot.SendPhoto(ctx, mt); wo != nil && wo.OnOk != nil {
-					wo.OnOk(r, e)
-				}
-			}
-
-			if wo != nil {
-				wo.Done()
 			}
 
 		case update := <-updates: //приехали апдейты с сервера
