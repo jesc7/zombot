@@ -56,11 +56,12 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 	}, e
 }
 
-func (b *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, error) {
-	fileInfo, e := b.bot.Uploads.GetFile(ctx, fileID)
+func (b *Bot) GetFile(ctx context.Context, url string) ([]byte, string, error) {
+	/*fileInfo, e := b.bot.Uploads.GetFile(ctx, fileID)
 	if err != nil {
 		return nil, err
-	}
+	}*/
+	return []byte{}, "", nil
 }
 
 func (b *Bot) SendText(ctx context.Context, core types.UniCore) {
@@ -184,6 +185,12 @@ out:
 						}
 
 						if len(upd.Message.Body.Attachments) != 0 {
+							for _, attach := range upd.Message.Body.Attachments {
+								switch at := attach.(type) {
+								case *schemes.PhotoAttachment:
+									log.Println(at.Payload.Url)
+								}
+							}
 							/*for _, att := range upd.Message.Body.Attachments {
 								log.Println(att)
 							}*/
