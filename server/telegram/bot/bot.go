@@ -246,17 +246,19 @@ func (b *Bot) Run(ctx context.Context) error {
 					b.SendText(ctx, msg.UniCore)
 
 				case types.UniMessageMedia:
-					if msg.IsCollage() && len(msg.Media) < 11 {
+					if msg.IsCollage() && len(msg.Media) > 1 && len(msg.Media) < 11 {
 						var mediaGroup []tg.InputMedia
-						if msg.IsPhotoCollage() {
-							text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
-								tu.Entity(msg.Caption + "\n"),
-								tu.Entity(msg.Text),
-							})...)
-							for i, media := range msg.Media {
+						text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
+							tu.Entity(msg.Caption + "\n"),
+							tu.Entity(msg.Text),
+						})...)
+
+						for i, media := range msg.Media {
+							switch mt := media.(type) {
+							case types.UniImage:
 								photo := &tg.InputMediaPhoto{
 									Type:            tg.MediaTypePhoto,
-									Media:           tu.FileFromBytes(media.(types.UniImage).Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1)),
+									Media:           tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1)),
 									Caption:         text,
 									CaptionEntities: entities,
 									ParseMode:       tg.ModeHTML,
@@ -266,6 +268,8 @@ func (b *Bot) Run(ctx context.Context) error {
 									photo.CaptionEntities = []tg.MessageEntity{}
 								}
 								mediaGroup = append(mediaGroup, photo)
+
+							case types.UniVideo:
 							}
 						}
 						b.SendMediaGroup(ctx, msg.UniCore, mediaGroup)
