@@ -240,24 +240,18 @@ func (b *Bot) Run(ctx context.Context) error {
 						var mediaGroup []telego.InputMedia
 						if msg.IsPhotoCollage() {
 							for i, media := range msg.Media {
-								var photo tg.InputMediaPhoto
-								switch mt := media.(type) {
-								case types.UniImage:
-									if i == 0 {
-										//photo := tu.Photo(tu.ID(b.chatID), tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1))).
-										//	WithCaption(msg.Caption)
-										photo := tg.InputMediaPhoto{
-											Type:      tg.MediaTypePhoto,
-											Media:     tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1)),
-											Caption:   msg.Caption,
-											ParseMode: tg.ModeHTML,
-										}
-										mediaGroup = append(mediaGroup, photo)
-
-									} else {
-
-									}
+								mt := media.(types.UniImage)
+								photo := &tg.InputMediaPhoto{
+									Type:      tg.MediaTypePhoto,
+									Media:     tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1)),
+									Caption:   msg.Caption,
+									ParseMode: tg.ModeHTML,
 								}
+								if i != 0 {
+									photo.Caption = ""
+									photo.ParseMode = ""
+								}
+								mediaGroup = append(mediaGroup, photo)
 							}
 						}
 
