@@ -49,7 +49,6 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 			}
 
 			q.mu.Lock()
-			//for (len(q.qCrit)+len(q.qHigh)+len(q.qNorm)) == 0 && ctx.Err() == nil {
 			for (len(q.q[PRIORITY_NORMAL])+len(q.q[PRIORITY_HIGH])+len(q.q[PRIORITY_CRITICAL])) == 0 && ctx.Err() == nil {
 				q.cond.Wait()
 			}
@@ -59,7 +58,13 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 				return
 			}
 
-			var item any
+			//var item any
+			item,pri := any(nil), 0
+			switch {
+				case 
+
+			}
+
 			if len(q.q[PRIORITY_CRITICAL]) > 0 {
 				item = q.q[PRIORITY_CRITICAL][0]
 				q.q[PRIORITY_CRITICAL] = q.q[PRIORITY_CRITICAL][1:]
