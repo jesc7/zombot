@@ -143,16 +143,8 @@ func (b *Bot) SendImage(ctx context.Context, core types.UniCore, media types.Uni
 }
 
 func (b *Bot) SendMediaGroup(ctx context.Context, core types.UniCore, mediaGroup []tg.InputMedia) {
-	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
-		tu.Entity(core.Caption + "\n"),
-		tu.Entity(core.Text),
-	})...)
-
-	//tu.MediaGroup()
 	b.Q.Add(&queue.WaitObj{
-		O: tu.Photo(tu.ID(b.chatID), tu.FileFromBytes(media.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1))).
-			WithCaption(text).
-			WithCaptionEntities(entities...),
+		O: tu.MediaGroup(tu.ID(b.chatID), mediaGroup...),
 	}, queue.PRIORITY_NORMAL)
 }
 
@@ -209,6 +201,9 @@ func (b *Bot) Run(ctx context.Context) error {
 					if r, e = b.bot.SendPhoto(ctx, mt.WithParseMode(tg.ModeHTML)); wo != nil && wo.OnOk != nil {
 						wo.OnOk(r, e)
 					}
+
+				case *tg.SendMediaGroupParams:
+					b.bot.SendMediaGroup(ctx, mt)
 				}
 
 				if wo != nil {
