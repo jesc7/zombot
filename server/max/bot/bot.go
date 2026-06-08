@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
 	maxbot "github.com/max-messenger/max-bot-api-client-go"
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
@@ -62,12 +63,25 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 	}, e
 }
 
-func (b *Bot) GetFile(ctx context.Context, url string) ([]byte, string, error) {
-	/*fileInfo, e := b.bot.Uploads.GetFile(ctx, fileID)
-	if err != nil {
-		return nil, err
-	}*/
-	return []byte{}, "", nil
+func (b *Bot) GetFile(ctx context.Context, fileUrl string) ([]byte, string, error) {
+	c := &http.Client{Timeout: 10 * time.Second}
+	if b.proxy != "" {
+		proxy, _ := url.Parse(b.proxy)
+		c.Transport = &http.Transport{
+			Proxy: http.ProxyURL(proxy),
+		}
+	}
+	resp, e := ctypes.GetWithContext(ctx, c, fileUrl)
+	if e != nil {
+		return []byte{}, "", e
+	}
+	defer resp.Body.Close()
+
+	buf := new(bytes.Buffer)
+	if _, e = buf.ReadFrom(resp.Body); e != nil {
+		return []byte{}, "", e
+	}
+	return buf.Bytes(), "", nil
 }
 
 func (b *Bot) SendText(ctx context.Context, core types.UniCore) {

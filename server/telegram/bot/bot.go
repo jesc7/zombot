@@ -190,7 +190,7 @@ func (b *Bot) Run(ctx context.Context) error {
 
 				case *tg.SendPhotoParams:
 					var r *tg.Message
-					if r, e = b.bot.SendPhoto(ctx, mt); wo != nil && wo.OnOk != nil {
+					if r, e = b.bot.SendPhoto(ctx, mt.WithParseMode(tg.ModeHTML)); wo != nil && wo.OnOk != nil {
 						wo.OnOk(r, e)
 					}
 				}
