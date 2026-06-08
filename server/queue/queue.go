@@ -15,13 +15,10 @@ const (
 	PRIORITY_CRITICAL
 )
 
-// Queue очередь с ограничителем частоты выборки
+// Queue приоритетная очередь с ограничителем частоты выборки
 type Queue struct {
-	C chan any
-	q [3][]any
-	//qCrit []any
-	//qHigh []any
-	//qNorm []any
+	C    chan any
+	q    [3][]any
 	stop bool
 	mu   sync.Mutex
 	cond *sync.Cond
@@ -58,28 +55,17 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 				return
 			}
 
-			//var item any
-			item, pri := any(nil), 0
+			var pri Priority
 			switch {
 			case len(q.q[PRIORITY_CRITICAL]) > 0:
-				pri = int(PRIORITY_CRITICAL)
+				pri = PRIORITY_CRITICAL
 			case len(q.q[PRIORITY_HIGH]) > 0:
-				pri = int(PRIORITY_HIGH)
+				pri = PRIORITY_HIGH
 			default:
-				pri = int(PRIORITY_CRITICAL)
+				pri = PRIORITY_NORMAL
 			}
-
-			if len(q.q[PRIORITY_CRITICAL]) > 0 {
-				item = q.q[PRIORITY_CRITICAL][0]
-				q.q[PRIORITY_CRITICAL] = q.q[PRIORITY_CRITICAL][1:]
-			} else if len(q.q[PRIORITY_HIGH]) > 0 {
-				item = q.q[PRIORITY_HIGH][0]
-				q.q[PRIORITY_HIGH] = q.q[PRIORITY_HIGH][1:]
-			} else if len(q.q[PRIORITY_NORMAL]) > 0 {
-				item = q.q[PRIORITY_NORMAL][0]
-				q.q[PRIORITY_NORMAL] = q.q[PRIORITY_NORMAL][1:]
-			}
-
+			item := q.q[pri][0]
+			q.q[pri] = q.q[pri][1:]
 			q.mu.Unlock()
 
 			if err := q.lim.Wait(ctx); err != nil {
