@@ -66,6 +66,12 @@ type UniMessageMedia struct {
 	Media []IUniMedia
 }
 
+func (msg *UniMessageMedia) IsCollage() bool {
+	for _, m := range msg.Media {
+
+	}
+}
+
 type Contact struct {
 	Caption string
 	Phone   string

@@ -221,17 +221,9 @@ out:
 											Data: file,
 										},
 									})
-
-									var media types.UniImage
-									media.Data = file
-									core.Text = upd.GetText()
-
-									b.b.Write(v, types.UniMessageMedia{
-										UniCore: core,
-										Media:   append([]types.IUniMedia{}, media),
-									})
 								}
 							}
+							b.b.Write(v, media)
 
 						} else {
 							core.Text = upd.GetText()
