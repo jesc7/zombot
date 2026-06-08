@@ -177,9 +177,9 @@ out:
 						}
 
 						if len(upd.Message.Body.Attachments) != 0 {
-							for _, att := range upd.Message.Body.Attachments {
+							/*for _, att := range upd.Message.Body.Attachments {
 								log.Println(att)
-							}
+							}*/
 
 						} else {
 							core.Text = upd.GetText()
