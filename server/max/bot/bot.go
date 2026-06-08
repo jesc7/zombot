@@ -128,6 +128,12 @@ out:
 				switch um := env.(type) {
 				case types.UniMessageText:
 					b.SendText(ctx, um.Text)
+
+				case types.UniMessageMedia:
+					switch media := um.Media[0].(type) {
+					case types.UniImage:
+						b.SendImage(ctx, um.UniCore, media)
+					}
 				}
 			}
 

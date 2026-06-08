@@ -74,29 +74,6 @@ func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 	}, nil
 }
 
-func (b *Bot) SendText(ctx context.Context, core types.UniCore) {
-	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
-		tu.Entity(core.Caption + "\n"),
-		tu.Entity(core.Text),
-	})...)
-	b.Q.Add(&queue.WaitObj{
-		O: tu.Message(tu.ID(b.chatID), text).
-			WithEntities(entities...),
-	}, queue.PRIORITY_NORMAL)
-}
-
-func (b *Bot) SendImage(ctx context.Context, core types.UniCore, media types.UniImage) {
-	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
-		tu.Entity(core.Caption + "\n"),
-		tu.Entity(core.Text),
-	})...)
-	b.Q.Add(&queue.WaitObj{
-		O: tu.Photo(tu.ID(b.chatID), tu.FileFromBytes(media.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1))).
-			WithCaption(text).
-			WithCaptionEntities(entities...),
-	}, queue.PRIORITY_NORMAL)
-}
-
 func (b *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, error) {
 	var (
 		e error
@@ -138,6 +115,29 @@ func (b *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, error
 		return []byte{}, "", e
 	}
 	return buf.Bytes(), mime.TypeByExtension(filepath.Ext(f.FilePath)), nil
+}
+
+func (b *Bot) SendText(ctx context.Context, core types.UniCore) {
+	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
+		tu.Entity(core.Caption + "\n"),
+		tu.Entity(core.Text),
+	})...)
+	b.Q.Add(&queue.WaitObj{
+		O: tu.Message(tu.ID(b.chatID), text).
+			WithEntities(entities...),
+	}, queue.PRIORITY_NORMAL)
+}
+
+func (b *Bot) SendImage(ctx context.Context, core types.UniCore, media types.UniImage) {
+	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
+		tu.Entity(core.Caption + "\n"),
+		tu.Entity(core.Text),
+	})...)
+	b.Q.Add(&queue.WaitObj{
+		O: tu.Photo(tu.ID(b.chatID), tu.FileFromBytes(media.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1))).
+			WithCaption(text).
+			WithCaptionEntities(entities...),
+	}, queue.PRIORITY_NORMAL)
 }
 
 func (b *Bot) Run(ctx context.Context) error {
