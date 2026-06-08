@@ -242,8 +242,14 @@ func (b *Bot) Run(ctx context.Context) error {
 							switch mt := media.(type) {
 							case types.UniImage:
 								if i == 0 {
-									photo := tu.Photo(tu.ID(b.chatID), tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1))).
-										WithCaption(msg.Caption)
+									//photo := tu.Photo(tu.ID(b.chatID), tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1))).
+									//	WithCaption(msg.Caption)
+									photo := tg.InputMediaPhoto{
+										Type:      tg.MediaTypePhoto,
+										Media:     tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1)),
+										Caption:   msg.Caption,
+										ParseMode: tg.ModeHTML,
+									}
 									mediaGroup = append(mediaGroup, photo)
 
 								} else {
