@@ -235,9 +235,15 @@ func (b *Bot) Run(ctx context.Context) error {
 					b.SendText(ctx, um.UniCore)
 
 				case types.UniMessageMedia:
-					switch media := um.Media[0].(type) {
-					case types.UniImage:
-						b.SendImage(ctx, um.UniCore, media)
+					if um.IsCollage() && len(um.Media) < 11 {
+
+					} else {
+						for _, media := range um.Media {
+							switch mt := media.(type) {
+							case types.UniImage:
+								b.SendImage(ctx, um.UniCore, mt)
+							}
+						}
 					}
 				}
 			}

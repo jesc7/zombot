@@ -66,10 +66,17 @@ type UniMessageMedia struct {
 	Media []IUniMedia
 }
 
-func (msg *UniMessageMedia) IsCollage() bool {
+func (msg UniMessageMedia) IsCollage() bool {
+	var image, video int
 	for _, m := range msg.Media {
-
+		switch m.(type) {
+		case UniImage:
+			image++
+		case UniVideo, UniVideoNote:
+			video++
+		}
 	}
+	return image == len(msg.Media) || video == len(msg.Media)
 }
 
 type Contact struct {
