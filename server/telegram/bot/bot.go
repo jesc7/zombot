@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mymmrac/telego"
 	tg "github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
 	"golang.org/x/time/rate"
@@ -143,6 +142,20 @@ func (b *Bot) SendImage(ctx context.Context, core types.UniCore, media types.Uni
 	}, queue.PRIORITY_NORMAL)
 }
 
+func (b *Bot) SendMediaGroup(ctx context.Context, core types.UniCore, mediaGroup []tg.InputMedia) {
+	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
+		tu.Entity(core.Caption + "\n"),
+		tu.Entity(core.Text),
+	})...)
+
+	//tu.MediaGroup()
+	b.Q.Add(&queue.WaitObj{
+		O: tu.Photo(tu.ID(b.chatID), tu.FileFromBytes(media.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1))).
+			WithCaption(text).
+			WithCaptionEntities(entities...),
+	}, queue.PRIORITY_NORMAL)
+}
+
 func (b *Bot) Run(ctx context.Context) error {
 	updates, e := b.bot.UpdatesViaLongPolling(ctx, &tg.GetUpdatesParams{
 		Offset:  -1,
@@ -237,13 +250,12 @@ func (b *Bot) Run(ctx context.Context) error {
 
 				case types.UniMessageMedia:
 					if msg.IsCollage() && len(msg.Media) < 11 {
-						var mediaGroup []telego.InputMedia
+						var mediaGroup []tg.InputMedia
 						if msg.IsPhotoCollage() {
 							for i, media := range msg.Media {
-								mt := media.(types.UniImage)
 								photo := &tg.InputMediaPhoto{
 									Type:      tg.MediaTypePhoto,
-									Media:     tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1)),
+									Media:     tu.FileFromBytes(media.(types.UniImage).Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1)),
 									Caption:   msg.Caption,
 									ParseMode: tg.ModeHTML,
 								}
@@ -254,6 +266,7 @@ func (b *Bot) Run(ctx context.Context) error {
 								mediaGroup = append(mediaGroup, photo)
 							}
 						}
+						b.SendMediaGroup(ctx, msg.UniCore, mediaGroup)
 
 					} else {
 						var core types.UniCore
