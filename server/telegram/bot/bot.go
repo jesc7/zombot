@@ -29,6 +29,7 @@ var otherMessengers = ctypes.Filter(types.ALL_MESSENGERS, func(v string) bool { 
 type Bot struct {
 	bot    *tg.Bot
 	token  string
+	proxy  string
 	me     *tg.User
 	Q      *queue.Queue
 	chatID int64
@@ -37,9 +38,11 @@ type Bot struct {
 }
 
 func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
+	var proxy string
 	options := append([]tg.BotOption{}, tg.WithDefaultLogger(false, true))
 	if cfg.Proxy.Addr != "" {
-		proxy, e := url.Parse(fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port))
+		proxy = fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port)
+		proxy, e := url.Parse(proxy)
 		if e == nil {
 			options = append(options, tg.WithHTTPClient(
 				&http.Client{
@@ -115,6 +118,19 @@ func (b *Bot) GetFile(ctx context.Context, fileID string) ([]byte, string, error
 	if e != nil {
 		return []byte{}, "", e
 	}
+
+	/*if cfg.Proxy.Addr != "" {
+		proxy, e := url.Parse(fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port))
+		if e == nil {
+			options = append(options, tg.WithHTTPClient(
+				&http.Client{
+					Transport: &http.Transport{
+						Proxy: http.ProxyURL(proxy),
+					},
+				},
+			))
+		}
+	}*/
 
 	resp, e := ctypes.GetWithContext(ctx, nil, "https://api.telegram.org/file/bot"+b.token+"/"+f.FilePath)
 	if e != nil {
