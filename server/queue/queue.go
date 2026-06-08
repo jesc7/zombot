@@ -65,11 +65,12 @@ func NewQ(ctx context.Context, limit rate.Limit) *Queue {
 				q.q[pri] = q.q[pri][1:]
 				q.mu.Unlock()
 
-				select {
+				q.C <- item
+				/*select {
 				case <-ctx.Done():
 					return
 				case q.C <- item:
-				}
+				}*/
 			}
 		}
 	}()
