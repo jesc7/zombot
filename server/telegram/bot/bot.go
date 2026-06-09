@@ -188,26 +188,16 @@ func (b *Bot) SendMediaGroup(ctx context.Context, core types.UniCore, mediaGroup
 
 func (b *Bot) SendContacts(ctx context.Context, msg types.UniMessageContacts) (m *tg.Message, e error) {
 	coll := []tu.MessageEntityCollection{
-		tu.Entity(msg.Caption + "\n"),
+		tu.Entity("📞 " + msg.Caption + "\n"),
 		tu.Entity(msg.Text),
 	}
-	for _, c := range contacts {
-		coll = append(coll, tu.Entity(c.name+"\n").Bold())
-		for _, phone := range c.phones {
-			coll = append(coll, tu.Entity(fmt.Sprintf("%s\n", phone)).PhoneNumber())
-		}
+	for _, c := range msg.Contacts {
+		coll = append(coll, tu.Entity("<b>"+c.Caption+"<b>\n"))
+		coll = append(coll, tu.Entity(c.Phone+"\n").PhoneNumber())
 		coll = append(coll, tu.Entity("\n"))
 	}
-	bot.Queue.Wait(Obj{
-		obj: tu.MessageWithEntities(tu.ID(id), coll...).
-			WithReplyParameters(
-				&tg.ReplyParameters{
-					ChatID:                   tu.ID(id),
-					MessageID:                topic,
-					AllowSendingWithoutReply: true,
-				},
-			),
-		evt: func(a ...any) { m, e = R[*tg.Message](a, 0), E(a, 1) },
+	b.Q.Add(&queue.WaitObj{
+		O: tu.MessageWithEntities(tu.ID(b.chatID), coll...),
 	}, queue.PRIORITY_NORMAL)
 	return
 }
