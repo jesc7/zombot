@@ -246,6 +246,12 @@ func (b *Bot) Run(ctx context.Context) error {
 						wo.OnOk(r, e)
 					}
 
+				case *tg.SendAudioParams:
+					var r *tg.Message
+					if r, e = b.bot.SendAudio(ctx, mt.WithParseMode(tg.ModeHTML)); wo != nil && wo.OnOk != nil {
+						wo.OnOk(r, e)
+					}
+
 				case *tg.SendDocumentParams:
 					var r *tg.Message
 					if r, e = b.bot.SendDocument(ctx, mt.WithParseMode(tg.ModeHTML)); wo != nil && wo.OnOk != nil {
