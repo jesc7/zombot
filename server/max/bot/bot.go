@@ -37,6 +37,7 @@ type Bot struct {
 func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 	var proxyAddr string
 	var options []maxbot.Option
+	maxbot.GetUpdatesParams{}
 	if cfg.Proxy.Addr != "" {
 		proxyAddr = fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port)
 		proxy, e := url.Parse(proxyAddr)
@@ -105,9 +106,6 @@ func (b *Bot) SendImage(ctx context.Context, core types.UniCore, media types.Uni
 }
 
 func (b *Bot) Run(ctx context.Context) {
-	//subs, e := b.bot.Subscriptions.GetSubscriptions(ctx)
-	//log.Println(subs, e)
-
 	go func() { //запросы в Max обрабатываем в отдельной горутине
 		for {
 			select {
