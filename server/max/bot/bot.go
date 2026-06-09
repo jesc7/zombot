@@ -207,6 +207,7 @@ out:
 						if len(upd.Message.Body.Attachments) != 0 {
 							core.Text = upd.GetText()
 							media := types.UniMessageMedia{UniCore: core}
+							contacts := types.UniMessageContacts{UniCore: core}
 
 							for _, attach := range upd.Message.Body.Attachments {
 								switch at := attach.(type) {
@@ -258,9 +259,21 @@ out:
 											Name: at.Filename,
 										},
 									})
+
+								case *schemes.ContactAttachment:
+									contacts.Contacts = append(contacts.Contacts, types.Contact{
+										Caption: at.Payload.TamInfo.Username,
+										Phone:   strconv.FormatInt(at.Payload.TamInfo.UserId, 10),
+									})
 								}
 							}
-							b.b.Write(v, media)
+							switch {
+							case len(media.Media) != 0:
+								b.b.Write(v, media)
+
+							case len(contacts.Contacts) != 0:
+								b.b.Write(v, contacts)
+							}
 
 						} else {
 							core.Text = upd.GetText()
