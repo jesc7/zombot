@@ -261,6 +261,11 @@ out:
 									})
 
 								case *schemes.ContactAttachment:
+									user, e := b.bot.Chats.GetChat(ctx, at.Payload.TamInfo.UserId)
+									if e != nil {
+										continue
+									}
+
 									contacts.Contacts = append(contacts.Contacts, types.Contact{
 										Caption: at.Payload.TamInfo.Username,
 										Phone:   strconv.FormatInt(at.Payload.TamInfo.UserId, 10),
