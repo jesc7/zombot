@@ -520,6 +520,22 @@ func (b *Bot) Run(ctx context.Context) error {
 							Media:   append([]types.IUniMedia{}, media),
 						})
 
+					} else if msg.Contact != nil {
+						file, _, e := b.GetFile(ctx, msg.Document.FileID)
+						if e != nil {
+							return
+						}
+
+						var media types.UniDocument
+						media.Name = msg.Document.FileName
+						media.Data = file
+						core.Text = msg.Caption
+
+						b.b.Write(v, types.UniMessageMedia{
+							UniCore: core,
+							Media:   append([]types.IUniMedia{}, media),
+						})
+
 					} else {
 						core.Text = update.Message.Text
 						b.b.Write(v, types.UniMessageText{

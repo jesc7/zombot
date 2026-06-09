@@ -146,19 +146,12 @@ func (b *Bot) SendDocument(ctx context.Context, core types.UniCore, media types.
 func (b *Bot) SendContacts(ctx context.Context, msg types.UniMessageContacts) {
 	text := msg.Caption + " отправил(а) контакты 📞\n"
 	for _, c := range msg.Contacts {
-		text += "<b>" + c.Caption + "</b>\n"
-		coll = append(coll, tu.Entity("<b>"+c.Caption+"</b>\n"))
-		ent := tu.Entity(c.Phone + "\n")
-		if rePhone.MatchString(c.Phone) {
-			ent = ent.PhoneNumber()
-		}
-		coll = append(coll, ent)
-		coll = append(coll, tu.Entity("\n"))
+		text += "<b>" + c.Caption + "</b>\n" + c.Phone + "\n\n"
 	}
 	b.Q.Add(&queue.WaitObj{
-		O: tu.MessageWithEntities(tu.ID(b.chatID), coll...),
+		O: maxbot.NewMessage().
+			SetText(text),
 	}, queue.PRIORITY_NORMAL)
-	return
 }
 
 func (b *Bot) Run(ctx context.Context) {
