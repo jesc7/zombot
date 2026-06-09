@@ -480,6 +480,7 @@ func (b *Bot) Run(ctx context.Context) error {
 						}
 
 						var media types.UniVideo
+						media.Name = msg.Video.FileName
 						media.Data = file
 						core.Text = msg.Caption
 
