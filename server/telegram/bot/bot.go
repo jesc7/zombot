@@ -443,14 +443,81 @@ func (b *Bot) Run(ctx context.Context) error {
 						})
 
 					} else if msg.Audio != nil {
+						file, _, e := b.GetFile(ctx, msg.Audio.FileID)
+						if e != nil {
+							return
+						}
+
+						var media types.UniAudio
+						media.Name = msg.Audio.FileName
+						media.Data = file
+						core.Text = msg.Caption
+
+						b.b.Write(v, types.UniMessageMedia{
+							UniCore: core,
+							Media:   append([]types.IUniMedia{}, media),
+						})
 
 					} else if msg.Voice != nil {
+						file, _, e := b.GetFile(ctx, msg.Voice.FileID)
+						if e != nil {
+							return
+						}
+
+						var media types.UniVoice
+						media.Data = file
+						core.Text = msg.Caption
+
+						b.b.Write(v, types.UniMessageMedia{
+							UniCore: core,
+							Media:   append([]types.IUniMedia{}, media),
+						})
 
 					} else if msg.Video != nil {
+						file, _, e := b.GetFile(ctx, msg.Video.FileID)
+						if e != nil {
+							return
+						}
+
+						var media types.UniVideo
+						media.Data = file
+						core.Text = msg.Caption
+
+						b.b.Write(v, types.UniMessageMedia{
+							UniCore: core,
+							Media:   append([]types.IUniMedia{}, media),
+						})
 
 					} else if msg.VideoNote != nil {
+						file, _, e := b.GetFile(ctx, msg.VideoNote.FileID)
+						if e != nil {
+							return
+						}
+
+						var media types.UniVideoNote
+						media.Data = file
+						core.Text = msg.Caption
+
+						b.b.Write(v, types.UniMessageMedia{
+							UniCore: core,
+							Media:   append([]types.IUniMedia{}, media),
+						})
 
 					} else if msg.Document != nil {
+						file, _, e := b.GetFile(ctx, msg.Document.FileID)
+						if e != nil {
+							return
+						}
+
+						var media types.UniDocument
+						media.Name = msg.Document.FileName
+						media.Data = file
+						core.Text = msg.Caption
+
+						b.b.Write(v, types.UniMessageMedia{
+							UniCore: core,
+							Media:   append([]types.IUniMedia{}, media),
+						})
 
 					} else {
 						core.Text = update.Message.Text
