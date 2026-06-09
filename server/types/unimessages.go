@@ -25,6 +25,7 @@ type UniMessageText struct {
 
 type IUniMedia interface {
 	UniData() []byte
+	UniName() string
 }
 
 type UniMedia struct {
@@ -34,6 +35,10 @@ type UniMedia struct {
 
 func (m UniMedia) UniData() []byte {
 	return m.Data
+}
+
+func (m UniMedia) UniName() string {
+	return m.Name
 }
 
 type UniImage struct {
