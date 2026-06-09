@@ -186,6 +186,32 @@ func (b *Bot) SendMediaGroup(ctx context.Context, core types.UniCore, mediaGroup
 	}, queue.PRIORITY_NORMAL)
 }
 
+func (b *Bot) SendContacts(ctx context.Context, msg types.UniMessageContacts) (m *tg.Message, e error) {
+	coll := []tu.MessageEntityCollection{
+		tu.Entity(msg.Caption + "\n"),
+		tu.Entity(msg.Text),
+	}
+	for _, c := range contacts {
+		coll = append(coll, tu.Entity(c.name+"\n").Bold())
+		for _, phone := range c.phones {
+			coll = append(coll, tu.Entity(fmt.Sprintf("%s\n", phone)).PhoneNumber())
+		}
+		coll = append(coll, tu.Entity("\n"))
+	}
+	bot.Queue.Wait(Obj{
+		obj: tu.MessageWithEntities(tu.ID(id), coll...).
+			WithReplyParameters(
+				&tg.ReplyParameters{
+					ChatID:                   tu.ID(id),
+					MessageID:                topic,
+					AllowSendingWithoutReply: true,
+				},
+			),
+		evt: func(a ...any) { m, e = R[*tg.Message](a, 0), E(a, 1) },
+	}, queue.PRIORITY_NORMAL)
+	return
+}
+
 func (b *Bot) Run(ctx context.Context) error {
 	updates, e := b.bot.UpdatesViaLongPolling(ctx, &tg.GetUpdatesParams{
 		Offset:  -1,
@@ -380,6 +406,7 @@ func (b *Bot) Run(ctx context.Context) error {
 					}
 
 				case types.UniMessageContacts:
+					b.SendContacts(ctx, msg)
 				}
 			}
 
