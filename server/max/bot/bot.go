@@ -169,15 +169,35 @@ out:
 
 			// пакеты других мессенджеров или внутренние
 			case types.IUniMessage:
-				switch um := env.(type) {
+				switch msg := env.(type) {
 				case types.UniMessageText:
-					b.SendText(ctx, um.UniCore)
+					b.SendText(ctx, msg.UniCore)
 
 				case types.UniMessageMedia:
-					switch media := um.Media[0].(type) {
-					case types.UniImage:
-						b.SendImage(ctx, um.UniCore, media)
+					var core types.UniCore
+					for i, media := range msg.Media {
+						if i == 0 {
+							core = msg.UniCore
+						}
+						switch mt := media.(type) {
+						case types.UniImage:
+							b.SendImage(ctx, core, mt)
+
+						case types.UniVideo:
+							b.SendVideo(ctx, core, mt)
+
+						case types.UniAudio:
+							b.SendAudio(ctx, core, mt)
+
+						case types.UniDocument:
+							b.SendDocument(ctx, core, mt)
+						}
+						core.Text = "" //текст сообщения только у первого файла
 					}
+					/*switch media := msg.Media[0].(type) {
+					case types.UniImage:
+						b.SendImage(ctx, msg.UniCore, media)
+					}*/
 				}
 			}
 
