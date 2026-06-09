@@ -105,6 +105,9 @@ func (b *Bot) SendImage(ctx context.Context, core types.UniCore, media types.Uni
 }
 
 func (b *Bot) Run(ctx context.Context) {
+	//subs, e := b.bot.Subscriptions.GetSubscriptions(ctx)
+	//log.Println(subs, e)
+
 	go func() { //запросы в Max обрабатываем в отдельной горутине
 		for {
 			select {
