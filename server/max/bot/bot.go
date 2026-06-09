@@ -143,6 +143,24 @@ func (b *Bot) SendDocument(ctx context.Context, core types.UniCore, media types.
 	}, queue.PRIORITY_NORMAL)
 }
 
+func (b *Bot) SendContacts(ctx context.Context, msg types.UniMessageContacts) {
+	text := msg.Caption + " отправил(а) контакты 📞\n"
+	for _, c := range msg.Contacts {
+		text += "<b>" + c.Caption + "</b>\n"
+		coll = append(coll, tu.Entity("<b>"+c.Caption+"</b>\n"))
+		ent := tu.Entity(c.Phone + "\n")
+		if rePhone.MatchString(c.Phone) {
+			ent = ent.PhoneNumber()
+		}
+		coll = append(coll, ent)
+		coll = append(coll, tu.Entity("\n"))
+	}
+	b.Q.Add(&queue.WaitObj{
+		O: tu.MessageWithEntities(tu.ID(b.chatID), coll...),
+	}, queue.PRIORITY_NORMAL)
+	return
+}
+
 func (b *Bot) Run(ctx context.Context) {
 	go func() { //запросы в Max обрабатываем в отдельной горутине
 		for {
@@ -233,6 +251,9 @@ out:
 						}
 						core.Text = "" //текст сообщения только у первого файла
 					}
+
+				case types.UniMessageContacts:
+					b.SendContacts(ctx, msg)
 				}
 			}
 
