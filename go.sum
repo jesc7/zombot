@@ -27,6 +27,8 @@ github.com/klauspost/cpuid/v2 v2.2.9 h1:66ze0taIn2H33fBvCkXuv9BmCwDfafmiIVpKV9kK
 github.com/klauspost/cpuid/v2 v2.2.9/go.mod h1:rqkxqrZ1EhYM9G+hXH7YdowN5R5RGN6NK4QwQ3WMXF8=
 github.com/max-messenger/max-bot-api-client-go v1.6.17 h1:Ol9obu6H9+XD0JdKYCu88qlHjIZhoFm9tR/mTesKXFE=
 github.com/max-messenger/max-bot-api-client-go v1.6.17/go.mod h1:on8Ne+fH8HaGxZgMHAY5kWczdj7dLUFpBTb6aY9PhdU=
+github.com/max-messenger/max-bot-api-client-go v1.6.18 h1:zNVgKxcNOtlBP7txj2Yd8OAm22klKaJgzP4iUazTHY8=
+github.com/max-messenger/max-bot-api-client-go v1.6.18/go.mod h1:on8Ne+fH8HaGxZgMHAY5kWczdj7dLUFpBTb6aY9PhdU=
 github.com/mymmrac/telego v1.8.0 h1:EvIprWo9Cn0MHgumvvqNXPAXO1yJj3pu2cdCCeDxbow=
 github.com/mymmrac/telego v1.8.0/go.mod h1:pdLV346EgVuq7Xrh3kMggeBiazeHhsdEoK0RTEOPXRM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

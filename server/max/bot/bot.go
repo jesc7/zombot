@@ -37,7 +37,6 @@ type Bot struct {
 func NewBot(ctx context.Context, cfg types.Config, b *bus.Bus) (*Bot, error) {
 	var proxyAddr string
 	var options []maxbot.Option
-	maxbot.GetUpdatesParams{}
 	if cfg.Proxy.Addr != "" {
 		proxyAddr = fmt.Sprintf("%s:%d", cfg.Proxy.Addr, cfg.Proxy.Port)
 		proxy, e := url.Parse(proxyAddr)
