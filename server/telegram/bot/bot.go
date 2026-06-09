@@ -378,6 +378,8 @@ func (b *Bot) Run(ctx context.Context) error {
 							core.Text = "" //текст сообщения только у первого файла
 						}
 					}
+
+				case types.UniMessageContacts:
 				}
 			}
 
