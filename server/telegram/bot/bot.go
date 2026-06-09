@@ -521,19 +521,14 @@ func (b *Bot) Run(ctx context.Context) error {
 						})
 
 					} else if msg.Contact != nil {
-						file, _, e := b.GetFile(ctx, msg.Document.FileID)
-						if e != nil {
-							return
-						}
-
-						var media types.UniDocument
-						media.Name = msg.Document.FileName
-						media.Data = file
+						var contact types.Contact
+						contact.Caption = msg.Contact.FirstName
+						contact.Phone = msg.Contact.PhoneNumber
 						core.Text = msg.Caption
 
-						b.b.Write(v, types.UniMessageMedia{
-							UniCore: core,
-							Media:   append([]types.IUniMedia{}, media),
+						b.b.Write(v, types.UniMessageContacts{
+							UniCore:  core,
+							Contacts: append([]types.Contact{}, contact),
 						})
 
 					} else {

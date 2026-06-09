@@ -104,8 +104,8 @@ func (b *Bot) SendImage(ctx context.Context, core types.UniCore, media types.Uni
 	}, queue.PRIORITY_NORMAL)
 }
 
-func (b *Bot) SendVideo(ctx context.Context, core types.UniCore, media types.UniVideo) {
-	video, e := b.bot.Uploads.UploadMediaFromReader(ctx, schemes.VIDEO, bytes.NewReader(media.Data))
+func (b *Bot) SendVideo(ctx context.Context, core types.UniCore, media types.IUniMedia) {
+	video, e := b.bot.Uploads.UploadMediaFromReader(ctx, schemes.VIDEO, bytes.NewReader(media.UniData()))
 	if e != nil {
 		return
 	}
@@ -117,8 +117,8 @@ func (b *Bot) SendVideo(ctx context.Context, core types.UniCore, media types.Uni
 	}, queue.PRIORITY_NORMAL)
 }
 
-func (b *Bot) SendAudio(ctx context.Context, core types.UniCore, media types.UniAudio) {
-	audio, e := b.bot.Uploads.UploadMediaFromReader(ctx, schemes.AUDIO, bytes.NewReader(media.Data))
+func (b *Bot) SendAudio(ctx context.Context, core types.UniCore, media types.IUniMedia) {
+	audio, e := b.bot.Uploads.UploadMediaFromReader(ctx, schemes.AUDIO, bytes.NewReader(media.UniData()))
 	if e != nil {
 		return
 	}
@@ -131,7 +131,7 @@ func (b *Bot) SendAudio(ctx context.Context, core types.UniCore, media types.Uni
 }
 
 func (b *Bot) SendDocument(ctx context.Context, core types.UniCore, media types.UniDocument) {
-	file, e := b.bot.Uploads.UploadMediaFromReader(ctx, schemes.FILE, bytes.NewReader(media.Data))
+	file, e := b.bot.Uploads.UploadMediaFromReaderWithName(ctx, schemes.FILE, bytes.NewReader(media.Data), media.Name)
 	if e != nil {
 		return
 	}
@@ -233,10 +233,10 @@ out:
 						case types.UniImage:
 							b.SendImage(ctx, core, mt)
 
-						case types.UniVideo:
+						case types.UniVideo, types.UniVideoNote:
 							b.SendVideo(ctx, core, mt)
 
-						case types.UniAudio:
+						case types.UniAudio, types.UniVoice:
 							b.SendAudio(ctx, core, mt)
 
 						case types.UniDocument:
