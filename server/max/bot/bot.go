@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	maxbot "github.com/max-messenger/max-bot-api-client-go"
@@ -235,25 +236,83 @@ out:
 					b.SendText(ctx, msg.UniCore)
 
 				case types.UniMessageMedia:
-					var core types.UniCore
-					for i, media := range msg.Media {
-						if i == 0 {
-							core = msg.UniCore
+					if msg.IsCollage() && len(msg.Media) > 1 && len(msg.Media) < 11 {
+						m := maxbot.NewMessage().
+							SetText(fmt.Sprintf("%s\n%s", msg.Caption, msg.Text))
+
+						for i, media := range msg.Media {
+							switch mt := media.(type) {
+							case types.UniImage:
+								photo, e := b.bot.Uploads.UploadPhotoFromReader(ctx, bytes.NewReader(media.Data))
+								if e != nil {
+									return
+								}
+
+								photo := &tg.InputMediaPhoto{
+									Type:            tg.MediaTypePhoto,
+									Media:           tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1)),
+									Caption:         text,
+									CaptionEntities: entities,
+									ParseMode:       tg.ModeHTML,
+								}
+								if i != 0 {
+									photo.Caption = ""
+									photo.CaptionEntities = []tg.MessageEntity{}
+								}
+								mediaGroup = append(mediaGroup, photo)
+
+							case types.UniVideo:
+								video := &tg.InputMediaVideo{
+									Type:            tg.MediaTypeVideo,
+									Media:           tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Video_150405.000000"), ".", "", 1)),
+									Caption:         text,
+									CaptionEntities: entities,
+									ParseMode:       tg.ModeHTML,
+								}
+								if i != 0 {
+									video.Caption = ""
+									video.CaptionEntities = []tg.MessageEntity{}
+								}
+								mediaGroup = append(mediaGroup, video)
+
+							case types.UniVideoNote:
+								video := &tg.InputMediaVideo{
+									Type:            tg.MediaTypeVideo,
+									Media:           tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Video_150405.000000"), ".", "", 1)),
+									Caption:         text,
+									CaptionEntities: entities,
+									ParseMode:       tg.ModeHTML,
+								}
+								if i != 0 {
+									video.Caption = ""
+									video.CaptionEntities = []tg.MessageEntity{}
+								}
+								mediaGroup = append(mediaGroup, video)
+							}
 						}
-						switch mt := media.(type) {
-						case types.UniImage:
-							b.SendImage(ctx, core, mt)
+						b.SendMediaGroup(ctx, msg.UniCore, mediaGroup)
 
-						case types.UniVideo, types.UniVideoNote:
-							b.SendVideo(ctx, core, mt)
+					} else {
+						var core types.UniCore
+						for i, media := range msg.Media {
+							if i == 0 {
+								core = msg.UniCore
+							}
+							switch mt := media.(type) {
+							case types.UniImage:
+								b.SendImage(ctx, core, mt)
 
-						case types.UniAudio, types.UniVoice:
-							b.SendAudio(ctx, core, mt)
+							case types.UniVideo, types.UniVideoNote:
+								b.SendVideo(ctx, core, mt)
 
-						case types.UniDocument:
-							b.SendDocument(ctx, core, mt)
+							case types.UniAudio, types.UniVoice:
+								b.SendAudio(ctx, core, mt)
+
+							case types.UniDocument:
+								b.SendDocument(ctx, core, mt)
+							}
+							core.Text = "" //текст сообщения только у первого файла
 						}
-						core.Text = "" //текст сообщения только у первого файла
 					}
 
 				case types.UniMessageContacts:
