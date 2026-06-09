@@ -118,7 +118,18 @@ func (b *Bot) SendVideo(ctx context.Context, core types.UniCore, media types.IUn
 }
 
 func (b *Bot) SendAudio(ctx context.Context, core types.UniCore, media types.IUniMedia) {
-	audio, e := b.bot.Uploads.UploadMediaFromReaderWithName(ctx, schemes.AUDIO, bytes.NewReader(media.UniData()), media.UniName())
+	name := media.UniName()
+	if name != "" {
+		b.SendDocument(ctx, core, types.UniDocument{
+			UniMedia: types.UniMedia{
+				Name: name,
+				Data: media.UniData(),
+			},
+		})
+		return
+	}
+
+	audio, e := b.bot.Uploads.UploadMediaFromReader(ctx, schemes.AUDIO, bytes.NewReader(media.UniData()))
 	if e != nil {
 		return
 	}
