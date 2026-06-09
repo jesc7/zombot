@@ -154,6 +154,19 @@ func (b *Bot) SendVideo(ctx context.Context, core types.UniCore, media types.Uni
 	}, queue.PRIORITY_NORMAL)
 }
 
+func (b *Bot) SendAudio(ctx context.Context, core types.UniCore, media types.UniAudio) {
+	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
+		tu.Entity(core.Caption + "\n"),
+		tu.Entity(core.Text),
+	})...)
+
+	b.Q.Add(&queue.WaitObj{
+		O: tu.Audio(tu.ID(b.chatID), tu.FileFromBytes(media.Data, strings.Replace(time.Now().Format("Audio_150405.000000"), ".", "", 1))).
+			WithCaption(text).
+			WithCaptionEntities(entities...),
+	}, queue.PRIORITY_NORMAL)
+}
+
 func (b *Bot) SendDocument(ctx context.Context, core types.UniCore, media types.UniDocument) {
 	text, entities := tu.MessageEntities(([]tu.MessageEntityCollection{
 		tu.Entity(core.Caption + "\n"),
@@ -349,6 +362,9 @@ func (b *Bot) Run(ctx context.Context) error {
 
 							case types.UniVideo:
 								b.SendVideo(ctx, core, mt)
+
+							case types.UniAudio:
+								b.SendAudio(ctx, core, mt)
 
 							case types.UniDocument:
 								b.SendDocument(ctx, core, mt)

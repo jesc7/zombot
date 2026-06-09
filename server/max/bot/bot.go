@@ -234,6 +234,18 @@ out:
 										},
 									})
 
+								case *schemes.AudioAttachment:
+									file, _, e := b.GetFile(ctx, at.Payload.Url)
+									if e != nil {
+										return
+									}
+
+									media.Media = append(media.Media, types.UniAudio{
+										UniMedia: types.UniMedia{
+											Data: file,
+										},
+									})
+
 								case *schemes.FileAttachment:
 									file, _, e := b.GetFile(ctx, at.Payload.Url)
 									if e != nil {
