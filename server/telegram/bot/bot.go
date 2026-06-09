@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -25,6 +26,7 @@ import (
 
 var myName = types.BUS_BOTTG
 var otherMessengers = ctypes.Filter(types.ALL_MESSENGERS, func(v string) bool { return v != myName })
+var rePhone = regexp.MustCompile(`^(?:\+?\d[\-\s]?\(?\s?\d{3,5}\s?\)?[\-\s]?)?(?:\d[\-\s]?){4,6}\d$`)
 
 type Bot struct {
 	bot    *tg.Bot
@@ -188,12 +190,15 @@ func (b *Bot) SendMediaGroup(ctx context.Context, core types.UniCore, mediaGroup
 
 func (b *Bot) SendContacts(ctx context.Context, msg types.UniMessageContacts) (m *tg.Message, e error) {
 	coll := []tu.MessageEntityCollection{
-		tu.Entity("📞 " + msg.Caption + "\n"),
-		tu.Entity(msg.Text),
+		tu.Entity(msg.Caption + " отправил(а) контакты 📞\n"),
 	}
 	for _, c := range msg.Contacts {
-		coll = append(coll, tu.Entity("<b>"+c.Caption+"<b>\n"))
-		coll = append(coll, tu.Entity(c.Phone+"\n").PhoneNumber())
+		coll = append(coll, tu.Entity("<b>"+c.Caption+"</b>\n"))
+		ent := tu.Entity(c.Phone + "\n")
+		if rePhone.MatchString(c.Phone) {
+			ent = ent.PhoneNumber()
+		}
+		coll = append(coll, ent)
 		coll = append(coll, tu.Entity("\n"))
 	}
 	b.Q.Add(&queue.WaitObj{

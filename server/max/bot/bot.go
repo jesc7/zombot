@@ -262,8 +262,8 @@ out:
 
 								case *schemes.ContactAttachment:
 									contacts.Contacts = append(contacts.Contacts, types.Contact{
-										Caption: at.Payload.TamInfo.Username,
-										Phone:   "<скрыт>",
+										Caption: at.Payload.TamInfo.FirstName,
+										Phone:   "[скрыт]",
 									})
 								}
 							}
