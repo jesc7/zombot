@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 
 	maxbot "github.com/max-messenger/max-bot-api-client-go"
@@ -240,57 +239,24 @@ out:
 						m := maxbot.NewMessage().
 							SetText(fmt.Sprintf("%s\n%s", msg.Caption, msg.Text))
 
-						for i, media := range msg.Media {
-							switch mt := media.(type) {
+						for _, media := range msg.Media {
+							switch media.(type) {
 							case types.UniImage:
-								photo, e := b.bot.Uploads.UploadPhotoFromReader(ctx, bytes.NewReader(media.Data))
+								photo, e := b.bot.Uploads.UploadPhotoFromReader(ctx, bytes.NewReader(media.UniData()))
 								if e != nil {
-									return
+									continue
 								}
+								m.AddPhoto(photo)
 
-								photo := &tg.InputMediaPhoto{
-									Type:            tg.MediaTypePhoto,
-									Media:           tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Image_150405.000000"), ".", "", 1)),
-									Caption:         text,
-									CaptionEntities: entities,
-									ParseMode:       tg.ModeHTML,
+							case types.UniVideo, *types.UniVideoNote:
+								video, e := b.bot.Uploads.UploadMediaFromReader(ctx, schemes.VIDEO, bytes.NewReader(media.UniData()))
+								if e != nil {
+									continue
 								}
-								if i != 0 {
-									photo.Caption = ""
-									photo.CaptionEntities = []tg.MessageEntity{}
-								}
-								mediaGroup = append(mediaGroup, photo)
-
-							case types.UniVideo:
-								video := &tg.InputMediaVideo{
-									Type:            tg.MediaTypeVideo,
-									Media:           tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Video_150405.000000"), ".", "", 1)),
-									Caption:         text,
-									CaptionEntities: entities,
-									ParseMode:       tg.ModeHTML,
-								}
-								if i != 0 {
-									video.Caption = ""
-									video.CaptionEntities = []tg.MessageEntity{}
-								}
-								mediaGroup = append(mediaGroup, video)
-
-							case types.UniVideoNote:
-								video := &tg.InputMediaVideo{
-									Type:            tg.MediaTypeVideo,
-									Media:           tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Video_150405.000000"), ".", "", 1)),
-									Caption:         text,
-									CaptionEntities: entities,
-									ParseMode:       tg.ModeHTML,
-								}
-								if i != 0 {
-									video.Caption = ""
-									video.CaptionEntities = []tg.MessageEntity{}
-								}
-								mediaGroup = append(mediaGroup, video)
+								m.AddVideo(video)
 							}
 						}
-						b.SendMediaGroup(ctx, msg.UniCore, mediaGroup)
+						b.Q.Add(&queue.WaitObj{O: m}, queue.PRIORITY_NORMAL)
 
 					} else {
 						var core types.UniCore
