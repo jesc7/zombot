@@ -346,24 +346,10 @@ func (b *Bot) Run(ctx context.Context) error {
 								}
 								mediaGroup = append(mediaGroup, photo)
 
-							case types.UniVideo:
+							case types.UniVideo, types.UniVideoNote:
 								video := &tg.InputMediaVideo{
 									Type:            tg.MediaTypeVideo,
-									Media:           tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Video_150405.000000"), ".", "", 1)),
-									Caption:         text,
-									CaptionEntities: entities,
-									ParseMode:       tg.ModeHTML,
-								}
-								if i != 0 {
-									video.Caption = ""
-									video.CaptionEntities = []tg.MessageEntity{}
-								}
-								mediaGroup = append(mediaGroup, video)
-
-							case types.UniVideoNote:
-								video := &tg.InputMediaVideo{
-									Type:            tg.MediaTypeVideo,
-									Media:           tu.FileFromBytes(mt.Data, strings.Replace(time.Now().Format("Video_150405.000000"), ".", "", 1)),
+									Media:           tu.FileFromBytes(media.UniData(), strings.Replace(time.Now().Format("Video_150405.000000"), ".", "", 1)),
 									Caption:         text,
 									CaptionEntities: entities,
 									ParseMode:       tg.ModeHTML,
