@@ -296,7 +296,7 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) (str
 		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Переработник %s'</b>\n%s (%+d мин.)", types.Iif(weekly, "недели", "месяца"), r[0].name, r[0].value)
 	}
 
-	r = _edited(start, 5) //гэп 5 минут не считается за редактирование
+	r = _edited(start, 10) //гэп 10 минут не считается за редактирование
 	if len(r) != 0 {
 		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Мастер фотошопа'</b>\n%s (%d исправлений)", r[0].name, r[0].value)
 	}
