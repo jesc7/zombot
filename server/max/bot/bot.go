@@ -248,7 +248,7 @@ out:
 								}
 								m.AddPhoto(photo)
 
-							case types.UniVideo, *types.UniVideoNote:
+							case types.UniVideo, types.UniVideoNote:
 								video, e := b.bot.Uploads.UploadMediaFromReader(ctx, schemes.VIDEO, bytes.NewReader(media.UniData()))
 								if e != nil {
 									continue
