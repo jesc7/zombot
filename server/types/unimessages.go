@@ -72,14 +72,14 @@ type UniMessageMedia struct {
 }
 
 func (msg UniMessageMedia) IsCollage() bool {
-	var count int
 	for _, m := range msg.Media {
 		switch m.(type) {
 		case UniImage, UniVideo, UniVideoNote:
-			count++
+		default:
+			return false
 		}
 	}
-	return count == len(msg.Media)
+	return true
 }
 
 func (msg UniMessageMedia) IsPhotoCollage() bool {
