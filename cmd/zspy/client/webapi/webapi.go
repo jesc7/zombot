@@ -18,7 +18,6 @@ import (
 
 type WebServer struct {
 	srv *http.Server
-	//skt *webskt.WebSocketClient
 }
 
 var (
