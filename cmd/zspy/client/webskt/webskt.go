@@ -231,11 +231,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 		case <-t08_00.C: //everyday 8:00
 			t08_00.Reset(24 * time.Hour)
-			log.Println("Timer t08_00")
 
 			go func() { //update phone base
-				log.Println("phones.PbUpdate")
-
 				if e := phones.PbUpdate(ws.cwd, []string{}); e != nil {
 					log.Println("phones.PbUpdate error:", e)
 					return
@@ -243,8 +240,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 			go func() { //checks EC
-				log.Println("checks.CheckEC")
-
 				s, e := checks.CheckEC(cfg.EC)
 				if e != nil {
 					log.Println("checks.CheckEC error:", e)
@@ -262,11 +257,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 		case <-t08_10.C: //everyday 8:10
 			t08_10.Reset(24 * time.Hour)
-			log.Println("Timer t08_10")
 
 			go func() { //birthdays today
-				log.Println("planner.Birthdays")
-
 				var (
 					pay shared.MessageBirthdays
 					e   error
@@ -287,8 +279,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 			go func() { //another countries holiday
-				log.Println("planner.ForeignHoliday")
-
 				if s := planner.ForeignHoliday(ws.cwd); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
@@ -299,8 +289,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 			go func() { //check domains registration
-				log.Println("planner.CheckWhois")
-
 				if s := checks.CheckWhois(cfg.CheckDomains, 10); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
@@ -312,11 +300,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 		case <-t09_00.C: //everyday 9:00
 			t09_00.Reset(24 * time.Hour)
-			log.Println("Timer t09_00")
 
 			go func() { //who's absent today
-				log.Println("planner.Absents")
-
 				pay, e := planner.Absents(ctx, ws.db)
 				if e != nil || len(pay) == 0 {
 					if e != nil {
@@ -333,8 +318,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 			go func() { //missing duties
-				log.Println("duties.MissDuties")
-
 				s, e := duties.MissDuties(ctx, ws.db, ws.cwd, 20)
 				if e != nil {
 					log.Println("duties.MissDuties error:", e)
@@ -352,12 +335,9 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 		case <-t11_00.C: //everyday 11:00
 			t11_00.Reset(24 * time.Hour)
-			log.Println("Timer t11_00")
 
 			go func() { //ratings
 				if time.Now().Weekday() == time.Friday {
-					log.Println("planner.Ratings")
-
 					//weekly ratings
 					s, e := planner.Ratings(ctx, ws.db, true, time.Now().AddDate(0, 0, -7))
 					if e != nil {
@@ -374,8 +354,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 					}
 
 					if time.Now().Month() != time.Now().AddDate(0, 0, 7).Month() {
-						log.Println("planner.Ratings (month)")
-
 						//monthly ratings
 						s, e := planner.Ratings(ctx, ws.db, false, time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC))
 						if e != nil {
@@ -396,11 +374,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 		case <-t18_00.C: //everyday 18:00
 			t18_00.Reset(24 * time.Hour)
-			log.Println("Timer t18_00")
 
 			go func() { //holidays detector
-				log.Println("duties.HolidaysCount")
-
 				i, e := duties.HolidaysCount(ctx, ws.db)
 				if e != nil {
 					log.Println("duties.HolidaysCount error:", e)
@@ -420,11 +395,8 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 
 		case <-t20_00.C: //everyday 20:00
 			t20_00.Reset(24 * time.Hour)
-			log.Println("Timer t20_00")
 
 			go func() { //tomorrow duties
-				log.Println("duties.TomorrowDuties")
-
 				s, e := duties.TomorrowDuties(ctx, ws.db)
 				if e != nil {
 					log.Println("duties.TomorrowDuties error:", e)
@@ -441,8 +413,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 			go func() { //find duties for next 2 days
-				log.Println("duties.Duty")
-
 				var (
 					pay shared.MessageDuties
 					e   error
@@ -478,8 +448,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 		case <-t5m.C: //every 5 minutes
-			log.Println("Ticker t5m")
-
 			go func() { //start-of-work for duties
 				if s := planner.SowList(ctx, ws.db, ws.cwd); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
@@ -518,11 +486,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 		case <-t9m.C: //every 9 minutes
-			log.Println("Ticker t9m")
-
 			go func() { //cf tasks
-				log.Println("checks.CheckCFResources")
-
 				if s := checks.CheckCFResources(cfg.CFChecks); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
@@ -533,11 +497,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 		case <-t30m.C: //every 30 minutes
-			log.Println("Ticker t30m")
-
 			go func() { //critical tasks
-				log.Println("planner.CriticalTasks")
-
 				s, e := planner.CriticalTasks(ctx, ws.db, 30)
 				if e != nil {
 					log.Println("planner.CriticalTasks error:", e)
@@ -554,8 +514,6 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			}()
 
 			go func() { //check resources
-				log.Println("checks.CheckResources")
-
 				if s := checks.CheckResources(cfg.Checks); s != "" {
 					env, e := shared.Pack(shared.TypeMessageText, shared.MessageText{Text: s})
 					if e != nil {
