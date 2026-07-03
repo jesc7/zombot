@@ -339,7 +339,7 @@ func (ws *WebSocketClient) handle(ctx context.Context, cfg types.Config) {
 			go func() { //ratings
 				if time.Now().Weekday() == time.Friday {
 					//weekly ratings
-					s, e := planner.Ratings(ctx, ws.db, true, time.Now().AddDate(0, 0, -7))
+					s, e := planner.Ratings(ctx, ws.db, true, time.Now().AddDate(0, 0, -5))
 					if e != nil {
 						log.Println("planner.Ratings error:", e)
 						return
