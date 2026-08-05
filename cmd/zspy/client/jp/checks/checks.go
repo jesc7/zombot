@@ -86,7 +86,7 @@ func CheckCFResources(sl []string) string {
 				defer resp.Body.Close()
 
 				if resp.StatusCode != http.StatusOK {
-					return errors.New(resp.Status)
+					return fmt.Errorf("%d - %s", resp.StatusCode, resp.Status) //errors.New(resp.Status)
 				}
 
 				buf := new(bytes.Buffer)
