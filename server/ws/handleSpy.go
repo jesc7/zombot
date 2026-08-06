@@ -216,7 +216,7 @@ func (ws *WebSocketServer) handleSpy(ctx context.Context, conn *websocket.Conn, 
 					m.Text = fmt.Sprintf("⚠️ <i>zsrv %s беспокоится</i>\n%s", m.Caption, m.Text)
 				case shared.ZSRV_PANIC:
 					m.Text = fmt.Sprintf("🆘 <i>zsrv %s паникует</i>\n%s", m.Caption, m.Text)
-				default:
+				case shared.ZSRV_INFO:
 					m.Text = fmt.Sprintf("ℹ <i>zsrv %s информирует</i>\n%s", m.Caption, m.Text)
 				}
 				if env, e = shared.Pack(shared.TypeMessageText, shared.MessageText{Text: m.Text}); e != nil {
