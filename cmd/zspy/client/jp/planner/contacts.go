@@ -27,9 +27,11 @@ var (
 func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shared.Contact, error) {
 	onceContacts.Do(func() {
 		searches = make(map[string]search)
+
 		go func(ctx context.Context) {
 			t5m := time.NewTicker(5 * time.Minute)
 			defer t5m.Stop()
+
 			for {
 				select {
 				case <-ctx.Done():
