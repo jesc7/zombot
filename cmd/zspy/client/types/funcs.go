@@ -205,7 +205,7 @@ func CopyFile(src, dst string) error {
 	return out.Sync()
 }
 
-func Iif[T any](b bool, v1, v2 T) T {
+func If[T any](b bool, v1, v2 T) T {
 	if b {
 		return v1
 	}

@@ -249,7 +249,7 @@ func CheckWhois(sl []string, days int) string {
 			switch d := int(time.Until(exp) / Day); {
 			case d >= -3 && d <= days:
 				fmt.Fprintf(&sb, "\n%s: %s (%d дн)%s", domain, exp.Format("02.01.2006"), d,
-					types.Iif(len(ans.Registrant.Country) != 0, " "+ans.Registrant.Name, ""))
+					types.If(len(ans.Registrant.Country) != 0, " "+ans.Registrant.Name, ""))
 			default:
 			}
 		}(v)

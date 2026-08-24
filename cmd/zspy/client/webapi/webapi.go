@@ -39,7 +39,7 @@ func NewWebServer(ctx context.Context, cfg types.Config, cwd string, skt *webskt
 
 		contacts, _ := skt.SearchContacts(ctx, phone)
 		env, _ := shared.Pack(shared.TypeMessageCall, shared.MessageCall{
-			Prefix:   types.Iif(strings.HasPrefix(v[0], "8800 "), "8800", ""),
+			Prefix:   types.If(strings.HasPrefix(v[0], "8800 "), "8800", ""),
 			Phone:    phone,
 			Region:   phones.FindByPhone(cwd, phone),
 			Contacts: contacts,

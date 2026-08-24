@@ -148,9 +148,9 @@ func MissDuties(ctx context.Context, db *sql.DB, cwd string, days int) (string, 
 		if dutCount < count {
 			switch dutCount {
 			case 0:
-				ds = append(ds, needs{t, types.Iif(count == 1, "", " - 2 чел, работают "+strings.Join(countries, ","))})
+				ds = append(ds, needs{t, types.If(count == 1, "", " - 2 чел, работают "+strings.Join(countries, ","))})
 			default:
-				ds = append(ds, needs{t, types.Iif(count == 1, "", " - доп.дежурный, работают "+strings.Join(countries, ","))})
+				ds = append(ds, needs{t, types.If(count == 1, "", " - доп.дежурный, работают "+strings.Join(countries, ","))})
 			}
 		}
 	}
@@ -199,14 +199,14 @@ func TomorrowDuties(ctx context.Context, db *sql.DB) (string, error) {
 	)
 	for rows.Next() {
 		if e = rows.Scan(&dt, &ttype, &name, &gender, &tg_id, &sched_id); e == nil {
-			gender = types.Iif(gender == 1, 1, 0)
-			res += fmt.Sprintf("%s - %s\n", types.Iif(ttype == 6, "🌒 Утро", "☀️ День"), strings.Trim(name, " "))
+			gender = types.If(gender == 1, 1, 0)
+			res += fmt.Sprintf("%s - %s\n", types.If(ttype == 6, "🌒 Утро", "☀️ День"), strings.Trim(name, " "))
 		}
 	}
 	if res == "" {
 		return "", nil
 	}
-	return "<b>👷 Дежурные на завтра</b>\n" + types.Iif(strings.Count(res, "\n") > 1, "\n", "") + res, nil
+	return "<b>👷 Дежурные на завтра</b>\n" + types.If(strings.Count(res, "\n") > 1, "\n", "") + res, nil
 }
 
 func HolidaysCount(ctx context.Context, db *sql.DB) (int, error) {

@@ -107,7 +107,7 @@ func Search(ctx context.Context, db *sql.DB, msg shared.MessageContacts) ([]shar
 			continue
 		}
 		res = append(res, shared.Contact{
-			LastPID: types.Iif(len(res) == 0, s.LastPID, 0),
+			LastPID: types.If(len(res) == 0, s.LastPID, 0),
 			CID:     cid,
 			PID:     pid,
 			Caption: caption,

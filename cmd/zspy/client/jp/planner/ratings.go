@@ -249,7 +249,7 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) (str
 		return res
 	}
 
-	res := types.Iif(weekly, "<b>Рейтинг 'Неделька'</b>", "<b>Победители по итогам месяца</b> 🥁🥁🥁")
+	res := types.If(weekly, "<b>Рейтинг 'Неделька'</b>", "<b>Победители по итогам месяца</b> 🥁🥁🥁")
 	r := _continuous(start, 5, 5) //опоздания до 5 минут не считаются
 	if len(r) != 0 {
 		var s string
@@ -288,12 +288,12 @@ func Ratings(ctx context.Context, db *sql.DB, weekly bool, start time.Time) (str
 
 	r = _lates(start, 5) //опоздания до 5 минут не считаются
 	if len(r) != 0 {
-		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Засоня %s'</b>\n%s (%d мин. опозданий)", types.Iif(weekly, "недели", "месяца"), r[0].name, r[0].value)
+		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Засоня %s'</b>\n%s (%d мин. опозданий)", types.If(weekly, "недели", "месяца"), r[0].name, r[0].value)
 	}
 
 	r = _maxWorker(start) //величина переработки в минутах
 	if len(r) != 0 {
-		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Переработник %s'</b>\n%s (%+d мин.)", types.Iif(weekly, "недели", "месяца"), r[0].name, r[0].value)
+		res += fmt.Sprintf("\n\n🏆 <b>Номинация 'Переработник %s'</b>\n%s (%+d мин.)", types.If(weekly, "недели", "месяца"), r[0].name, r[0].value)
 	}
 
 	r = _edited(start, 10) //гэп 10 минут не считается за редактирование
