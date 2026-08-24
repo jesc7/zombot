@@ -15,7 +15,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/uuid"
 	"golang.org/x/text/encoding/charmap"
 )
 
@@ -213,13 +212,13 @@ func Iif[T any](b bool, v1, v2 T) T {
 	return v2
 }
 
-func UUID() (string, error) {
+/*func UUID() (string, error) {
 	uid, e := uuid.NewRandom()
 	if e != nil {
 		return "", e
 	}
 	return uid.String(), nil
-}
+}*/
 
 func DeleteOldFiles(dir, mask string, days uint) error {
 	if mask == "" {

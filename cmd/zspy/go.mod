@@ -3,7 +3,6 @@ module github.com/jesc7/zombot/cmd/zspy
 go 1.25.0
 
 require (
-	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/jesc7/zombot v0.0.0-20260426091759-9949b85dc5cc
 	github.com/kardianos/service v1.2.4
@@ -13,6 +12,7 @@ require (
 )
 
 require (
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/nakagami/chacha20 v0.1.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
